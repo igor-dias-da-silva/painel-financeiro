@@ -78,101 +78,94 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Dashboard</h1>
-          <p className="text-gray-600">Visão geral do seu sistema de gerenciamento de tarefas</p>
-        </div>
+    <div className="space-y-6">
+      {/* Cards de Estatísticas */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total de Quadros</CardTitle>
+            <BarChart3 className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.totalBoards}</div>
+            <p className="text-xs text-muted-foreground">
+              {stats.totalBoards > 0 ? 'Ativos' : 'Nenhum quadro criado'}
+            </p>
+          </CardContent>
+        </Card>
 
-        {/* Cards de Estatísticas */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total de Tarefas</CardTitle>
+            <CheckCircle className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.totalTasks}</div>
+            <p className="text-xs text-muted-foreground">
+              {stats.totalTasks > 0 ? 'Ativas' : 'Nenhuma tarefa'}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Concluídas</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.completedTasks}</div>
+            <p className="text-xs text-muted-foreground">
+              {stats.completionRate}% de conclusão
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Atrasadas</CardTitle>
+            <AlertCircle className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-600">{stats.overdueTasks}</div>
+            <p className="text-xs text-muted-foreground">
+              Necessitam atenção
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Lista de Quadros Recentes */}
+      <div>
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">Seus Quadros</h2>
+        {boards.length === 0 ? (
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total de Quadros</CardTitle>
-              <BarChart3 className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalBoards}</div>
-              <p className="text-xs text-muted-foreground">
-                {stats.totalBoards > 0 ? 'Ativos' : 'Nenhum quadro criado'}
-              </p>
+            <CardContent className="text-center py-8">
+              <p className="text-gray-500">Nenhum quadro criado ainda</p>
+              <Button className="mt-4">Criar Primeiro Quadro</Button>
             </CardContent>
           </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total de Tarefas</CardTitle>
-              <CheckCircle className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalTasks}</div>
-              <p className="text-xs text-muted-foreground">
-                {stats.totalTasks > 0 ? 'Ativas' : 'Nenhuma tarefa'}
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Concluídas</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.completedTasks}</div>
-              <p className="text-xs text-muted-foreground">
-                {stats.completionRate}% de conclusão
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Atrasadas</CardTitle>
-              <AlertCircle className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">{stats.overdueTasks}</div>
-              <p className="text-xs text-muted-foreground">
-                Necessitam atenção
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Lista de Quadros Recentes */}
-        <div className="mt-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Seus Quadros</h2>
-          {boards.length === 0 ? (
-            <Card>
-              <CardContent className="text-center py-8">
-                <p className="text-gray-500">Nenhum quadro criado ainda</p>
-                <Button className="mt-4">Criar Primeiro Quadro</Button>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {boards.map(board => (
-                <Card key={board.id} className="hover:shadow-md transition-shadow">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg">{board.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm text-gray-600">{board.columns.length} colunas</span>
-                      <span className="text-sm text-gray-600">{board.tasks.length} tarefas</span>
-                    </div>
-                    <div className="flex space-x-2">
-                      <Badge variant="outline">A Fazer: {board.tasks.filter(t => t.columnId === 'todo').length}</Badge>
-                      <Badge variant="outline">Progresso: {board.tasks.filter(t => t.columnId === 'in-progress').length}</Badge>
-                      <Badge variant="outline">Concluído: {board.tasks.filter(t => t.columnId === 'done').length}</Badge>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {boards.map(board => (
+              <Card key={board.id} className="hover:shadow-md transition-shadow">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg">{board.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm text-gray-600">{board.columns.length} colunas</span>
+                    <span className="text-sm text-gray-600">{board.tasks.length} tarefas</span>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Badge variant="outline">A Fazer: {board.tasks.filter(t => t.columnId === 'todo').length}</Badge>
+                    <Badge variant="outline">Progresso: {board.tasks.filter(t => t.columnId === 'in-progress').length}</Badge>
+                    <Badge variant="outline">Concluído: {board.tasks.filter(t => t.columnId === 'done').length}</Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
