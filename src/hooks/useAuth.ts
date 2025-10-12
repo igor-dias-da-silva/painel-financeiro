@@ -22,7 +22,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Verificar se o usuário está logado ao carregar a página
     const checkAuth = () => {
       const storedUser = localStorage.getItem('kanban-user');
       if (storedUser) {
@@ -42,7 +41,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const login = (email: string, password: string): Promise<boolean> => {
     return new Promise((resolve) => {
-      // Simulação de login (em um app real, isso seria uma chamada à API)
       setTimeout(() => {
         if (email && password) {
           const userData: User = {
@@ -63,7 +61,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const register = (name: string, email: string, password: string): Promise<boolean> => {
     return new Promise((resolve) => {
-      // Simulação de registro
       setTimeout(() => {
         if (name && email && password) {
           const userData: User = {

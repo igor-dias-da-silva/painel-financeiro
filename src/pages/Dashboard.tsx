@@ -29,8 +29,8 @@ const Dashboard = () => {
       done: 0
     };
 
-    const overdueTasks = 0;
-    const completedTasks = 0;
+    let overdueTasks = 0;
+    let completedTasks = 0;
 
     boards.forEach(board => {
       board.tasks.forEach(task => {
