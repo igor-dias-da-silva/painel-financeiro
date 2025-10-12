@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, createContext, useContext, React } from 'react';
+import { useState, useEffect, createContext, useContext } from 'react';
 import { User, AuthState } from '@/types/auth';
 
 const AuthContext = createContext<AuthState | undefined>(undefined);
@@ -17,7 +17,7 @@ interface AuthProviderProps {
   children: React.ReactNode;
 }
 
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
