@@ -57,6 +57,37 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
           </Link>
         ))}
       </nav>
+      <div className="p-4 border-t relative">
+        <div
+          className="flex items-center space-x-2 cursor-pointer"
+          onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+        >
+          <Avatar>
+            <AvatarImage src={user?.avatar} alt={user?.name} />
+            <AvatarFallback>{user?.name?.charAt(0) || 'U'}</AvatarFallback>
+          </Avatar>
+          <span className="text-sm font-medium text-gray-700 truncate flex-1">{user?.name || 'Usuário'}</span>
+          {isProfileMenuOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+        </div>
+        {isProfileMenuOpen && (
+          <div className="absolute left-4 right-4 bottom-full mb-2 bg-white rounded-md shadow-lg py-1 z-10">
+            <Link
+              to="/profile"
+              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              onClick={() => setIsProfileMenuOpen(false)}
+            >
+              Perfil
+            </Link>
+            <button
+              onClick={handleLogout}
+              className="w-full text-left flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Sair
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 
@@ -90,32 +121,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               </Link>
             ))}
           </nav>
-        </div>
-      </aside>
-
-      {/* Mobile Sidebar */}
-      <div className="md:hidden">
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="m-4">
-              <Menu className="h-6 w-6" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="p-0 w-64">
-            <SidebarContent />
-          </SheetContent>
-        </Sheet>
-      </div>
-
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="bg-white shadow-sm p-4 flex justify-between items-center">
-          <div className="md:hidden">
-            {/* Placeholder to balance the header */}
-          </div>
-          <h2 className="text-xl font-semibold text-gray-800">
-            {navItems.find(item => item.path === location.pathname)?.name || 'Página'}
-          </h2>
-          <div className="relative">
+          <div className="p-4 border-t relative">
             <div
               className="flex items-center space-x-2 cursor-pointer"
               onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
@@ -124,14 +130,15 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                 <AvatarImage src={user?.avatar} alt={user?.name} />
                 <AvatarFallback>{user?.name?.charAt(0) || 'U'}</AvatarFallback>
               </Avatar>
-              <span className="hidden sm:inline text-sm font-medium text-gray-700">{user?.name || 'Usuário'}</span>
-              {isProfileMenuOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              {isSidebarOpen && <span className="text-sm font-medium text-gray-700 truncate flex-1">{user?.name || 'Usuário'}</span>}
+              {isSidebarOpen && (isProfileMenuOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />)}
             </div>
             {isProfileMenuOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
+              <div className="absolute left-4 right-4 bottom-full mb-2 bg-white rounded-md shadow-lg py-1 z-10">
                 <Link
                   to="/profile"
                   className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  onClick={() => setIsProfileMenuOpen(false)}
                 >
                   Perfil
                 </Link>
@@ -145,6 +152,27 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               </div>
             )}
           </div>
+        </div>
+      </aside>
+
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <header className="bg-white shadow-sm p-4 flex justify-between items-center">
+          <div className="md:hidden">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Menu className="h-6 w-6" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="p-0 w-64">
+                <SidebarContent />
+              </SheetContent>
+            </Sheet>
+          </div>
+          <h2 className="text-xl font-semibold text-gray-800">
+            {navItems.find(item => item.path === location.pathname)?.name || 'Página'}
+          </h2>
+          <div className="w-10 h-10" /> {/* Placeholder to keep title centered */}
         </header>
         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
           {children}
