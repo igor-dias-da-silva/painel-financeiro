@@ -121,7 +121,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
             >
               <Avatar>
-                <AvatarImage src={user?.avatar_url} alt={user?.name} />
+                <AvatarImage src={user?.avatar} alt={user?.name} />
                 <AvatarFallback>{user?.name?.charAt(0) || 'U'}</AvatarFallback>
               </Avatar>
               <span className="hidden sm:inline text-sm font-medium text-gray-700">{user?.name || 'Usuário'}</span>
