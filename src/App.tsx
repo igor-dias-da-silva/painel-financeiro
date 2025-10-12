@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AuthGuard } from "./components/AuthGuard";
-import Layout from "./components/Layout";
+import { Layout } from "./components/Layout";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
