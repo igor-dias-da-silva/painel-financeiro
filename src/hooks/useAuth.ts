@@ -3,7 +3,6 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { User, AuthState } from '@/types/auth';
 import { supabase } from '@/integrations/supabase/client';
-import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext<AuthState | undefined>(undefined);
 
@@ -22,7 +21,6 @@ interface AuthProviderProps {
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -59,17 +57,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           avatar: session.user.user_metadata?.avatar_url
         };
         setUser(userData);
-        // Redirecionar para o dashboard após login
-        navigate('/dashboard');
       } else if (event === 'SIGNED_OUT') {
         setUser(null);
-        // Redirecionar para login após logout
-        navigate('/login');
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
@@ -91,8 +85,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           avatar: data.user.user_metadata?.avatar_url
         };
         setUser(userData);
-        // Redirecionar para o dashboard após login
-        navigate('/dashboard');
         return true;
       }
 
@@ -128,8 +120,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           avatar: data.user.user_metadata?.avatar_url
         };
         setUser(userData);
-        // Redirecionar para o dashboard após registro
-        navigate('/dashboard');
         return true;
       }
 
