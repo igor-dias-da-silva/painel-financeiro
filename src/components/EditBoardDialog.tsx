@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Board, Column } from '@/lib/database'; // Use Board from database.ts
+import { Board, Column as SupabaseColumn } from '@/lib/database'; // Use Board and SupabaseColumn from database.ts
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea'; // Added Textarea import
 import { Trash2, Plus } from 'lucide-react';
 import { showError } from '@/utils/toast';
 
@@ -13,11 +14,11 @@ interface EditBoardDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   board: Board; // Board from database.ts
-  columns: Column[]; // Columns from database.ts
+  columns: SupabaseColumn[]; // Columns from database.ts
   onBoardUpdate: (updatedBoard: Board) => void;
-  onColumnUpdate: (updates: { id: string; data: Partial<Column> }) => void;
+  onColumnUpdate: (updates: { id: string; data: Partial<SupabaseColumn> }) => void;
   onColumnDelete: (columnId: string) => void;
-  onColumnCreate: (newColumn: Omit<Column, 'id'>) => void;
+  onColumnCreate: (newColumn: Omit<SupabaseColumn, 'id' | 'created_at' | 'updated_at'>) => void; // Adjusted type
 }
 
 export const EditBoardDialog: React.FC<EditBoardDialogProps> = ({
@@ -32,7 +33,7 @@ export const EditBoardDialog: React.FC<EditBoardDialogProps> = ({
 }) => {
   const [title, setTitle] = useState(board.title);
   const [description, setDescription] = useState(board.description || '');
-  const [localColumns, setLocalColumns] = useState<Column[]>([]);
+  const [localColumns, setLocalColumns] = useState<SupabaseColumn[]>([]);
   const [newColumnTitle, setNewColumnTitle] = useState('');
 
   useEffect(() => {

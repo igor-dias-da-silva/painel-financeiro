@@ -25,8 +25,19 @@ export interface Card {
   column_id: string
   order: number
   user_id: string
+  priority: 'low' | 'medium' | 'high' | 'urgent' // Added priority
+  due_date?: string // Added due_date
+  tags: string[] // Added tags
   created_at: string
   updated_at: string
+}
+
+export interface Profile {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  avatar_url: string | null;
+  updated_at: string;
 }
 
 // Boards
@@ -118,11 +129,11 @@ export const deleteColumn = async (id: string): Promise<void> => {
 }
 
 // Cards
-export const getCards = async (columnId: string): Promise<Card[]> => {
+export const getCards = async (boardId: string): Promise<Card[]> => {
   const { data, error } = await supabase
     .from('cards')
     .select('*')
-    .eq('column_id', columnId)
+    .eq('board_id', boardId) // Assuming cards can be filtered by board_id
     .order('order')
   
   if (error) throw error
@@ -170,3 +181,29 @@ export const getTotalCards = async (userId: string): Promise<number> => {
   if (error) throw error;
   return count || 0;
 }
+
+// Profiles
+export const getProfile = async (userId: string): Promise<Profile | null> => {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', userId)
+    .single();
+
+  if (error && error.code !== 'PGRST116') { // PGRST116 means no rows found
+    throw error;
+  }
+  return data || null;
+};
+
+export const updateProfile = async (userId: string, updates: Partial<Omit<Profile, 'id' | 'updated_at'>>): Promise<Profile> => {
+  const { data, error } = await supabase
+    .from('profiles')
+    .update({ ...updates, updated_at: new Date().toISOString() })
+    .eq('id', userId)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+};

@@ -5,32 +5,30 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { KanbanBoard } from '@/components/KanbanBoard';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Loader2 } from 'lucide-react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getBoards, updateBoard, deleteBoard, Board, getColumns, getCards, Column, Card } from '@/lib/database';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'; // Import useMutation
+import { getBoards, updateBoard, deleteBoard, Board, getColumns, getCards, Column as SupabaseColumn, Card as SupabaseCard } from '@/lib/database';
 import { useAuth } from '@/hooks/useAuth';
 import { showError, showSuccess } from '@/utils/toast';
 import { AuthGuard } from '@/components/AuthGuard';
+import { Task } from '@/types/task'; // Import Task from types/task.ts
 
-const fetchFullBoardData = async (boardId: string, userId: string): Promise<Board & { columns: Column[]; tasks: Card[] }> => {
-  const { data: boardData, error: boardError } = await getBoards(userId); // Fetch all boards to find the specific one
-  if (boardError) throw boardError;
+const fetchFullBoardData = async (boardId: string, userId: string): Promise<Board & { columns: SupabaseColumn[]; tasks: Task[] }> => {
+  const boardData = await getBoards(userId); // getBoards directly returns data or throws error
   const board = boardData.find(b => b.id === boardId);
   if (!board) throw new Error('Quadro não encontrado');
 
-  const { data: columns, error: columnsError } = await getColumns(boardId);
-  if (columnsError) throw columnsError;
+  const columns = await getColumns(boardId); // getColumns directly returns data or throws error
 
-  const { data: cards, error: cardsError } = await getCards(boardId); // Assuming getCards can filter by boardId
-  if (cardsError) throw cardsError;
+  const cards = await getCards(boardId); // getCards directly returns data or throws error
 
   // Map Supabase Card to local Task type
   const tasks: Task[] = cards.map(card => ({
     id: card.id,
     title: card.title,
     description: card.description || undefined,
-    priority: 'medium', // Default or fetch from card metadata if available
-    dueDate: undefined, // Default or fetch from card metadata if available
-    tags: [], // Default or fetch from card metadata if available
+    priority: card.priority || 'medium', 
+    dueDate: card.due_date || undefined, 
+    tags: card.tags || [], 
     columnId: card.column_id,
     order: card.order,
   }));
@@ -44,7 +42,7 @@ const BoardView = () => {
   const { user, isLoading: authLoading } = useAuth();
   const queryClient = useQueryClient();
 
-  const { data: board, isLoading, isError, error } = useQuery<Board & { columns: Column[]; tasks: Card[] }>({
+  const { data: board, isLoading, isError, error } = useQuery<Board & { columns: SupabaseColumn[]; tasks: Task[] }>({
     queryKey: ['fullBoard', boardId, user?.id],
     queryFn: () => fetchFullBoardData(boardId!, user!.id),
     enabled: !!boardId && !!user?.id,

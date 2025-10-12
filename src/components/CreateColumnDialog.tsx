@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Column } from '@/types/task';
+import { Column as SupabaseColumn } from '@/lib/database'; // Import SupabaseColumn
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,7 +12,7 @@ interface CreateColumnDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   boardId: string;
-  onColumnCreate: (column: Omit<Column, 'id'>) => void;
+  onColumnCreate: (column: Omit<SupabaseColumn, 'id' | 'created_at' | 'updated_at'>) => void;
 }
 
 export const CreateColumnDialog: React.FC<CreateColumnDialogProps> = ({
@@ -31,7 +31,7 @@ export const CreateColumnDialog: React.FC<CreateColumnDialogProps> = ({
       return;
     }
 
-    const newColumn: Omit<Column, 'id'> = {
+    const newColumn: Omit<SupabaseColumn, 'id' | 'created_at' | 'updated_at'> = {
       title: title.trim(),
       board_id: boardId,
       order: 0, // Order will be determined by the backend or reordered after creation

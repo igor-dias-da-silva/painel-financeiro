@@ -3,19 +3,16 @@ export interface Task {
   title: string;
   description?: string;
   priority: 'low' | 'medium' | 'high' | 'urgent';
-  dueDate?: string;
+  dueDate?: string; // Corresponds to due_date in Supabase
   tags: string[];
-  columnId: string;
+  columnId: string; // Corresponds to column_id in Supabase
   order: number;
 }
 
+// This Column interface is for UI components that might not need all Supabase fields
+// For database interactions, use the Column interface from '@/lib/database'
 export interface Column {
   id: string;
   title: string;
-  color?: string;
+  color?: string; // This is a local UI property, not directly from Supabase
 }
-
-// The Board interface from src/lib/database.ts is now the source of truth for Supabase boards.
-// This file's Board interface is no longer needed as it was for local storage.
-// Keeping it minimal for other components that might still reference it locally.
-// The actual Board type for Supabase interactions is in src/lib/database.ts

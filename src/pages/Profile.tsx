@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
-import { Board } from '@/types/task';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,23 +8,101 @@ import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { User, Mail, Calendar, Clock, Award } from 'lucide-react';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { User, Mail, Calendar, Clock, Award, Loader2 } from 'lucide-react';
 import { AuthGuard } from '@/components/AuthGuard';
+import { useAuth } from '@/hooks/useAuth';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getProfile, updateProfile, getTotalCards, getBoards, Profile as SupabaseProfile, Board, Card as SupabaseCard } from '@/lib/database';
+import { showError, showSuccess } from '@/utils/toast';
+import { supabase } from '@/integrations/supabase/client'; // Import supabase client
 
 const Profile = () => {
-  const [boards] = useLocalStorage<Board[]>('kanban-boards', []);
-  const [userName, setUserName] = useState('Usuário Kanban');
-  const [userEmail, setUserEmail] = useState('usuario@kanban.com');
-  const [bio, setBio] = useState('Gerenciador de tarefas Kanban entusiasta');
-  const [joinDate] = useState(new Date('2024-01-01').toLocaleDateString('pt-BR'));
+  const { user, isLoading: authLoading, logout } = useAuth();
+  const queryClient = useQueryClient();
+
+  const userId = user?.id;
+
+  const { data: profile, isLoading: profileLoading, isError: profileError } = useQuery<SupabaseProfile | null>({
+    queryKey: ['profile', userId],
+    queryFn: () => getProfile(userId!),
+    enabled: !!userId,
+  });
+
+  const { data: boardsCount, isLoading: boardsCountLoading } = useQuery<number>({
+    queryKey: ['boardsCount', userId],
+    queryFn: async () => {
+      const boards = await getBoards(userId!);
+      return boards.length;
+    },
+    enabled: !!userId,
+  });
+
+  const { data: totalTasksCount, isLoading: tasksCountLoading } = useQuery<number>({
+    queryKey: ['totalTasks', userId],
+    queryFn: () => getTotalCards(userId!),
+    enabled: !!userId,
+  });
+
+  const { data: allCards, isLoading: cardsLoading } = useQuery<SupabaseCard[]>({
+    queryKey: ['allCards', userId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('cards')
+        .select('*')
+        .eq('user_id', userId!);
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!userId,
+  });
+
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [bio, setBio] = useState(''); // Bio is not directly in Supabase profile, keeping it local for now
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (profile) {
+      setFirstName(profile.first_name || '');
+      setLastName(profile.last_name || '');
+      setAvatarUrl(profile.avatar_url || null);
+    } else if (user) {
+      const fullName = user.name.split(' ');
+      setFirstName(fullName[0] || '');
+      setLastName(fullName.slice(1).join(' ') || '');
+      setAvatarUrl(user.avatar || null);
+    }
+  }, [profile, user]);
+
+  const updateProfileMutation = useMutation({
+    mutationFn: (updates: Partial<Omit<SupabaseProfile, 'id' | 'updated_at'>>) => updateProfile(userId!, updates),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['profile', userId] });
+      showSuccess('Perfil atualizado com sucesso!');
+    },
+    onError: (error) => {
+      console.error('Erro ao atualizar perfil:', error);
+      showError('Erro ao atualizar perfil. Tente novamente.');
+    },
+  });
+
+  const handleSaveProfile = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!userId) {
+      showError('Usuário não autenticado.');
+      return;
+    }
+    updateProfileMutation.mutate({ first_name: firstName, last_name: lastName, avatar_url: avatarUrl });
+  };
+
+  const handleLogout = async () => {
+    await logout();
+  };
 
   const calculateStats = () => {
-    const totalTasks = boards.reduce((sum, board) => sum + board.tasks.length, 0);
-    const completedTasks = boards.reduce((sum, board) => 
-      sum + board.tasks.filter(task => task.columnId === 'done').length, 0
-    );
-    const totalBoards = boards.length;
+    const totalTasks = totalTasksCount || 0;
+    const completedTasks = allCards?.filter(card => card.column_id === 'done').length || 0; // Assuming 'done' is a column ID
+    const totalBoards = boardsCount || 0;
     
     const tasksByPriority = {
       urgent: 0,
@@ -34,10 +111,10 @@ const Profile = () => {
       low: 0
     };
 
-    boards.forEach(board => {
-      board.tasks.forEach(task => {
-        tasksByPriority[task.priority]++;
-      });
+    allCards?.forEach(card => {
+      if (card.priority) {
+        tasksByPriority[card.priority]++;
+      }
     });
 
     return {
@@ -65,6 +142,36 @@ const Profile = () => {
     low: 'Baixa'
   };
 
+  const isLoading = authLoading || profileLoading || boardsCountLoading || tasksCountLoading || cardsLoading;
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      </div>
+    );
+  }
+
+  if (profileError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Card className="p-6 text-center">
+          <CardTitle className="text-red-600 mb-4">Erro ao carregar perfil</CardTitle>
+          <CardContent>
+            <p className="text-gray-600">Não foi possível carregar seus dados de perfil. Tente novamente mais tarde.</p>
+            <Button onClick={() => queryClient.invalidateQueries({ queryKey: ['profile', userId] })} className="mt-4">
+              Recarregar
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const displayName = `${firstName} ${lastName}`.trim() || user?.email?.split('@')[0] || 'Usuário';
+  const displayEmail = user?.email || 'N/A';
+  const joinDate = user?.created_at ? new Date(user.created_at).toLocaleDateString('pt-BR') : 'N/A';
+
   return (
     <AuthGuard>
       <div className="min-h-screen bg-gray-50 p-4">
@@ -81,14 +188,14 @@ const Profile = () => {
                 <CardHeader className="text-center">
                   <div className="flex justify-center mb-4">
                     <Avatar className="h-24 w-24">
-                      <AvatarImage src="/placeholder.svg" alt="Avatar" />
+                      <AvatarImage src={avatarUrl || "/placeholder.svg"} alt="Avatar" />
                       <AvatarFallback className="text-2xl">
-                        {userName.split(' ').map(n => n[0]).join('')}
+                        {displayName.split(' ').map(n => n[0]).join('') || 'U'}
                       </AvatarFallback>
                     </Avatar>
                   </div>
-                  <CardTitle className="text-xl">{userName}</CardTitle>
-                  <p className="text-gray-600">{userEmail}</p>
+                  <CardTitle className="text-xl">{displayName}</CardTitle>
+                  <p className="text-gray-600">{displayEmail}</p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-center space-x-2 text-sm text-gray-600">
@@ -106,21 +213,47 @@ const Profile = () => {
                     <span>{stats.totalTasks} tarefas criadas</span>
                   </div>
                   
-                  <div className="pt-4 border-t">
-                    <Label>Bio</Label>
-                    <Textarea
-                      value={bio}
-                      onChange={(e) => setBio(e.target.value)}
-                      placeholder="Conte um pouco sobre você..."
-                      className="mt-2"
-                      rows={3}
-                    />
-                  </div>
-                  
-                  <div className="flex space-x-2">
-                    <Button className="flex-1">Salvar Alterações</Button>
-                    <Button variant="outline">Editar Foto</Button>
-                  </div>
+                  <form onSubmit={handleSaveProfile} className="space-y-4 pt-4 border-t">
+                    <div>
+                      <Label htmlFor="firstName">Primeiro Nome</Label>
+                      <Input
+                        id="firstName"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        className="mt-2"
+                        disabled={updateProfileMutation.isPending}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="lastName">Sobrenome</Label>
+                      <Input
+                        id="lastName"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        className="mt-2"
+                        disabled={updateProfileMutation.isPending}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="bio">Bio</Label>
+                      <Textarea
+                        id="bio"
+                        value={bio}
+                        onChange={(e) => setBio(e.target.value)}
+                        placeholder="Conte um pouco sobre você..."
+                        className="mt-2"
+                        rows={3}
+                        disabled={updateProfileMutation.isPending}
+                      />
+                    </div>
+                    
+                    <div className="flex space-x-2">
+                      <Button type="submit" className="flex-1" disabled={updateProfileMutation.isPending}>
+                        {updateProfileMutation.isPending ? 'Salvando...' : 'Salvar Alterações'}
+                      </Button>
+                      <Button variant="outline" disabled>Editar Foto</Button> {/* Placeholder for avatar upload */}
+                    </div>
+                  </form>
                 </CardContent>
               </Card>
             </div>
@@ -184,21 +317,23 @@ const Profile = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {boards.slice(0, 3).map(board => (
+                    {/* Fetching recent boards for display */}
+                    {boards?.slice(0, 3).map(board => (
                       <div key={board.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                         <div>
                           <div className="font-medium">{board.title}</div>
                           <div className="text-sm text-gray-600">
-                            {board.tasks.length} tarefas • {board.columns.length} colunas
+                            {/* Placeholder for tasks/columns count, will fetch from Supabase later */}
+                            ... tarefas • ... colunas
                           </div>
                         </div>
                         <Badge variant="outline">
-                          {new Date(board.updatedAt).toLocaleDateString('pt-BR')}
+                          {new Date(board.updated_at).toLocaleDateString('pt-BR')}
                         </Badge>
                       </div>
                     ))}
                     
-                    {boards.length === 0 && (
+                    {(boards?.length === 0 || !boards) && (
                       <div className="text-center py-8 text-gray-500">
                         Nenhuma atividade recente
                       </div>
@@ -214,29 +349,19 @@ const Profile = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <Label htmlFor="name">Nome</Label>
-                    <Input
-                      id="name"
-                      value={userName}
-                      onChange={(e) => setUserName(e.target.value)}
-                      className="mt-1"
-                    />
-                  </div>
-                  
-                  <div>
                     <Label htmlFor="email">Email</Label>
                     <Input
                       id="email"
                       type="email"
-                      value={userEmail}
-                      onChange={(e) => setUserEmail(e.target.value)}
+                      value={displayEmail}
                       className="mt-1"
+                      disabled
                     />
                   </div>
                   
                   <div className="flex space-x-3 pt-4">
-                    <Button>Salvar Alterações</Button>
-                    <Button variant="outline">Alterar Senha</Button>
+                    <Button variant="outline" disabled>Alterar Senha</Button> {/* Placeholder */}
+                    <Button variant="destructive" onClick={handleLogout}>Sair</Button>
                   </div>
                 </CardContent>
               </Card>
