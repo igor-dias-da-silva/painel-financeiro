@@ -5,6 +5,7 @@ import { Board } from '@/types/task';
 import { BoardList } from '@/components/BoardList';
 import { KanbanBoard } from '@/components/KanbanBoard';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { AuthGuard } from '@/components/AuthGuard';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 
@@ -52,23 +53,35 @@ const Index = () => {
     setCurrentBoard(null);
   };
 
-  if (currentBoard) {
-    return (
-      <KanbanBoard
-        board={currentBoard}
-        onBoardUpdate={handleBoardUpdate}
-        onDeleteBoard={handleDeleteBoard}
-      />
-    );
-  }
-
   return (
-    <BoardList
-      boards={boards}
-      onCreateBoard={handleCreateBoard}
-      onEditBoard={handleEditBoard}
-      onDeleteBoard={handleDeleteBoard}
-    />
+    <AuthGuard>
+      {currentBoard ? (
+        <div className="min-h-screen bg-gray-50">
+          <div className="p-4">
+            <Button 
+              variant="outline" 
+              onClick={handleBackToBoards}
+              className="mb-4"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Voltar aos Quadros
+            </Button>
+            <KanbanBoard
+              board={currentBoard}
+              onBoardUpdate={handleBoardUpdate}
+              onDeleteBoard={handleDeleteBoard}
+            />
+          </div>
+        </div>
+      ) : (
+        <BoardList
+          boards={boards}
+          onCreateBoard={handleCreateBoard}
+          onEditBoard={handleEditBoard}
+          onDeleteBoard={handleDeleteBoard}
+        />
+      )}
+    </AuthGuard>
   );
 };
 

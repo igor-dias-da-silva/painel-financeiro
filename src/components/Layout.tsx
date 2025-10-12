@@ -13,6 +13,7 @@ import {
   Home,
   LogOut
 } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -20,6 +21,7 @@ interface LayoutProps {
 
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
+  const { user, logout } = useAuth();
 
   const navigation = [
     { name: 'Início', href: '/', icon: Home },
@@ -31,6 +33,10 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   ];
 
   const isActive = (href: string) => location.pathname === href;
+
+  const handleLogout = () => {
+    logout();
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -44,6 +50,25 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <span className="text-white font-bold text-sm">K</span>
               </div>
               <span className="text-xl font-bold text-gray-800">Kanban</span>
+            </div>
+          </div>
+
+          {/* User Info */}
+          <div className="px-4 py-3 border-b">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                <span className="text-sm font-medium text-gray-700">
+                  {user?.name?.charAt(0).toUpperCase()}
+                </span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900 truncate">
+                  {user?.name}
+                </p>
+                <p className="text-xs text-gray-500 truncate">
+                  {user?.email}
+                </p>
+              </div>
             </div>
           </div>
 
@@ -75,7 +100,12 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               Novo Quadro
             </Button>
             
-            <Button variant="ghost" className="w-full mt-2" size="sm">
+            <Button 
+              variant="ghost" 
+              className="w-full mt-2" 
+              size="sm"
+              onClick={handleLogout}
+            >
               <LogOut className="h-4 w-4 mr-2" />
               Sair
             </Button>
@@ -101,7 +131,11 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               <Button variant="ghost" size="sm">
                 <HelpCircle className="h-4 w-4" />
               </Button>
-              <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
+              <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                <span className="text-sm font-medium text-gray-700">
+                  {user?.name?.charAt(0).toUpperCase()}
+                </span>
+              </div>
             </div>
           </div>
         </header>
