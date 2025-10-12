@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { User, AuthState } from '@/types/auth';
+import { supabase } from '@/integrations/supabase/client';
 
 const AuthContext = createContext<AuthState | undefined>(undefined);
 
@@ -22,66 +23,120 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const checkAuth = () => {
-      const storedUser = localStorage.getItem('kanban-user');
-      if (storedUser) {
-        try {
-          const parsedUser = JSON.parse(storedUser);
-          setUser(parsedUser);
-        } catch (error) {
-          console.error('Error parsing user data:', error);
-          localStorage.removeItem('kanban-user');
+    const checkAuth = async () => {
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser();
+        
+        if (error) {
+          console.error('Error checking auth:', error);
+        } else if (user) {
+          const userData: User = {
+            id: user.id,
+            name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuário',
+            email: user.email!,
+            avatar: user.user_metadata?.avatar_url
+          };
+          setUser(userData);
         }
+      } catch (error) {
+        console.error('Error in auth check:', error);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
 
     checkAuth();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session?.user) {
+        const userData: User = {
+          id: session.user.id,
+          name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'Usuário',
+          email: session.user.email!,
+          avatar: session.user.user_metadata?.avatar_url
+        };
+        setUser(userData);
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const login = (email: string, password: string): Promise<boolean> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        if (email && password) {
-          const userData: User = {
-            id: Date.now().toString(),
-            name: email.split('@')[0],
-            email: email,
-          };
-          
-          localStorage.setItem('kanban-user', JSON.stringify(userData));
-          setUser(userData);
-          resolve(true);
-        } else {
-          resolve(false);
-        }
-      }, 1000);
-    });
+  const login = async (email: string, password: string): Promise<boolean> => {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        console.error('Login error:', error);
+        return false;
+      }
+
+      if (data.user) {
+        const userData: User = {
+          id: data.user.id,
+          name: data.user.user_metadata?.full_name || data.user.email?.split('@')[0] || 'Usuário',
+          email: data.user.email!,
+          avatar: data.user.user_metadata?.avatar_url
+        };
+        setUser(userData);
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      console.error('Login error:', error);
+      return false;
+    }
   };
 
-  const register = (name: string, email: string, password: string): Promise<boolean> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        if (name && email && password) {
-          const userData: User = {
-            id: Date.now().toString(),
-            name: name,
-            email: email,
-          };
-          
-          localStorage.setItem('kanban-user', JSON.stringify(userData));
-          setUser(userData);
-          resolve(true);
-        } else {
-          resolve(false);
-        }
-      }, 1000);
-    });
+  const register = async (name: string, email: string, password: string): Promise<boolean> => {
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: name,
+          },
+        },
+      });
+
+      if (error) {
+        console.error('Register error:', error);
+        return false;
+      }
+
+      if (data.user) {
+        const userData: User = {
+          id: data.user.id,
+          name: name,
+          email: data.user.email!,
+          avatar: data.user.user_metadata?.avatar_url
+        };
+        setUser(userData);
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      console.error('Register error:', error);
+      return false;
+    }
   };
 
-  const logout = () => {
-    localStorage.removeItem('kanban-user');
-    setUser(null);
+  const logout = async () => {
+    try {
+      await supabase.auth.signOut();
+      setUser(null);
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   const value: AuthState = {
