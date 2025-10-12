@@ -1,147 +1,152 @@
 "use client";
 
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { 
-  LayoutDashboard, 
-  List, 
-  Settings, 
-  User, 
-  HelpCircle, 
-  Plus,
-  Home,
-  LogOut
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import {
+  LayoutDashboard,
+  ClipboardList,
+  Settings,
+  User,
+  HelpCircle,
+  LogOut,
+  Menu,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
-interface LayoutProps {
-  children: React.ReactNode;
-}
+const navItems = [
+  { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
+  { name: 'Quadros', icon: ClipboardList, path: '/boards' },
+  { name: 'Configurações', icon: Settings, path: '/settings' },
+  { name: 'Perfil', icon: User, path: '/profile' },
+  { name: 'Ajuda', icon: HelpCircle, path: '/help' },
+];
 
-export const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const location = useLocation();
+export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const navigation = [
-    { name: 'Início', href: '/', icon: Home },
-    { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-    { name: 'Meus Quadros', href: '/boards', icon: List },
-    { name: 'Configurações', href: '/settings', icon: Settings },
-    { name: 'Perfil', href: '/profile', icon: User },
-    { name: 'Ajuda', href: '/help', icon: HelpCircle },
-  ];
-
-  const isActive = (href: string) => location.pathname === href;
-
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
   };
 
+  const SidebarContent = () => (
+    <div className="flex flex-col h-full bg-gray-50 border-r">
+      <div className="p-4 border-b">
+        <h1 className="text-2xl font-bold text-blue-600">Kanban</h1>
+      </div>
+      <nav className="flex-1 p-4 space-y-2">
+        {navItems.map((item) => (
+          <Link
+            key={item.name}
+            to={item.path}
+            className={`flex items-center p-2 rounded-md text-gray-700 hover:bg-blue-100 hover:text-blue-600 ${
+              location.pathname === item.path ? 'bg-blue-100 text-blue-600' : ''
+            }`}
+          >
+            <item.icon className="h-5 w-5 mr-3" />
+            {item.name}
+          </Link>
+        ))}
+      </nav>
+    </div>
+  );
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Sidebar */}
-      <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg border-r">
-        <div className="flex flex-col h-full">
-          {/* Logo */}
-          <div className="flex items-center justify-center h-16 px-4 border-b">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">K</span>
-              </div>
-              <span className="text-xl font-bold text-gray-800">Kanban</span>
-            </div>
+    <div className="flex h-screen bg-gray-100">
+      {/* Desktop Sidebar */}
+      <aside
+        className={`hidden md:flex flex-col transition-all duration-300 ${
+          isSidebarOpen ? 'w-64' : 'w-20'
+        }`}
+      >
+        <div className="flex flex-col h-full bg-gray-50 border-r">
+          <div className="p-4 border-b flex items-center justify-between">
+            {isSidebarOpen && <h1 className="text-2xl font-bold text-blue-600">Kanban</h1>}
+            <Button variant="ghost" size="icon" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
+              <Menu className="h-6 w-6" />
+            </Button>
           </div>
-
-          {/* User Info */}
-          <div className="px-4 py-3 border-b">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                <span className="text-sm font-medium text-gray-700">
-                  {user?.name?.charAt(0).toUpperCase()}
-                </span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">
-                  {user?.name}
-                </p>
-                <p className="text-xs text-gray-500 truncate">
-                  {user?.email}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 space-y-2">
-            {navigation.map((item) => {
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    isActive(item.href)
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                  }`}
-                >
-                  <Icon className="h-5 w-5" />
-                  <span>{item.name}</span>
-                </Link>
-              );
-            })}
+          <nav className="flex-1 p-4 space-y-2">
+            {navItems.map((item) => (
+              <Link
+                key={item.name}
+                to={item.path}
+                className={`flex items-center p-2 rounded-md text-gray-700 hover:bg-blue-100 hover:text-blue-600 ${
+                  location.pathname === item.path ? 'bg-blue-100 text-blue-600' : ''
+                }`}
+                title={item.name}
+              >
+                <item.icon className="h-5 w-5" />
+                {isSidebarOpen && <span className="ml-3">{item.name}</span>}
+              </Link>
+            ))}
           </nav>
-
-          {/* Bottom Actions */}
-          <div className="p-4 border-t">
-            <Button className="w-full" size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              Novo Quadro
-            </Button>
-            
-            <Button 
-              variant="ghost" 
-              className="w-full mt-2" 
-              size="sm"
-              onClick={handleLogout}
-            >
-              <LogOut className="h-4 w-4 mr-2" />
-              Sair
-            </Button>
-          </div>
         </div>
+      </aside>
+
+      {/* Mobile Sidebar */}
+      <div className="md:hidden">
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button variant="ghost" size="icon" className="m-4">
+              <Menu className="h-6 w-6" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="p-0 w-64">
+            <SidebarContent />
+          </SheetContent>
+        </Sheet>
       </div>
 
-      {/* Main Content */}
-      <div className="pl-64">
-        {/* Top Bar */}
-        <header className="bg-white shadow-sm border-b">
-          <div className="flex items-center justify-between px-6 py-4">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                {navigation.find(item => isActive(item.href))?.name || 'Kanban App'}
-              </h1>
-              <p className="text-sm text-gray-600">
-                Gerenciador de tarefas visual e eficiente
-              </p>
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <header className="bg-white shadow-sm p-4 flex justify-between items-center">
+          <div className="md:hidden">
+            {/* Placeholder to balance the header */}
+          </div>
+          <h2 className="text-xl font-semibold text-gray-800">
+            {navItems.find(item => item.path === location.pathname)?.name || 'Página'}
+          </h2>
+          <div className="relative">
+            <div
+              className="flex items-center space-x-2 cursor-pointer"
+              onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+            >
+              <Avatar>
+                <AvatarImage src={user?.avatar_url} alt={user?.name} />
+                <AvatarFallback>{user?.name?.charAt(0) || 'U'}</AvatarFallback>
+              </Avatar>
+              <span className="hidden sm:inline text-sm font-medium text-gray-700">{user?.name || 'Usuário'}</span>
+              {isProfileMenuOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
             </div>
-            
-            <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="sm">
-                <HelpCircle className="h-4 w-4" />
-              </Button>
-              <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                <span className="text-sm font-medium text-gray-700">
-                  {user?.name?.charAt(0).toUpperCase()}
-                </span>
+            {isProfileMenuOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
+                <Link
+                  to="/profile"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  Perfil
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-left flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sair
+                </button>
               </div>
-            </div>
+            )}
           </div>
         </header>
-
-        {/* Page Content */}
-        <main className="p-6">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
           {children}
         </main>
       </div>
