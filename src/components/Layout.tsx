@@ -27,7 +27,7 @@ const navItems = [
 ];
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Keep true for initial expanded state
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -39,17 +39,17 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   };
 
   const SidebarContent = () => (
-    <div className="flex flex-col h-full bg-gray-50 border-r">
-      <div className="p-4 border-b">
-        <h1 className="text-2xl font-bold text-blue-600">Kanban</h1>
+    <div className="flex flex-col h-full bg-blue-800 text-white border-r border-blue-700"> {/* Make background very distinct */}
+      <div className="p-4 border-b border-blue-700">
+        <h1 className="text-2xl font-bold">Kanban</h1> {/* Removed text-blue-600 */}
       </div>
       <nav className="flex-1 p-4 space-y-2">
         {navItems.map((item) => (
           <Link
             key={item.name}
             to={item.path}
-            className={`flex items-center p-2 rounded-md text-gray-700 hover:bg-blue-100 hover:text-blue-600 ${
-              location.pathname === item.path ? 'bg-blue-100 text-blue-600' : ''
+            className={`flex items-center p-2 rounded-md hover:bg-blue-700 ${
+              location.pathname === item.path ? 'bg-blue-700' : ''
             }`}
           >
             <item.icon className="h-5 w-5 mr-3" />
@@ -57,7 +57,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
           </Link>
         ))}
       </nav>
-      <div className="p-4 border-t relative">
+      <div className="p-4 border-t border-blue-700 relative">
         <div
           className="flex items-center space-x-2 cursor-pointer"
           onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
@@ -66,21 +66,21 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             <AvatarImage src={user?.avatar} alt={user?.name} />
             <AvatarFallback>{user?.name?.charAt(0) || 'U'}</AvatarFallback>
           </Avatar>
-          <span className="text-sm font-medium text-gray-700 truncate flex-1">{user?.name || 'Usuário'}</span>
+          <span className="text-sm font-medium truncate flex-1">{user?.name || 'Usuário'}</span>
           {isProfileMenuOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
         </div>
         {isProfileMenuOpen && (
-          <div className="absolute left-4 right-4 bottom-full mb-2 bg-white rounded-md shadow-lg py-1 z-10">
+          <div className="absolute left-4 right-4 bottom-full mb-2 bg-blue-700 rounded-md shadow-lg py-1 z-10"> {/* Changed background */}
             <Link
               to="/profile"
-              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              className="block px-4 py-2 text-sm hover:bg-blue-600"
               onClick={() => setIsProfileMenuOpen(false)}
             >
               Perfil
             </Link>
             <button
               onClick={handleLogout}
-              className="w-full text-left flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+              className="w-full text-left flex items-center px-4 py-2 text-sm text-red-300 hover:bg-red-700" {/* Adjusted text/hover color */}
             >
               <LogOut className="h-4 w-4 mr-2" />
               Sair
@@ -95,14 +95,12 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     <div className="flex h-screen bg-gray-100">
       {/* Desktop Sidebar */}
       <aside
-        className={`hidden md:flex flex-col transition-all duration-300 ${
-          isSidebarOpen ? 'w-64' : 'w-20'
-        }`}
+        className={`hidden md:flex flex-col transition-all duration-300 w-64`} // Force w-64
       >
-        <div className="flex flex-col h-full bg-gray-50 border-r">
-          <div className="p-4 border-b flex items-center justify-between">
-            {isSidebarOpen && <h1 className="text-2xl font-bold text-blue-600">Kanban</h1>}
-            <Button variant="ghost" size="icon" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
+        <div className="flex flex-col h-full bg-blue-800 text-white border-r border-blue-700"> {/* Make background very distinct */}
+          <div className="p-4 border-b flex items-center justify-between border-blue-700">
+            <h1 className="text-2xl font-bold">Kanban</h1> {/* Removed text-blue-600 */}
+            <Button variant="ghost" size="icon" onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="text-white hover:bg-blue-700"> {/* Adjusted button color */}
               <Menu className="h-6 w-6" />
             </Button>
           </div>
@@ -111,17 +109,17 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               <Link
                 key={item.name}
                 to={item.path}
-                className={`flex items-center p-2 rounded-md text-gray-700 hover:bg-blue-100 hover:text-blue-600 ${
-                  location.pathname === item.path ? 'bg-blue-100 text-blue-600' : ''
+                className={`flex items-center p-2 rounded-md hover:bg-blue-700 ${
+                  location.pathname === item.path ? 'bg-blue-700' : ''
                 }`}
                 title={item.name}
               >
                 <item.icon className="h-5 w-5" />
-                {isSidebarOpen && <span className="ml-3">{item.name}</span>}
+                <span className="ml-3">{item.name}</span> {/* Always show text */}
               </Link>
             ))}
           </nav>
-          <div className="p-4 border-t relative">
+          <div className="p-4 border-t relative border-blue-700">
             <div
               className="flex items-center space-x-2 cursor-pointer"
               onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
@@ -130,21 +128,21 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                 <AvatarImage src={user?.avatar} alt={user?.name} />
                 <AvatarFallback>{user?.name?.charAt(0) || 'U'}</AvatarFallback>
               </Avatar>
-              {isSidebarOpen && <span className="text-sm font-medium text-gray-700 truncate flex-1">{user?.name || 'Usuário'}</span>}
-              {isSidebarOpen && (isProfileMenuOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />)}
+              <span className="text-sm font-medium truncate flex-1">{user?.name || 'Usuário'}</span>
+              {isProfileMenuOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
             </div>
             {isProfileMenuOpen && (
-              <div className="absolute left-4 right-4 bottom-full mb-2 bg-white rounded-md shadow-lg py-1 z-10">
+              <div className="absolute left-4 right-4 bottom-full mb-2 bg-blue-700 rounded-md shadow-lg py-1 z-10">
                 <Link
                   to="/profile"
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  className="block px-4 py-2 text-sm hover:bg-blue-600"
                   onClick={() => setIsProfileMenuOpen(false)}
                 >
                   Perfil
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="w-full text-left flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                  className="w-full text-left flex items-center px-4 py-2 text-sm text-red-300 hover:bg-red-700"
                 >
                   <LogOut className="h-4 w-4 mr-2" />
                   Sair
