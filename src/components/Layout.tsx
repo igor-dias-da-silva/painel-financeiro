@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ThemeToggle } from './ThemeToggle'; // Importar ThemeToggle
 
 const navItems = [
   { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
@@ -154,7 +155,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
       </aside>
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="bg-white shadow-sm p-4 flex justify-between items-center">
+        <header className="bg-white shadow-sm p-4 flex justify-between items-center dark:bg-gray-800"> {/* Adicionado dark:bg-gray-800 */}
           <div className="md:hidden">
             <Sheet>
               <SheetTrigger asChild>
@@ -167,12 +168,12 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               </SheetContent>
             </Sheet>
           </div>
-          <h2 className="text-xl font-semibold text-gray-800">
+          <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100"> {/* Adicionado dark:text-gray-100 */}
             {navItems.find(item => item.path === location.pathname)?.name || 'Página'}
           </h2>
-          <div className="w-10 h-10" /> {/* Placeholder to keep title centered */}
+          <ThemeToggle /> {/* Adicionado o ThemeToggle aqui */}
         </header>
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6 dark:bg-gray-900"> {/* Adicionado dark:bg-gray-900 */}
           {children}
         </main>
       </div>
