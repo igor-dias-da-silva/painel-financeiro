@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,15 +8,16 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Trash2, Download, Upload, Palette, Bell, Shield, Loader2 } from 'lucide-react';
-import { AuthGuard } from '@/components/AuthGuard'; // Corrected import syntax
+import { AuthGuard } from '@/components/AuthGuard';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
-import { getBoards, getTotalCards, Board } from '@/lib/database'; // Import Board from database.ts
+import { getBoards, getTotalCards, Board } from '@/lib/database';
 import { showError, showSuccess } from '@/utils/toast';
+import { useTheme } from 'next-themes'; // Importar useTheme
 
 const Settings = () => {
   const { user, isLoading: authLoading } = useAuth();
-  const [darkMode, setDarkMode] = useState(false);
+  const { theme, setTheme } = useTheme(); // Usar o hook useTheme
   const [notifications, setNotifications] = useState(true);
   const [autoSave, setAutoSave] = useState(true);
   const [defaultPriority, setDefaultPriority] = useState('medium');
@@ -34,6 +35,15 @@ const Settings = () => {
     queryFn: () => getTotalCards(userId!),
     enabled: !!userId,
   });
+
+  // Sincronizar o estado do Switch com o tema atual
+  useEffect(() => {
+    if (theme === 'dark') {
+      // setDarkMode(true); // Não precisamos mais de um estado local para darkMode
+    } else {
+      // setDarkMode(false);
+    }
+  }, [theme]);
 
   const handleExportData = () => {
     if (!boards) {
@@ -58,20 +68,13 @@ const Settings = () => {
     showSuccess('Dados exportados com sucesso!');
   };
 
-  // Removed handleImportData as it's complex to implement with Supabase client-side.
-  // Importing data would require parsing the JSON and then inserting/updating records in Supabase,
-  // which is beyond a simple client-side file read.
-
   const handleClearAllData = async () => {
     if (!user?.id) {
       showError('Usuário não autenticado.');
       return;
     }
     if (confirm('Tem certeza que deseja excluir TODOS os seus quadros e tarefas? Esta ação não pode ser desfeita.')) {
-      // This would require a server-side function or iterating through all boards/columns/cards
-      // For simplicity, we'll just show an error for now.
       showError('A exclusão de todos os dados não está implementada via cliente. Por favor, entre em contato com o suporte.');
-      // In a real application, you would call a Supabase Edge Function or a series of delete mutations here.
     }
   };
 
@@ -92,18 +95,18 @@ const Settings = () => {
 
   return (
     <AuthGuard>
-      <div className="min-h-screen bg-gray-50 p-4">
+      <div className="min-h-screen bg-gray-50 p-4 dark:bg-gray-900"> {/* Adicionado dark:bg-gray-900 */}
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">Configurações</h1>
-            <p className="text-gray-600">Gerencie suas preferências e dados do aplicativo</p>
+            <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">Configurações</h1> {/* Adicionado dark:text-gray-100 */}
+            <p className="text-gray-600 dark:text-gray-400">Gerencie suas preferências e dados do aplicativo</p> {/* Adicionado dark:text-gray-400 */}
           </div>
 
           <div className="space-y-6">
             {/* Aparência */}
-            <Card>
+            <Card className="dark:bg-gray-800 dark:border-gray-700"> {/* Adicionado dark classes */}
               <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
+                <CardTitle className="flex items-center space-x-2 dark:text-gray-100"> {/* Adicionado dark:text-gray-100 */}
                   <Palette className="h-5 w-5" />
                   <span>Aparência</span>
                 </CardTitle>
@@ -111,19 +114,19 @@ const Settings = () => {
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label>Modo Escuro</Label>
-                    <p className="text-sm text-gray-500">Ative o tema escuro para melhor visualização noturna</p>
+                    <Label className="dark:text-gray-200">Modo Escuro</Label> {/* Adicionado dark:text-gray-200 */}
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Ative o tema escuro para melhor visualização noturna</p> {/* Adicionado dark:text-gray-400 */}
                   </div>
                   <Switch
-                    checked={darkMode}
-                    onCheckedChange={setDarkMode}
+                    checked={theme === 'dark'} // Usar o tema de next-themes
+                    onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')} // Alternar tema
                   />
                 </div>
                 
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label>Prioridade Padrão</Label>
-                    <p className="text-sm text-gray-500">Define a prioridade padrão para novas tarefas</p>
+                    <Label className="dark:text-gray-200">Prioridade Padrão</Label> {/* Adicionado dark:text-gray-200 */}
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Define a prioridade padrão para novas tarefas</p> {/* Adicionado dark:text-gray-400 */}
                   </div>
                   <div className="flex space-x-2">
                     {Object.entries(priorityColors).map(([priority, color]) => (
@@ -142,9 +145,9 @@ const Settings = () => {
             </Card>
 
             {/* Notificações */}
-            <Card>
+            <Card className="dark:bg-gray-800 dark:border-gray-700"> {/* Adicionado dark classes */}
               <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
+                <CardTitle className="flex items-center space-x-2 dark:text-gray-100"> {/* Adicionado dark:text-gray-100 */}
                   <Bell className="h-5 w-5" />
                   <span>Notificações</span>
                 </CardTitle>
@@ -152,8 +155,8 @@ const Settings = () => {
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label>Notificações</Label>
-                    <p className="text-sm text-gray-500">Receba notificações sobre tarefas e atualizações</p>
+                    <Label className="dark:text-gray-200">Notificações</Label> {/* Adicionado dark:text-gray-200 */}
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Receba notificações sobre tarefas e atualizações</p> {/* Adicionado dark:text-gray-400 */}
                   </div>
                   <Switch
                     checked={notifications}
@@ -163,8 +166,8 @@ const Settings = () => {
                 
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label>Auto-save</Label>
-                    <p className="text-sm text-gray-500">Salva automaticamente suas alterações</p>
+                    <Label className="dark:text-gray-200">Auto-save</Label> {/* Adicionado dark:text-gray-200 */}
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Salva automaticamente suas alterações</p> {/* Adicionado dark:text-gray-400 */}
                   </div>
                   <Switch
                     checked={autoSave}
@@ -176,9 +179,9 @@ const Settings = () => {
             </Card>
 
             {/* Dados e Backup */}
-            <Card>
+            <Card className="dark:bg-gray-800 dark:border-gray-700"> {/* Adicionado dark classes */}
               <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
+                <CardTitle className="flex items-center space-x-2 dark:text-gray-100"> {/* Adicionado dark:text-gray-100 */}
                   <Shield className="h-5 w-5" />
                   <span>Dados e Backup</span>
                 </CardTitle>
@@ -186,11 +189,11 @@ const Settings = () => {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label>Total de Quadros</Label>
+                    <Label className="dark:text-gray-200">Total de Quadros</Label> {/* Adicionado dark:text-gray-200 */}
                     <p className="text-2xl font-bold text-blue-600">{boards?.length || 0}</p>
                   </div>
                   <div>
-                    <Label>Total de Tarefas</Label>
+                    <Label className="dark:text-gray-200">Total de Tarefas</Label> {/* Adicionado dark:text-gray-200 */}
                     <p className="text-2xl font-bold text-green-600">
                       {totalTasks || 0}
                     </p>
@@ -203,14 +206,13 @@ const Settings = () => {
                     Exportar Dados
                   </Button>
                   
-                  {/* Import data functionality removed for simplicity with Supabase */}
                   <Button variant="outline" className="flex-1" disabled>
                     <Upload className="h-4 w-4 mr-2" />
                     Importar Dados (Indisponível)
                   </Button>
                 </div>
                 
-                <div className="pt-4 border-t">
+                <div className="pt-4 border-t dark:border-gray-700"> {/* Adicionado dark:border-gray-700 */}
                   <Button
                     variant="destructive"
                     onClick={handleClearAllData}
@@ -219,7 +221,7 @@ const Settings = () => {
                     <Trash2 className="h-4 w-4 mr-2" />
                     Excluir Todos os Dados
                   </Button>
-                  <p className="text-xs text-gray-500 mt-2">
+                  <p className="text-xs text-gray-500 mt-2 dark:text-gray-400"> {/* Adicionado dark:text-gray-400 */}
                     Esta ação excluirá permanentemente todos os seus quadros e tarefas.
                   </p>
                 </div>
@@ -227,32 +229,32 @@ const Settings = () => {
             </Card>
 
             {/* Sobre */}
-            <Card>
+            <Card className="dark:bg-gray-800 dark:border-gray-700"> {/* Adicionado dark classes */}
               <CardHeader>
-                <CardTitle>Sobre</CardTitle>
+                <CardTitle className="dark:text-gray-100">Sobre</CardTitle> {/* Adicionado dark:text-gray-100 */}
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   <div>
-                    <Label>Versão</Label>
-                    <p className="text-gray-600">1.0.0</p>
+                    <Label className="dark:text-gray-200">Versão</Label> {/* Adicionado dark:text-gray-200 */}
+                    <p className="text-gray-600 dark:text-gray-400">1.0.0</p> {/* Adicionado dark:text-gray-400 */}
                   </div>
                   <div>
-                    <Label>Armazenamento</Label>
-                    <p className="text-gray-600">Supabase</p>
+                    <Label className="dark:text-gray-200">Armazenamento</Label> {/* Adicionado dark:text-gray-200 */}
+                    <p className="text-gray-600 dark:text-gray-400">Supabase</p> {/* Adicionado dark:text-gray-400 */}
                   </div>
                   <div>
-                    <Label>Tecnologias</Label>
-                    <p className="text-gray-600">React, TypeScript, Tailwind CSS</p>
+                    <Label className="dark:text-gray-200">Tecnologias</Label> {/* Adicionado dark:text-gray-200 */}
+                    <p className="text-gray-600 dark:text-gray-400">React, TypeScript, Tailwind CSS</p> {/* Adicionado dark:text-gray-400 */}
                   </div>
                   <div>
-                    <Label>Desenvolvido por</Label>
-                    <p className="text-gray-600">Dyad AI</p>
+                    <Label className="dark:text-gray-200">Desenvolvido por</Label> {/* Adicionado dark:text-gray-200 */}
+                    <p className="text-gray-600 dark:text-gray-400">Dyad AI</p> {/* Adicionado dark:text-gray-400 */}
                   </div>
                 </div>
                 
-                <div className="pt-4 border-t">
-                  <p className="text-sm text-gray-600">
+                <div className="pt-4 border-t dark:border-gray-700"> {/* Adicionado dark:border-gray-700 */}
+                  <p className="text-sm text-gray-600 dark:text-gray-400"> {/* Adicionado dark:text-gray-400 */}
                     Este aplicativo é um gerenciador de tarefas Kanban completo que funciona 
                     diretamente no seu navegador, com persistência de dados via Supabase.
                   </p>
