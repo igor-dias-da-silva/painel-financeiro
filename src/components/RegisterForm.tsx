@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -23,6 +24,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { register } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,7 +44,9 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
 
     try {
       const success = await register(name, email, password);
-      if (!success) {
+      if (success) {
+        navigate('/dashboard');
+      } else {
         setError('Erro ao criar conta');
       }
     } catch (err) {

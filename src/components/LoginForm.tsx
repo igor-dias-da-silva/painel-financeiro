@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,6 +21,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,7 +30,9 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
 
     try {
       const success = await login(email, password);
-      if (!success) {
+      if (success) {
+        navigate('/dashboard');
+      } else {
         setError('Email ou senha inválidos');
       }
     } catch (err) {
