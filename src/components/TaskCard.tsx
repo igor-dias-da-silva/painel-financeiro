@@ -15,10 +15,10 @@ import {
 
 interface TaskCardProps {
   task: Task;
-  onTaskMove: (taskId: string, newColumnId: string, newOrder: number) => void;
-  onTaskReorder: (columnId: string, taskId: string, newOrder: number) => void;
+  onTaskMove: (taskId: string, newColumnId: string, newOrderIndex: number) => void; // Alterado newOrder para newOrderIndex
+  onTaskReorder: (columnId: string, taskId: string, newOrderIndex: number) => void; // Alterado newOrder para newOrderIndex
   onDragStart: (task: Task) => void;
-  onTaskDelete: (taskId: string) => void; // Added delete handler
+  onTaskDelete: (taskId: string) => void;
   priorityColors: Record<string, string>;
 }
 
@@ -48,8 +48,8 @@ export const TaskCard: React.FC<TaskCardProps> = ({
       const targetIndex = tasks.findIndex(child => child.getAttribute('data-task-id') === task.id);
       
       if (draggedIndex !== -1 && targetIndex !== -1) {
-        const newOrder = targetIndex;
-        onTaskReorder(task.columnId, draggedTaskId, newOrder);
+        const newOrderIndex = targetIndex; // Alterado newOrder para newOrderIndex
+        onTaskReorder(task.columnId, draggedTaskId, newOrderIndex);
       }
     }
   };

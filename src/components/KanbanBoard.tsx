@@ -1,14 +1,14 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Board, Column as SupabaseColumn, Card as SupabaseCard, updateCard, createCard, deleteCard, updateColumn, createColumn, deleteColumn, getColumns, getCards } from '@/lib/database'; // Import Supabase functions and getColumns/getCards
-import { Task, Column } from '@/types/task'; // Import Task and Column from types/task.ts
+import { Board, Column as SupabaseColumn, Card as SupabaseCard, updateCard, createCard, deleteCard, updateColumn, createColumn, deleteColumn, getColumns, getCards } from '@/lib/database';
+import { Task, Column } from '@/types/task';
 import { Card as ShadcnCard, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit2, Trash2, Search, Filter, Loader2 } from 'lucide-react'; // Import Loader2
+import { Plus, Edit2, Trash2, Search, Filter, Loader2 } from 'lucide-react';
 import { TaskCard } from './TaskCard';
 import { CreateTaskDialog } from './CreateTaskDialog';
 import { CreateColumnDialog } from './CreateColumnDialog';
@@ -18,7 +18,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { showError, showSuccess } from '@/utils/toast';
 
 interface KanbanBoardProps {
-  board: Board & { columns: SupabaseColumn[]; tasks: Task[] }; // Board now includes columns and tasks
+  board: Board & { columns: SupabaseColumn[]; tasks: Task[] };
   onBoardUpdate: (updatedBoard: Board) => void;
   onDeleteBoard: (boardId: string) => void;
 }
@@ -48,7 +48,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
   const { data: tasks, isLoading: tasksLoading, isError: tasksError } = useQuery<Task[]>({
     queryKey: ['cards', board.id],
     queryFn: async () => {
-      const cards = await getCards(board.id); // getCards directly returns data or throws error
+      const cards = await getCards(board.id);
       return cards.map(card => ({
         id: card.id,
         title: card.title,
@@ -57,7 +57,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
         dueDate: card.due_date || undefined, 
         tags: card.tags || [], 
         columnId: card.column_id,
-        order: card.order,
+        order_index: card.order_index, // Alterado de 'order' para 'order_index'
       }));
     },
     enabled: !!board.id,
@@ -68,13 +68,13 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
       title: updates.data.title,
       description: updates.data.description,
       column_id: updates.data.columnId,
-      order: updates.data.order,
+      order_index: updates.data.order_index, // Alterado de 'order' para 'order_index'
       user_id: user!.id, 
       priority: updates.data.priority,
       due_date: updates.data.dueDate,
       tags: updates.data.tags,
       updated_at: new Date().toISOString(),
-    } as SupabaseCard), // Cast to SupabaseCard
+    } as SupabaseCard),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cards', board.id] });
       queryClient.invalidateQueries({ queryKey: ['totalTasks', user?.id] });
@@ -91,12 +91,12 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
       title: newTask.title,
       description: newTask.description || null,
       column_id: newTask.columnId,
-      order: newTask.order,
+      order_index: newTask.order_index, // Alterado de 'order' para 'order_index'
       user_id: user!.id,
       priority: newTask.priority,
       due_date: newTask.dueDate,
       tags: newTask.tags,
-    } as Omit<SupabaseCard, 'id' | 'created_at' | 'updated_at'>), // Cast to Omit<SupabaseCard, ...>
+    } as Omit<SupabaseCard, 'id' | 'created_at' | 'updated_at'>),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cards', board.id] });
       queryClient.invalidateQueries({ queryKey: ['totalTasks', user?.id] });
@@ -125,7 +125,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
     mutationFn: (newColumn: Omit<SupabaseColumn, 'id' | 'created_at' | 'updated_at'>) => createColumn({
       title: newColumn.title,
       board_id: board.id,
-      order: columns ? columns.length : 0,
+      order_index: columns ? columns.length : 0, // Alterado de 'order' para 'order_index'
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['columns', board.id] });
@@ -173,7 +173,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
   const getTasksByColumn = (columnId: string) => {
     return filteredTasks
       .filter(task => task.columnId === columnId)
-      .sort((a, b) => a.order - b.order);
+      .sort((a, b) => a.order_index - b.order_index); // Alterado de 'order' para 'order_index'
   };
 
   const handleTaskCreate = (newTask: Omit<Task, 'id'>) => {
@@ -184,12 +184,12 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
     createColumnMutation.mutate(newColumn);
   };
 
-  const handleTaskMove = (taskId: string, newColumnId: string, newOrder: number) => {
-    updateCardMutation.mutate({ id: taskId, data: { columnId: newColumnId, order: newOrder } });
+  const handleTaskMove = (taskId: string, newColumnId: string, newOrderIndex: number) => {
+    updateCardMutation.mutate({ id: taskId, data: { columnId: newColumnId, order_index: newOrderIndex } }); // Alterado de 'order' para 'order_index'
   };
 
-  const handleTaskReorder = (columnId: string, taskId: string, newOrder: number) => {
-    updateCardMutation.mutate({ id: taskId, data: { order: newOrder } });
+  const handleTaskReorder = (columnId: string, taskId: string, newOrderIndex: number) => {
+    updateCardMutation.mutate({ id: taskId, data: { order_index: newOrderIndex } }); // Alterado de 'order' para 'order_index'
   };
 
   const handleDragStart = (task: Task) => {
@@ -204,8 +204,8 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
     e.preventDefault();
     if (draggedTask) {
       const tasksInColumn = getTasksByColumn(columnId);
-      const newOrder = tasksInColumn.length; // Place at the end of the column
-      handleTaskMove(draggedTask.id, columnId, newOrder);
+      const newOrderIndex = tasksInColumn.length; // Coloca no final da coluna
+      handleTaskMove(draggedTask.id, columnId, newOrderIndex);
       setDraggedTask(null);
     }
   };

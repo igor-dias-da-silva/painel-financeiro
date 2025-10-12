@@ -5,21 +5,21 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { KanbanBoard } from '@/components/KanbanBoard';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Loader2 } from 'lucide-react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'; // Import useMutation
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getBoards, updateBoard, deleteBoard, Board, getColumns, getCards, Column as SupabaseColumn, Card as SupabaseCard } from '@/lib/database';
 import { useAuth } from '@/hooks/useAuth';
 import { showError, showSuccess } from '@/utils/toast';
 import { AuthGuard } from '@/components/AuthGuard';
-import { Task } from '@/types/task'; // Import Task from types/task.ts
+import { Task } from '@/types/task';
 
 const fetchFullBoardData = async (boardId: string, userId: string): Promise<Board & { columns: SupabaseColumn[]; tasks: Task[] }> => {
-  const boardData = await getBoards(userId); // getBoards directly returns data or throws error
+  const boardData = await getBoards(userId);
   const board = boardData.find(b => b.id === boardId);
   if (!board) throw new Error('Quadro não encontrado');
 
-  const columns = await getColumns(boardId); // getColumns directly returns data or throws error
+  const columns = await getColumns(boardId);
 
-  const cards = await getCards(boardId); // getCards directly returns data or throws error
+  const cards = await getCards(boardId);
 
   // Map Supabase Card to local Task type
   const tasks: Task[] = cards.map(card => ({
@@ -30,7 +30,7 @@ const fetchFullBoardData = async (boardId: string, userId: string): Promise<Boar
     dueDate: card.due_date || undefined, 
     tags: card.tags || [], 
     columnId: card.column_id,
-    order: card.order,
+    order_index: card.order_index, // Alterado de 'order' para 'order_index'
   }));
 
   return { ...board, columns, tasks };

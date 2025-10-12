@@ -58,7 +58,7 @@ export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
       dueDate: dueDate || undefined,
       tags,
       columnId: selectedColumnId,
-      order: 0, // Order will be determined by the backend or reordered after creation
+      order_index: 0, // Alterado de 'order' para 'order_index'
     };
 
     onTaskCreate(newTask);

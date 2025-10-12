@@ -13,7 +13,7 @@ export interface Column {
   id: string
   title: string
   board_id: string
-  order: number
+  order_index: number // Alterado de 'order' para 'order_index'
   created_at: string
   updated_at: string
 }
@@ -23,11 +23,11 @@ export interface Card {
   title: string
   description?: string
   column_id: string
-  order: number
+  order_index: number // Alterado de 'order' para 'order_index'
   user_id: string
-  priority: 'low' | 'medium' | 'high' | 'urgent' // Added priority
-  due_date?: string // Added due_date
-  tags: string[] // Added tags
+  priority: 'low' | 'medium' | 'high' | 'urgent'
+  due_date?: string
+  tags: string[]
   created_at: string
   updated_at: string
 }
@@ -90,7 +90,7 @@ export const getColumns = async (boardId: string): Promise<Column[]> => {
     .from('columns')
     .select('*')
     .eq('board_id', boardId)
-    .order('order')
+    .order('order_index') // Alterado de 'order' para 'order_index'
   
   if (error) throw error
   return data || []
@@ -130,14 +130,41 @@ export const deleteColumn = async (id: string): Promise<void> => {
 
 // Cards
 export const getCards = async (boardId: string): Promise<Card[]> => {
+  // Para obter os cartões de um quadro, precisamos fazer um JOIN com a tabela 'columns'
   const { data, error } = await supabase
     .from('cards')
-    .select('*')
-    .eq('board_id', boardId) // Assuming cards can be filtered by board_id
-    .order('order')
+    .select(`
+      id,
+      title,
+      description,
+      column_id,
+      order_index,
+      user_id,
+      priority,
+      due_date,
+      tags,
+      created_at,
+      updated_at,
+      columns!inner(board_id)
+    `)
+    .eq('columns.board_id', boardId)
+    .order('order_index'); // Alterado de 'order' para 'order_index'
   
-  if (error) throw error
-  return data || []
+  if (error) throw error;
+  // Os dados retornados terão um objeto 'columns' com 'board_id'. Precisamos apenas dos dados do cartão.
+  return data.map(card => ({
+    id: card.id,
+    title: card.title,
+    description: card.description,
+    column_id: card.column_id,
+    order_index: card.order_index, // Alterado de 'order' para 'order_index'
+    user_id: card.user_id,
+    priority: card.priority,
+    due_date: card.due_date,
+    tags: card.tags,
+    created_at: card.created_at,
+    updated_at: card.updated_at,
+  })) || [];
 }
 
 export const createCard = async (card: Omit<Card, 'id' | 'created_at' | 'updated_at'>): Promise<Card> => {

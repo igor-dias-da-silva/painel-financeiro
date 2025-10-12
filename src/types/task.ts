@@ -6,7 +6,7 @@ export interface Task {
   dueDate?: string; // Corresponds to due_date in Supabase
   tags: string[];
   columnId: string; // Corresponds to column_id in Supabase
-  order: number;
+  order_index: number; // Alterado de 'order' para 'order_index'
 }
 
 // This Column interface is for UI components that might not need all Supabase fields
@@ -15,4 +15,5 @@ export interface Column {
   id: string;
   title: string;
   color?: string; // This is a local UI property, not directly from Supabase
+  order_index: number; // Alterado de 'order' para 'order_index'
 }
