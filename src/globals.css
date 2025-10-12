@@ -52,41 +52,42 @@
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 240 10% 3.9%; /* Fundo roxo muito escuro */
+    --foreground: 210 40% 98%; /* Texto claro */
 
-    --card: 222.2 84% 4.9%;
+    --card: 240 10% 7%; /* Cartões roxos escuros */
     --card-foreground: 210 40% 98%;
 
-    --popover: 222.2 84% 4.9%;
+    --popover: 240 10% 7%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 262 83% 58%; /* Roxo vibrante para elementos primários */
+    --primary-foreground: 210 40% 98%;
 
-    --secondary: 217.2 32.6% 17.5%;
+    --secondary: 262 40% 15%; /* Roxo mais escuro para elementos secundários */
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 217.2 32.6% 17.5%;
+    --muted: 262 20% 10%; /* Roxo dessaturado para texto muted */
     --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 217.2 32.6% 17.5%;
+    --accent: 262 40% 15%; /* Roxo para acentos */
     --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 62.8% 30.6%; /* Vermelho para destrutivo */
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --border: 262 20% 20%; /* Borda roxa sutil */
+    --input: 262 20% 20%; /* Input roxo sutil */
+    --ring: 262 83% 58%; /* Anel de foco roxo vibrante */
+
+    --sidebar-background: 262 80% 10%; /* Fundo da sidebar roxo profundo */
+    --sidebar-foreground: 210 40% 98%; /* Texto da sidebar claro */
+    --sidebar-primary: 262 83% 58%; /* Item ativo da sidebar roxo vibrante */
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 262 40% 15%; /* Acento da sidebar roxo escuro */
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 262 20% 20%;
+    --sidebar-ring: 262 83% 58%;
   }
 }
 
