@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { AuthGuard } from "./hooks/useAuth";
+import { AuthGuard } from "./components/AuthGuard";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
