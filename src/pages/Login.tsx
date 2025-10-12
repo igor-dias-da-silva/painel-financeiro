@@ -3,11 +3,9 @@
 import React, { useState } from 'react';
 import { LoginForm } from '@/components/LoginForm';
 import { RegisterForm } from '@/components/RegisterForm';
-import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const [isLoginMode, setIsLoginMode] = useState(true);
-  const navigate = useNavigate();
 
   const toggleMode = () => {
     setIsLoginMode(!isLoginMode);

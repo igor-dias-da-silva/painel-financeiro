@@ -13,16 +13,8 @@ function App() {
         <Route path="/" element={<Index />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/dashboard" element={
-          <AuthGuard>
-            <Dashboard />
-          </AuthGuard>
-        } />
-        <Route path="/boards" element={
-          <AuthGuard>
-            <Index />
-          </AuthGuard>
-        } />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/boards" element={<Index />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
