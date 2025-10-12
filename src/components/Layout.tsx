@@ -80,7 +80,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             </Link>
             <button
               onClick={handleLogout}
-              className="w-full text-left flex items-center px-4 py-2 text-sm text-red-300 hover:bg-red-700" {/* Adjusted text/hover color */}
+              className="w-full text-left flex items-center px-4 py-2 text-sm text-red-300 hover:bg-red-700"
             >
               <LogOut className="h-4 w-4 mr-2" />
               Sair
