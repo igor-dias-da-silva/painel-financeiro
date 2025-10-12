@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AuthGuard } from "./components/AuthGuard";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
@@ -16,6 +16,11 @@ function App() {
         <Route path="/dashboard" element={
           <AuthGuard>
             <Dashboard />
+          </AuthGuard>
+        } />
+        <Route path="/boards" element={
+          <AuthGuard>
+            <Index />
           </AuthGuard>
         } />
         <Route path="*" element={<NotFound />} />
