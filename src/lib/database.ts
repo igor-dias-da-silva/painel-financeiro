@@ -160,3 +160,13 @@ export const deleteCard = async (id: string): Promise<void> => {
   
   if (error) throw error
 }
+
+export const getTotalCards = async (userId: string): Promise<number> => {
+  const { count, error } = await supabase
+    .from('cards')
+    .select('id', { count: 'exact' })
+    .eq('user_id', userId);
+  
+  if (error) throw error;
+  return count || 0;
+}
