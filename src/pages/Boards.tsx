@@ -1,45 +1,97 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Board } from '@/types/task';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Search, Filter, Grid, List, Edit2, Trash2, Eye } from 'lucide-react';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { Plus, Search, Filter, Grid, List, Edit2, Trash2, Eye, Loader2 } from 'lucide-react';
 import { AuthGuard } from '@/components/AuthGuard';
+import { useAuth } from '@/hooks/useAuth';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getBoards, deleteBoard, Board } from '@/lib/database';
+import { CreateBoardDialog } from '@/components/CreateBoardDialog';
+import { EditBoardDetailsDialog } from '@/components/EditBoardDetailsDialog';
+import { showError, showSuccess } from '@/utils/toast';
 
 const Boards = () => {
-  const [boards] = useLocalStorage<Board[]>('kanban-boards', []);
+  const { user, isLoading: authLoading } = useAuth();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [showCreateBoardDialog, setShowCreateBoardDialog] = useState(false);
+  const [showEditBoardDetailsDialog, setShowEditBoardDetailsDialog] = useState(false);
+  const [selectedBoardToEdit, setSelectedBoardToEdit] = useState<Board | null>(null);
 
-  const filteredBoards = boards.filter(board =>
+  const userId = user?.id;
+
+  const { data: boards, isLoading: boardsLoading, isError: boardsError } = useQuery<Board[]>({
+    queryKey: ['boards', userId],
+    queryFn: () => getBoards(userId!),
+    enabled: !!userId,
+  });
+
+  const deleteBoardMutation = useMutation({
+    mutationFn: deleteBoard,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['boards', userId] });
+      showSuccess('Quadro excluído com sucesso!');
+    },
+    onError: (error) => {
+      console.error('Erro ao excluir quadro:', error);
+      showError('Erro ao excluir quadro. Tente novamente.');
+    },
+  });
+
+  const filteredBoards = boards?.filter(board =>
     board.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ) || [];
 
   const handleCreateBoard = () => {
-    // This would typically open a dialog or navigate to create board page
-    alert('Funcionalidade de criar quadro será implementada');
+    setShowCreateBoardDialog(true);
   };
 
   const handleEditBoard = (board: Board) => {
-    // This would navigate to edit board page
-    alert(`Editar quadro: ${board.title}`);
+    setSelectedBoardToEdit(board);
+    setShowEditBoardDetailsDialog(true);
   };
 
   const handleDeleteBoard = (boardId: string) => {
-    if (confirm('Tem certeza que deseja excluir este quadro?')) {
-      // This would delete the board
-      alert(`Quadro excluído: ${boardId}`);
+    if (confirm('Tem certeza que deseja excluir este quadro? Todas as tarefas e colunas associadas serão perdidas.')) {
+      deleteBoardMutation.mutate(boardId);
     }
   };
 
-  const handleViewBoard = (board: Board) => {
-    // This would navigate to the board view
-    alert(`Visualizar quadro: ${board.title}`);
+  const handleViewBoard = (boardId: string) => {
+    navigate(`/boards/${boardId}`);
   };
+
+  if (authLoading || boardsLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      </div>
+    );
+  }
+
+  if (boardsError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Card className="p-6 text-center">
+          <CardTitle className="text-red-600 mb-4">Erro ao carregar quadros</CardTitle>
+          <CardContent>
+            <p className="text-gray-600">Não foi possível carregar seus quadros. Tente novamente mais tarde.</p>
+            <Button onClick={() => queryClient.invalidateQueries({ queryKey: ['boards', userId] })} className="mt-4">
+              Recarregar
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <AuthGuard>
@@ -89,10 +141,10 @@ const Boards = () => {
               </Button>
             </div>
             
-            <Button variant="outline" size="sm">
+            {/* <Button variant="outline" size="sm">
               <Filter className="h-4 w-4 mr-2" />
               Filtrar
-            </Button>
+            </Button> */}
           </div>
 
           {/* Boards Grid/List */}
@@ -119,17 +171,19 @@ const Boards = () => {
                 : 'space-y-4'
             }>
               {filteredBoards.map(board => (
-                <Card key={board.id} className="hover:shadow-md transition-shadow cursor-pointer">
+                <Card key={board.id} className="hover:shadow-md transition-shadow">
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
-                      <CardTitle className="text-lg line-clamp-2">{board.title}</CardTitle>
+                      <CardTitle className="text-lg line-clamp-2 cursor-pointer" onClick={() => handleViewBoard(board.id)}>
+                        {board.title}
+                      </CardTitle>
                       <div className="flex space-x-1">
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleViewBoard(board);
+                            handleViewBoard(board.id);
                           }}
                         >
                           <Eye className="h-3 w-3" />
@@ -163,40 +217,24 @@ const Boards = () => {
                     {/* Stats */}
                     <div className="grid grid-cols-2 gap-4 mb-4">
                       <div className="text-center">
-                        <div className="text-2xl font-bold text-blue-600">{board.columns.length}</div>
+                        <div className="text-2xl font-bold text-blue-600">
+                          {/* Placeholder for columns count, will fetch from Supabase later */}
+                          {board.description ? '...' : '0'}
+                        </div>
                         <div className="text-xs text-gray-500">Colunas</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-2xl font-bold text-green-600">{board.tasks.length}</div>
+                        <div className="text-2xl font-bold text-green-600">
+                          {/* Placeholder for tasks count, will fetch from Supabase later */}
+                          {board.description ? '...' : '0'}
+                        </div>
                         <div className="text-xs text-gray-500">Tarefas</div>
-                      </div>
-                    </div>
-
-                    {/* Status Badges */}
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="text-gray-600">A Fazer</span>
-                        <Badge variant="outline">
-                          {board.tasks.filter(t => t.columnId === 'todo').length}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="text-gray-600">Em Progresso</span>
-                        <Badge variant="outline">
-                          {board.tasks.filter(t => t.columnId === 'in-progress').length}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="text-gray-600">Concluído</span>
-                        <Badge variant="outline">
-                          {board.tasks.filter(t => t.columnId === 'done').length}
-                        </Badge>
                       </div>
                     </div>
 
                     {/* Last Updated */}
                     <div className="mt-4 pt-4 border-t text-xs text-gray-500">
-                      Atualizado em {new Date(board.updatedAt).toLocaleDateString('pt-BR')}
+                      Atualizado em {new Date(board.updated_at).toLocaleDateString('pt-BR')}
                     </div>
                   </CardContent>
                 </Card>
@@ -208,15 +246,15 @@ const Boards = () => {
           <div className="mt-8 p-6 bg-white rounded-lg shadow-sm border">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Ações Rápidas</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Button variant="outline" className="h-20 flex-col">
+              <Button variant="outline" className="h-20 flex-col" onClick={handleCreateBoard}>
                 <Plus className="h-6 w-6 mb-2" />
                 <span>Novo Quadro</span>
               </Button>
-              <Button variant="outline" className="h-20 flex-col">
+              <Button variant="outline" className="h-20 flex-col" disabled>
                 <List className="h-6 w-6 mb-2" />
                 <span>Importar Quadro</span>
               </Button>
-              <Button variant="outline" className="h-20 flex-col">
+              <Button variant="outline" className="h-20 flex-col" disabled>
                 <Filter className="h-6 w-6 mb-2" />
                 <span>Organizar Quadros</span>
               </Button>
@@ -224,6 +262,17 @@ const Boards = () => {
           </div>
         </div>
       </div>
+
+      <CreateBoardDialog
+        open={showCreateBoardDialog}
+        onOpenChange={setShowCreateBoardDialog}
+      />
+
+      <EditBoardDetailsDialog
+        open={showEditBoardDetailsDialog}
+        onOpenChange={setShowEditBoardDetailsDialog}
+        board={selectedBoardToEdit}
+      />
     </AuthGuard>
   );
 };

@@ -15,11 +15,7 @@ export interface Column {
   color?: string;
 }
 
-export interface Board {
-  id: string;
-  title: string;
-  columns: Column[];
-  tasks: Task[];
-  createdAt: string;
-  updatedAt: string;
-}
+// The Board interface from src/lib/database.ts is now the source of truth for Supabase boards.
+// This file's Board interface is no longer needed as it was for local storage.
+// Keeping it minimal for other components that might still reference it locally.
+// The actual Board type for Supabase interactions is in src/lib/database.ts

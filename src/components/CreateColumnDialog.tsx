@@ -1,23 +1,24 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Column, Board } from '@/types/task';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Column } from '@/types/task';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { showError } from '@/utils/toast';
 
 interface CreateColumnDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  board: Board;
-  onColumnCreate: (column: Column) => void;
+  boardId: string;
+  onColumnCreate: (column: Omit<Column, 'id'>) => void;
 }
 
 export const CreateColumnDialog: React.FC<CreateColumnDialogProps> = ({
   open,
   onOpenChange,
-  board,
+  boardId,
   onColumnCreate,
 }) => {
   const [title, setTitle] = useState('');
@@ -25,11 +26,15 @@ export const CreateColumnDialog: React.FC<CreateColumnDialogProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!title.trim()) return;
+    if (!title.trim()) {
+      showError('Título da coluna é obrigatório.');
+      return;
+    }
 
-    const newColumn: Column = {
-      id: Date.now().toString(),
+    const newColumn: Omit<Column, 'id'> = {
       title: title.trim(),
+      board_id: boardId,
+      order: 0, // Order will be determined by the backend or reordered after creation
     };
 
     onColumnCreate(newColumn);
@@ -58,12 +63,12 @@ export const CreateColumnDialog: React.FC<CreateColumnDialogProps> = ({
             />
           </div>
 
-          <div className="flex justify-end space-x-2">
+          <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
             <Button type="submit">Criar Coluna</Button>
-          </div>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

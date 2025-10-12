@@ -1,40 +1,64 @@
 "use client";
 
-import React, { useState } from 'react';
-import { Board } from '@/types/task';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import React, { useState, useEffect } from 'react';
+import { Board, Column } from '@/lib/database'; // Use Board from database.ts
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Plus } from 'lucide-react';
+import { showError } from '@/utils/toast';
 
 interface EditBoardDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  board: Board;
+  board: Board; // Board from database.ts
+  columns: Column[]; // Columns from database.ts
   onBoardUpdate: (updatedBoard: Board) => void;
+  onColumnUpdate: (updates: { id: string; data: Partial<Column> }) => void;
+  onColumnDelete: (columnId: string) => void;
+  onColumnCreate: (newColumn: Omit<Column, 'id'>) => void;
 }
 
 export const EditBoardDialog: React.FC<EditBoardDialogProps> = ({
   open,
   onOpenChange,
   board,
+  columns,
   onBoardUpdate,
+  onColumnUpdate,
+  onColumnDelete,
+  onColumnCreate,
 }) => {
   const [title, setTitle] = useState(board.title);
-  const [columns, setColumns] = useState(board.columns.map(col => ({ ...col })));
+  const [description, setDescription] = useState(board.description || '');
+  const [localColumns, setLocalColumns] = useState<Column[]>([]);
   const [newColumnTitle, setNewColumnTitle] = useState('');
+
+  useEffect(() => {
+    if (board) {
+      setTitle(board.title);
+      setDescription(board.description || '');
+    }
+  }, [board]);
+
+  useEffect(() => {
+    setLocalColumns(columns);
+  }, [columns]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!title.trim()) return;
+    if (!title.trim()) {
+      showError('Título do quadro é obrigatório.');
+      return;
+    }
 
     const updatedBoard: Board = {
       ...board,
       title: title.trim(),
-      columns,
-      updatedAt: new Date().toISOString(),
+      description: description.trim() || null,
+      updated_at: new Date().toISOString(),
     };
 
     onBoardUpdate(updatedBoard);
@@ -43,25 +67,23 @@ export const EditBoardDialog: React.FC<EditBoardDialogProps> = ({
 
   const addColumn = () => {
     if (newColumnTitle.trim()) {
-      setColumns([
-        ...columns,
-        {
-          id: Date.now().toString(),
-          title: newColumnTitle.trim(),
-        }
-      ]);
+      onColumnCreate({
+        title: newColumnTitle.trim(),
+        board_id: board.id,
+        order: localColumns.length,
+      });
       setNewColumnTitle('');
     }
   };
 
   const removeColumn = (columnId: string) => {
-    setColumns(columns.filter(col => col.id !== columnId));
+    if (confirm('Tem certeza que deseja excluir esta coluna? Todas as tarefas nela serão perdidas.')) {
+      onColumnDelete(columnId);
+    }
   };
 
   const updateColumnTitle = (columnId: string, newTitle: string) => {
-    setColumns(columns.map(col => 
-      col.id === columnId ? { ...col, title: newTitle } : col
-    ));
+    onColumnUpdate({ id: columnId, data: { title: newTitle } });
   };
 
   return (
@@ -84,9 +106,20 @@ export const EditBoardDialog: React.FC<EditBoardDialogProps> = ({
           </div>
 
           <div>
+            <Label htmlFor="description">Descrição</Label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Uma breve descrição do quadro"
+              rows={3}
+            />
+          </div>
+
+          <div>
             <Label>Colunas</Label>
             <div className="space-y-2 mt-2">
-              {columns.map(column => (
+              {localColumns.map(column => (
                 <div key={column.id} className="flex items-center space-x-2">
                   <Input
                     value={column.title}
@@ -114,18 +147,19 @@ export const EditBoardDialog: React.FC<EditBoardDialogProps> = ({
                   onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addColumn())}
                 />
                 <Button type="button" variant="outline" onClick={addColumn}>
+                  <Plus className="h-4 w-4 mr-2" />
                   Adicionar
                 </Button>
               </div>
             </div>
           </div>
 
-          <div className="flex justify-end space-x-2">
+          <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
             <Button type="submit">Salvar Alterações</Button>
-          </div>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

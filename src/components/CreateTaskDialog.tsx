@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Task, Board } from '@/types/task';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Task, Column } from '@/types/task';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -10,18 +10,22 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Plus, X } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { showError } from '@/utils/toast';
 
 interface CreateTaskDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  board: Board;
-  onTaskCreate: (task: Task) => void;
+  boardId: string;
+  columns: Column[];
+  onTaskCreate: (task: Omit<Task, 'id'>) => void;
 }
 
 export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
   open,
   onOpenChange,
-  board,
+  boardId,
+  columns,
   onTaskCreate,
 }) => {
   const [title, setTitle] = useState('');
@@ -30,21 +34,31 @@ export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
   const [dueDate, setDueDate] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState('');
+  const [selectedColumnId, setSelectedColumnId] = useState(columns[0]?.id || '');
+  const { user } = useAuth();
+
+  React.useEffect(() => {
+    if (columns.length > 0 && !selectedColumnId) {
+      setSelectedColumnId(columns[0].id);
+    }
+  }, [columns, selectedColumnId]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!title.trim()) return;
+    if (!title.trim() || !user?.id || !selectedColumnId) {
+      showError('Título da tarefa, coluna e ID do usuário são obrigatórios.');
+      return;
+    }
 
-    const newTask: Task = {
-      id: Date.now().toString(),
+    const newTask: Omit<Task, 'id'> = {
       title: title.trim(),
       description: description.trim() || undefined,
       priority,
       dueDate: dueDate || undefined,
       tags,
-      columnId: board.columns[0]?.id || '',
-      order: board.tasks.filter(task => task.columnId === board.columns[0]?.id).length,
+      columnId: selectedColumnId,
+      order: 0, // Order will be determined by the backend or reordered after creation
     };
 
     onTaskCreate(newTask);
@@ -56,6 +70,7 @@ export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
     setDueDate('');
     setTags([]);
     setNewTag('');
+    setSelectedColumnId(columns[0]?.id || '');
     onOpenChange(false);
   };
 
@@ -108,6 +123,22 @@ export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
           </div>
 
           <div>
+            <Label htmlFor="column">Coluna</Label>
+            <Select value={selectedColumnId} onValueChange={setSelectedColumnId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione uma coluna" />
+              </SelectTrigger>
+              <SelectContent>
+                {columns.map(column => (
+                  <SelectItem key={column.id} value={column.id}>
+                    {column.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
             <Label htmlFor="priority">Prioridade</Label>
             <Select value={priority} onValueChange={(value: any) => setPriority(value)}>
               <SelectTrigger>
@@ -156,12 +187,12 @@ export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
             </div>
           </div>
 
-          <div className="flex justify-end space-x-2">
+          <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
             <Button type="submit">Criar Tarefa</Button>
-          </div>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

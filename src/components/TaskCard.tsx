@@ -18,6 +18,7 @@ interface TaskCardProps {
   onTaskMove: (taskId: string, newColumnId: string, newOrder: number) => void;
   onTaskReorder: (columnId: string, taskId: string, newOrder: number) => void;
   onDragStart: (task: Task) => void;
+  onTaskDelete: (taskId: string) => void; // Added delete handler
   priorityColors: Record<string, string>;
 }
 
@@ -26,6 +27,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   onTaskMove,
   onTaskReorder,
   onDragStart,
+  onTaskDelete,
   priorityColors,
 }) => {
   const handleDragStart = (e: React.DragEvent) => {
@@ -77,7 +79,14 @@ export const TaskCard: React.FC<TaskCardProps> = ({
                 <Edit2 className="h-3 w-3 mr-2" />
                 Editar
               </DropdownMenuItem>
-              <DropdownMenuItem className="text-red-600">
+              <DropdownMenuItem 
+                className="text-red-600" 
+                onClick={() => {
+                  if (confirm('Tem certeza que deseja excluir esta tarefa?')) {
+                    onTaskDelete(task.id);
+                  }
+                }}
+              >
                 <Trash2 className="h-3 w-3 mr-2" />
                 Excluir
               </DropdownMenuItem>

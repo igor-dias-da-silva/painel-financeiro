@@ -2,10 +2,14 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { AuthGuard } from "./components/AuthGuard";
 import { Layout } from "./components/Layout";
 import Home from "./pages/Home";
-import Index from "./pages/Index";
+import Boards from "./pages/Boards"; // Import the updated Boards page
+import BoardView from "./pages/BoardView"; // Import the new BoardView page
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
+import Settings from "./pages/Settings"; // Import Settings page
+import Profile from "./pages/Profile"; // Import Profile page
+import Help from "./pages/Help"; // Import Help page
 import NotFound from "./pages/NotFound";
 
 function App() {
@@ -25,37 +29,35 @@ function App() {
         <Route path="/boards" element={
           <AuthGuard>
             <Layout>
-              <Index />
+              <Boards /> {/* Use the updated Boards list page */}
+            </Layout>
+          </AuthGuard>
+        } />
+        <Route path="/boards/:boardId" element={
+          <AuthGuard>
+            <Layout>
+              <BoardView /> {/* New route for individual board view */}
             </Layout>
           </AuthGuard>
         } />
         <Route path="/settings" element={
           <AuthGuard>
             <Layout>
-              <div className="text-center py-12">
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">Configurações</h2>
-                <p className="text-gray-600">Página de configurações em desenvolvimento</p>
-              </div>
+              <Settings /> {/* Render the actual Settings page */}
             </Layout>
           </AuthGuard>
         } />
         <Route path="/profile" element={
           <AuthGuard>
             <Layout>
-              <div className="text-center py-12">
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">Perfil</h2>
-                <p className="text-gray-600">Página de perfil em desenvolvimento</p>
-              </div>
+              <Profile /> {/* Render the actual Profile page */}
             </Layout>
           </AuthGuard>
         } />
         <Route path="/help" element={
           <AuthGuard>
             <Layout>
-              <div className="text-center py-12">
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">Ajuda</h2>
-                <p className="text-gray-600">Página de ajuda em desenvolvimento</p>
-              </div>
+              <Help /> {/* Render the actual Help page */}
             </Layout>
           </AuthGuard>
         } />
