@@ -40,17 +40,17 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   };
 
   const SidebarContent = () => (
-    <div className="flex flex-col h-full bg-blue-800 text-white border-r border-blue-700"> {/* Make background very distinct */}
-      <div className="p-4 border-b border-blue-700">
-        <h1 className="text-2xl font-bold">Kanban</h1> {/* Removed text-blue-600 */}
+    <div className="flex flex-col h-full bg-sidebar-background text-sidebar-foreground border-r border-sidebar-border">
+      <div className="p-4 border-b border-sidebar-border">
+        <h1 className="text-2xl font-bold">Kanban</h1>
       </div>
       <nav className="flex-1 p-4 space-y-2">
         {navItems.map((item) => (
           <Link
             key={item.name}
             to={item.path}
-            className={`flex items-center p-2 rounded-md hover:bg-blue-700 ${
-              location.pathname === item.path ? 'bg-blue-700' : ''
+            className={`flex items-center p-2 rounded-md hover:bg-sidebar-accent ${
+              location.pathname === item.path ? 'bg-sidebar-primary text-sidebar-primary-foreground' : ''
             }`}
           >
             <item.icon className="h-5 w-5 mr-3" />
@@ -58,7 +58,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
           </Link>
         ))}
       </nav>
-      <div className="p-4 border-t border-blue-700 relative">
+      <div className="p-4 border-t border-sidebar-border relative">
         <div
           className="flex items-center space-x-2 cursor-pointer"
           onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
@@ -71,17 +71,17 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
           {isProfileMenuOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
         </div>
         {isProfileMenuOpen && (
-          <div className="absolute left-4 right-4 bottom-full mb-2 bg-blue-700 rounded-md shadow-lg py-1 z-10"> {/* Changed background */}
+          <div className="absolute left-4 right-4 bottom-full mb-2 bg-sidebar-accent rounded-md shadow-lg py-1 z-10">
             <Link
               to="/profile"
-              className="block px-4 py-2 text-sm hover:bg-blue-600"
+              className="block px-4 py-2 text-sm hover:bg-sidebar-primary"
               onClick={() => setIsProfileMenuOpen(false)}
             >
               Perfil
             </Link>
             <button
               onClick={handleLogout}
-              className="w-full text-left flex items-center px-4 py-2 text-sm text-red-300 hover:bg-red-700"
+              className="w-full text-left flex items-center px-4 py-2 text-sm text-destructive-foreground hover:bg-destructive"
             >
               <LogOut className="h-4 w-4 mr-2" />
               Sair
@@ -93,15 +93,15 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   );
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-gray-100 dark:bg-background"> {/* Adicionado dark:bg-background */}
       {/* Desktop Sidebar */}
       <aside
-        className={`hidden md:flex flex-col transition-all duration-300 w-64`} // Force w-64
+        className={`hidden md:flex flex-col transition-all duration-300 w-64`}
       >
-        <div className="flex flex-col h-full bg-blue-800 text-white border-r border-blue-700"> {/* Make background very distinct */}
-          <div className="p-4 border-b flex items-center justify-between border-blue-700">
-            <h1 className="text-2xl font-bold">Kanban</h1> {/* Removed text-blue-600 */}
-            <Button variant="ghost" size="icon" onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="text-white hover:bg-blue-700"> {/* Adjusted button color */}
+        <div className="flex flex-col h-full bg-sidebar-background text-sidebar-foreground border-r border-sidebar-border">
+          <div className="p-4 border-b flex items-center justify-between border-sidebar-border">
+            <h1 className="text-2xl font-bold">Kanban</h1>
+            <Button variant="ghost" size="icon" onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="text-sidebar-foreground hover:bg-sidebar-accent">
               <Menu className="h-6 w-6" />
             </Button>
           </div>
@@ -110,17 +110,17 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               <Link
                 key={item.name}
                 to={item.path}
-                className={`flex items-center p-2 rounded-md hover:bg-blue-700 ${
-                  location.pathname === item.path ? 'bg-blue-700' : ''
+                className={`flex items-center p-2 rounded-md hover:bg-sidebar-accent ${
+                  location.pathname === item.path ? 'bg-sidebar-primary text-sidebar-primary-foreground' : ''
                 }`}
                 title={item.name}
               >
                 <item.icon className="h-5 w-5" />
-                <span className="ml-3">{item.name}</span> {/* Always show text */}
+                <span className="ml-3">{item.name}</span>
               </Link>
             ))}
           </nav>
-          <div className="p-4 border-t relative border-blue-700">
+          <div className="p-4 border-t relative border-sidebar-border">
             <div
               className="flex items-center space-x-2 cursor-pointer"
               onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
@@ -133,17 +133,17 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               {isProfileMenuOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
             </div>
             {isProfileMenuOpen && (
-              <div className="absolute left-4 right-4 bottom-full mb-2 bg-blue-700 rounded-md shadow-lg py-1 z-10">
+              <div className="absolute left-4 right-4 bottom-full mb-2 bg-sidebar-accent rounded-md shadow-lg py-1 z-10">
                 <Link
                   to="/profile"
-                  className="block px-4 py-2 text-sm hover:bg-blue-600"
+                  className="block px-4 py-2 text-sm hover:bg-sidebar-primary"
                   onClick={() => setIsProfileMenuOpen(false)}
                 >
                   Perfil
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="w-full text-left flex items-center px-4 py-2 text-sm text-red-300 hover:bg-red-700"
+                  className="w-full text-left flex items-center px-4 py-2 text-sm text-destructive-foreground hover:bg-destructive"
                 >
                   <LogOut className="h-4 w-4 mr-2" />
                   Sair
@@ -155,7 +155,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
       </aside>
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="bg-white shadow-sm p-4 flex justify-between items-center dark:bg-gray-800"> {/* Adicionado dark:bg-gray-800 */}
+        <header className="bg-white shadow-sm p-4 flex justify-between items-center dark:bg-gray-800">
           <div className="md:hidden">
             <Sheet>
               <SheetTrigger asChild>
@@ -168,12 +168,12 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               </SheetContent>
             </Sheet>
           </div>
-          <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100"> {/* Adicionado dark:text-gray-100 */}
+          <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
             {navItems.find(item => item.path === location.pathname)?.name || 'Página'}
           </h2>
-          <ThemeToggle /> {/* Adicionado o ThemeToggle aqui */}
+          <ThemeToggle />
         </header>
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6 dark:bg-gray-900"> {/* Adicionado dark:bg-gray-900 */}
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6 dark:bg-gray-900">
           {children}
         </main>
       </div>
