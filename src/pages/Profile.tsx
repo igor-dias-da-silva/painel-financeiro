@@ -28,12 +28,9 @@ const Profile = () => {
     enabled: !!userId,
   });
 
-  const { data: boardsCount, isLoading: boardsCountLoading } = useQuery<number>({
-    queryKey: ['boardsCount', userId],
-    queryFn: async () => {
-      const boards = await getBoards(userId!);
-      return boards.length;
-    },
+  const { data: boards, isLoading: boardsLoading } = useQuery<Board[]>({
+    queryKey: ['boards', userId],
+    queryFn: () => getBoards(userId!),
     enabled: !!userId,
   });
 
@@ -102,7 +99,7 @@ const Profile = () => {
   const calculateStats = () => {
     const totalTasks = totalTasksCount || 0;
     const completedTasks = allCards?.filter(card => card.column_id === 'done').length || 0; // Assuming 'done' is a column ID
-    const totalBoards = boardsCount || 0;
+    const totalBoards = boards?.length || 0; // Use boards from useQuery
     
     const tasksByPriority = {
       urgent: 0,
@@ -142,7 +139,7 @@ const Profile = () => {
     low: 'Baixa'
   };
 
-  const isLoading = authLoading || profileLoading || boardsCountLoading || tasksCountLoading || cardsLoading;
+  const isLoading = authLoading || profileLoading || boardsLoading || tasksCountLoading || cardsLoading;
 
   if (isLoading) {
     return (
@@ -170,7 +167,8 @@ const Profile = () => {
 
   const displayName = `${firstName} ${lastName}`.trim() || user?.email?.split('@')[0] || 'Usuário';
   const displayEmail = user?.email || 'N/A';
-  const joinDate = user?.created_at ? new Date(user.created_at).toLocaleDateString('pt-BR') : 'N/A';
+  // Use a placeholder for joinDate as `user.created_at` is not available on the `User` type from useAuth
+  const joinDate = "N/A"; 
 
   return (
     <AuthGuard>

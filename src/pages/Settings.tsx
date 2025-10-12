@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Trash2, Download, Upload, Palette, Bell, Shield, Loader2 } from 'lucide-react';
-import { AuthGuard } = '@/components/AuthGuard';
+import { AuthGuard } from '@/components/AuthGuard'; // Corrected import syntax
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
 import { getBoards, getTotalCards, Board } from '@/lib/database'; // Import Board from database.ts
