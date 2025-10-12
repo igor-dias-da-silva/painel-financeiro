@@ -32,7 +32,7 @@ export interface Database {
           id: string
           title: string
           board_id: string
-          order: number
+          order_index: number // Corrigido de 'order' para 'order_index'
           created_at: string
           updated_at: string
         }
@@ -40,7 +40,7 @@ export interface Database {
           id?: string
           title: string
           board_id: string
-          order: number
+          order_index: number // Corrigido de 'order' para 'order_index'
           created_at?: string
           updated_at?: string
         }
@@ -48,7 +48,7 @@ export interface Database {
           id?: string
           title?: string
           board_id?: string
-          order?: number
+          order_index?: number // Corrigido de 'order' para 'order_index'
           created_at?: string
           updated_at?: string
         }
@@ -59,8 +59,11 @@ export interface Database {
           title: string
           description: string | null
           column_id: string
-          order: number
+          order_index: number // Corrigido de 'order' para 'order_index'
           user_id: string
+          priority: 'low' | 'medium' | 'high' | 'urgent' // Tipagem mais precisa
+          due_date: string | null
+          tags: string[] // Tipagem mais precisa
           created_at: string
           updated_at: string
         }
@@ -69,8 +72,11 @@ export interface Database {
           title: string
           description?: string | null
           column_id: string
-          order: number
+          order_index: number // Corrigido de 'order' para 'order_index'
           user_id: string
+          priority?: 'low' | 'medium' | 'high' | 'urgent'
+          due_date?: string | null
+          tags?: string[]
           created_at?: string
           updated_at?: string
         }
@@ -79,8 +85,11 @@ export interface Database {
           title?: string
           description?: string | null
           column_id?: string
-          order?: number
+          order_index?: number // Corrigido de 'order' para 'order_index'
           user_id?: string
+          priority?: 'low' | 'medium' | 'high' | 'urgent'
+          due_date?: string | null
+          tags?: string[]
           created_at?: string
           updated_at?: string
         }

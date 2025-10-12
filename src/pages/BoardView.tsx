@@ -13,27 +13,50 @@ import { AuthGuard } from '@/components/AuthGuard';
 import { Task } from '@/types/task';
 
 const fetchFullBoardData = async (boardId: string, userId: string): Promise<Board & { columns: SupabaseColumn[]; tasks: Task[] }> => {
-  const boardData = await getBoards(userId);
-  const board = boardData.find(b => b.id === boardId);
-  if (!board) throw new Error('Quadro não encontrado');
+  console.log('Fetching full board data for boardId:', boardId, 'userId:', userId);
 
-  const columns = await getColumns(boardId);
+  if (!userId) {
+    console.error('Error: userId is undefined in fetchFullBoardData');
+    throw new Error('ID do usuário não disponível.');
+  }
+  if (!boardId) {
+    console.error('Error: boardId is undefined in fetchFullBoardData');
+    throw new Error('ID do quadro não disponível.');
+  }
 
-  const cards = await getCards(boardId);
+  try {
+    const boardData = await getBoards(userId);
+    console.log('Fetched boards:', boardData);
+    const board = boardData.find(b => b.id === boardId);
+    if (!board) {
+      console.error('Error: Board not found for boardId:', boardId);
+      throw new Error('Quadro não encontrado.');
+    }
+    console.log('Found board:', board);
 
-  // Map Supabase Card to local Task type
-  const tasks: Task[] = cards.map(card => ({
-    id: card.id,
-    title: card.title,
-    description: card.description || undefined,
-    priority: card.priority || 'medium', 
-    dueDate: card.due_date || undefined, 
-    tags: card.tags || [], 
-    columnId: card.column_id,
-    order_index: card.order_index, // Alterado de 'order' para 'order_index'
-  }));
+    const columns = await getColumns(boardId);
+    console.log('Fetched columns:', columns);
 
-  return { ...board, columns, tasks };
+    const cards = await getCards(boardId);
+    console.log('Fetched cards:', cards);
+
+    const tasks: Task[] = cards.map(card => ({
+      id: card.id,
+      title: card.title,
+      description: card.description || undefined,
+      priority: card.priority || 'medium', 
+      dueDate: card.due_date || undefined, 
+      tags: card.tags || [], 
+      columnId: card.column_id,
+      order_index: card.order_index, // Alterado de 'order' para 'order_index'
+    }));
+    console.log('Mapped tasks:', tasks);
+
+    return { ...board, columns, tasks };
+  } catch (err: any) {
+    console.error('Error fetching full board data:', err.message);
+    throw new Error(`Erro ao carregar dados do quadro: ${err.message}`);
+  }
 };
 
 const BoardView = () => {
