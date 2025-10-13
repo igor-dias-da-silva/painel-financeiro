@@ -243,11 +243,11 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
+    <div className="min-h-screen bg-gray-50 p-4 dark:bg-background">
       {/* Header */}
       <div className="mb-6 flex justify-between items-center">
         <div className="flex items-center space-x-4">
-          <h1 className="text-3xl font-bold text-gray-800">{board.title}</h1>
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-foreground">{board.title}</h1>
           <Button
             variant="outline"
             size="sm"
@@ -270,18 +270,18 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
       {/* Search and Filters */}
       <div className="mb-6 flex flex-wrap gap-4 items-center">
         <div className="flex items-center space-x-2">
-          <Search className="h-4 w-4 text-gray-500" />
+          <Search className="h-4 w-4 text-gray-500 dark:text-muted-foreground" />
           <Input
             placeholder="Buscar tarefas..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-64"
+            className="w-64 dark:bg-input dark:text-foreground dark:border-border"
           />
         </div>
         
         <div className="flex items-center space-x-2">
-          <Filter className="h-4 w-4 text-gray-500" />
-          <span className="text-sm text-gray-600">Prioridade:</span>
+          <Filter className="h-4 w-4 text-gray-500 dark:text-muted-foreground" />
+          <span className="text-sm text-gray-600 dark:text-muted-foreground">Prioridade:</span>
           {Object.entries(priorityColors).map(([priority, color]) => (
             <Badge
               key={priority}
@@ -301,12 +301,12 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
         </div>
 
         <div className="flex items-center space-x-2">
-          <span className="text-sm text-gray-600">Tags:</span>
+          <span className="text-sm text-gray-600 dark:text-muted-foreground">Tags:</span>
           {getAllTags().map(tag => (
             <Badge
               key={tag}
               variant={selectedTags.includes(tag) ? "default" : "outline"}
-              className="cursor-pointer"
+              className="cursor-pointer dark:bg-secondary dark:text-secondary-foreground dark:border-border"
               onClick={() => {
                 if (selectedTags.includes(tag)) {
                   setSelectedTags(selectedTags.filter(t => t !== tag));
@@ -336,15 +336,15 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
         {columns?.map(column => (
           <div
             key={column.id}
-            className="flex-shrink-0 w-80 bg-white rounded-lg shadow-sm border"
+            className="flex-shrink-0 w-80 bg-white rounded-lg shadow-sm border dark:bg-card dark:border-border"
             onDragOver={(e) => handleDragOver(e, column.id)}
             onDrop={(e) => handleDrop(e, column.id)}
           >
-            <ShadcnCard className="h-full">
+            <ShadcnCard className="h-full dark:bg-card dark:border-border">
               <CardHeader className="pb-3">
-                <CardTitle className="text-lg font-semibold flex items-center justify-between">
+                <CardTitle className="text-lg font-semibold flex items-center justify-between dark:text-foreground">
                   {column.title}
-                  <span className="text-sm text-gray-500">
+                  <span className="text-sm text-gray-500 dark:text-muted-foreground">
                     {getTasksByColumn(column.id).length}
                   </span>
                 </CardTitle>
@@ -363,7 +363,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
                     />
                   ))}
                   {getTasksByColumn(column.id).length === 0 && (
-                    <div className="text-center text-gray-400 py-8">
+                    <div className="text-center text-gray-400 py-8 dark:text-muted-foreground">
                       Nenhuma tarefa nesta coluna
                     </div>
                   )}

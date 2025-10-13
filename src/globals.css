@@ -55,7 +55,7 @@
     --background: 0 0% 0%; /* Fundo preto */
     --foreground: 210 40% 98%; /* Texto claro */
 
-    --card: 220 10% 10%; /* Cartões cinza muito escuro */
+    --card: 0 0% 0%; /* Cartões agora são preto puro */
     --card-foreground: 210 40% 98%;
 
     --popover: 220 10% 10%;

@@ -1,7 +1,6 @@
 "use client";
 
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Plus, Loader2, LayoutDashboard, ListTodo } from 'lucide-react';
 import { Board, getTotalCards } from '@/lib/database';
 import { useAuth } from '@/hooks/useAuth';
+import { useQuery } from '@tanstack/react-query';
 
 const fetchBoards = async (userId: string): Promise<Board[]> => {
   const { data, error } = await supabase
@@ -63,8 +63,8 @@ const Dashboard = () => {
     <div className="p-4">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-800">Dashboard</h1>
-          <p className="text-gray-600 mt-1">Visão geral das suas atividades e quadros</p>
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-foreground">Dashboard</h1>
+          <p className="text-gray-600 mt-1 dark:text-muted-foreground">Visão geral das suas atividades e quadros</p>
         </div>
         <div className="flex gap-2">
           <Link to="/boards">
@@ -81,36 +81,36 @@ const Dashboard = () => {
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <Card>
+        <Card className="dark:bg-card dark:border-border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total de Quadros</CardTitle>
+            <CardTitle className="text-sm font-medium dark:text-foreground">Total de Quadros</CardTitle>
             <LayoutDashboard className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{boards?.length || 0}</div>
+            <div className="text-2xl font-bold dark:text-foreground">{boards?.length || 0}</div>
             <p className="text-xs text-muted-foreground">Quadros criados por você</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="dark:bg-card dark:border-border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total de Tarefas</CardTitle>
+            <CardTitle className="text-sm font-medium dark:text-foreground">Total de Tarefas</CardTitle>
             <ListTodo className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalTasks || 0}</div>
+            <div className="text-2xl font-bold dark:text-foreground">{totalTasks || 0}</div>
             <p className="text-xs text-muted-foreground">Tarefas em todos os seus quadros</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Recent Boards */}
-      <Card className="mb-8">
+      <Card className="mb-8 dark:bg-card dark:border-border">
         <CardHeader>
-          <CardTitle>Quadros Recentes</CardTitle>
+          <CardTitle className="dark:text-foreground">Quadros Recentes</CardTitle>
         </CardHeader>
         <CardContent>
           {boards && boards.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 text-gray-500 dark:text-muted-foreground">
               Nenhum quadro criado ainda.
               <Button variant="link" onClick={() => navigate('/boards')} className="block mt-2">
                 Crie seu primeiro quadro!
@@ -119,14 +119,14 @@ const Dashboard = () => {
           ) : (
             <div className="space-y-4">
               {boards?.slice(0, 3).map((board) => (
-                <div key={board.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div key={board.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg dark:bg-secondary dark:border-border">
                   <div>
                     <Link to={`/boards/${board.id}`} className="font-medium text-blue-600 hover:underline">
                       {board.title}
                     </Link>
-                    <p className="text-sm text-gray-600 line-clamp-1">{board.description || 'Sem descrição'}</p>
+                    <p className="text-sm text-gray-600 line-clamp-1 dark:text-muted-foreground">{board.description || 'Sem descrição'}</p>
                   </div>
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-gray-500 dark:text-muted-foreground">
                     Atualizado em {new Date(board.updated_at).toLocaleDateString('pt-BR')}
                   </span>
                 </div>

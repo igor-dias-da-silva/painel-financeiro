@@ -63,24 +63,24 @@ export const TaskCard: React.FC<TaskCardProps> = ({
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
-      className="cursor-move hover:shadow-md transition-shadow"
+      className="cursor-move hover:shadow-md transition-shadow dark:bg-card dark:border-border"
     >
       <CardContent className="p-4">
         <div className="flex items-start justify-between mb-2">
-          <h3 className="font-medium text-sm line-clamp-2">{task.title}</h3>
+          <h3 className="font-medium text-sm line-clamp-2 dark:text-foreground">{task.title}</h3>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+              <Button variant="ghost" size="sm" className="h-6 w-6 p-0 dark:text-muted-foreground dark:hover:bg-accent">
                 <MoreHorizontal className="h-3 w-3" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>
+            <DropdownMenuContent align="end" className="dark:bg-card dark:border-border">
+              <DropdownMenuItem className="dark:text-foreground dark:hover:bg-accent">
                 <Edit2 className="h-3 w-3 mr-2" />
                 Editar
               </DropdownMenuItem>
               <DropdownMenuItem 
-                className="text-red-600" 
+                className="text-red-600 dark:text-red-400 dark:hover:bg-destructive dark:hover:text-destructive-foreground" 
                 onClick={() => {
                   if (confirm('Tem certeza que deseja excluir esta tarefa?')) {
                     onTaskDelete(task.id);
@@ -95,7 +95,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
         </div>
         
         {task.description && (
-          <p className="text-xs text-gray-600 mb-3 line-clamp-3">{task.description}</p>
+          <p className="text-xs text-gray-600 mb-3 line-clamp-3 dark:text-muted-foreground">{task.description}</p>
         )}
 
         <div className="flex items-center justify-between">
@@ -104,7 +104,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
           </Badge>
           
           {task.dueDate && (
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-gray-500 dark:text-muted-foreground">
               {new Date(task.dueDate).toLocaleDateString()}
             </span>
           )}
@@ -113,7 +113,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
         {task.tags.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-2">
             {task.tags.map(tag => (
-              <Badge key={tag} variant="outline" className="text-xs">
+              <Badge key={tag} variant="outline" className="text-xs dark:bg-secondary dark:text-secondary-foreground dark:border-border">
                 {tag}
               </Badge>
             ))}
