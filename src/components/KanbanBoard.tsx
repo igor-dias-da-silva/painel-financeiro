@@ -108,7 +108,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
     },
   });
 
-  const deleteCardMutation = useMutation({
+  const deleteCardMutation = useMutation<void, Error, string>({ // Explicitly type TVariables as string
     mutationFn: deleteCard,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cards', board.id] });
