@@ -122,13 +122,13 @@ export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
             />
           </div>
 
-          <div>
+          <div className="relative z-20"> {/* Increased z-index for Select components */}
             <Label htmlFor="column">Coluna</Label>
-            <Select value={selectedColumnId} onValueChange={setSelectedColumnId}>
+            <Select value={selectedColumnId} onValueChange={setSelectedColumnId} disabled={columns.length === 0}>
               <SelectTrigger>
-                <SelectValue placeholder="Selecione uma coluna" />
+                <SelectValue placeholder={columns.length === 0 ? "Nenhuma coluna disponível" : "Selecione uma coluna"} />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-50"> {/* Explicitly set z-index for content */}
                 {columns.map(column => (
                   <SelectItem key={column.id} value={column.id}>
                     {column.title}
@@ -136,15 +136,18 @@ export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
                 ))}
               </SelectContent>
             </Select>
+            {columns.length === 0 && (
+              <p className="text-sm text-red-500 mt-1">Crie uma coluna no quadro antes de adicionar tarefas.</p>
+            )}
           </div>
 
-          <div>
+          <div className="relative z-10"> {/* Increased z-index for Select components, lower than column */}
             <Label htmlFor="priority">Prioridade</Label>
             <Select value={priority} onValueChange={(value: any) => setPriority(value)}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-50"> {/* Explicitly set z-index for content */}
                 <SelectItem value="low">Baixa</SelectItem>
                 <SelectItem value="medium">Média</SelectItem>
                 <SelectItem value="high">Alta</SelectItem>
