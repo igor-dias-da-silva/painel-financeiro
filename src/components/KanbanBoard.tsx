@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Board, Column as SupabaseColumn, Card as SupabaseCard, updateCard, createCard, deleteCard, updateColumn, createColumn, deleteColumn, getColumns, getCards } from '@/lib/database';
+import { Board, Column as SupabaseColumn, Card as SupabaseCard, updateCard, createCard, deleteCard, updateColumn, createColumn, deleteColumn, getColumns, getCards, getProfile } from '@/lib/database';
 import { Task, Column } from '@/types/task';
 import { Card as ShadcnCard, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,6 +23,13 @@ interface KanbanBoardProps {
   onDeleteBoard: (boardId: string) => void;
 }
 
+const defaultPriorityColors: Record<string, string> = {
+  urgent: '#EF4444', // red-500
+  high: '#F97316',   // orange-500
+  medium: '#F59E0B',  // yellow-500
+  low: '#3B82F6',    // blue-500
+};
+
 export const KanbanBoard: React.FC<KanbanBoardProps> = ({
   board,
   onBoardUpdate,
@@ -37,6 +44,15 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
   const [draggedTask, setDraggedTask] = useState<Task | null>(null);
   const { user } = useAuth();
   const queryClient = useQueryClient();
+
+  // Fetch user profile to get custom priority colors
+  const { data: userProfile } = useQuery({
+    queryKey: ['profile', user?.id],
+    queryFn: () => getProfile(user!.id),
+    enabled: !!user?.id,
+  });
+
+  const currentPriorityColors = userProfile?.priority_colors ? { ...defaultPriorityColors, ...userProfile.priority_colors } : defaultPriorityColors;
 
   // Fetch columns and cards for the current board
   const { data: columns, isLoading: columnsLoading, isError: columnsError } = useQuery<SupabaseColumn[]>({
@@ -218,13 +234,6 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
     return Array.from(tagSet);
   };
 
-  const priorityColors = {
-    urgent: 'bg-red-500',
-    high: 'bg-orange-500',
-    medium: 'bg-yellow-500',
-    low: 'bg-blue-500'
-  };
-
   if (columnsLoading || tasksLoading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -282,11 +291,12 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
         <div className="flex items-center space-x-2">
           <Filter className="h-4 w-4 text-gray-500 dark:text-muted-foreground" />
           <span className="text-sm text-gray-600 dark:text-muted-foreground">Prioridade:</span>
-          {Object.entries(priorityColors).map(([priority, color]) => (
+          {Object.keys(defaultPriorityColors).map((priority) => (
             <Badge
               key={priority}
               variant={selectedPriorities.includes(priority) ? "default" : "outline"}
-              className={`cursor-pointer ${color} text-white`}
+              style={{ backgroundColor: currentPriorityColors[priority], color: 'white' }}
+              className={`cursor-pointer`}
               onClick={() => {
                 if (selectedPriorities.includes(priority)) {
                   setSelectedPriorities(selectedPriorities.filter(p => p !== priority));
@@ -359,7 +369,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
                       onTaskReorder={handleTaskReorder}
                       onDragStart={handleDragStart}
                       onTaskDelete={deleteCardMutation.mutate}
-                      priorityColors={priorityColors}
+                      priorityColors={currentPriorityColors}
                     />
                   ))}
                   {getTasksByColumn(column.id).length === 0 && (

@@ -19,7 +19,7 @@ interface TaskCardProps {
   onTaskReorder: (columnId: string, taskId: string, newOrderIndex: number) => void; // Alterado newOrder para newOrderIndex
   onDragStart: (task: Task) => void;
   onTaskDelete: (taskId: string) => void;
-  priorityColors: Record<string, string>;
+  priorityColors: Record<string, string>; // Agora recebe as cores via props
 }
 
 export const TaskCard: React.FC<TaskCardProps> = ({
@@ -54,7 +54,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
     }
   };
 
-  const priorityColor = priorityColors[task.priority] || 'bg-gray-500';
+  const priorityColor = priorityColors[task.priority] || '#6B7280'; // Fallback para cinza se a cor não for encontrada
 
   return (
     <Card
@@ -99,7 +99,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
         )}
 
         <div className="flex items-center justify-between">
-          <Badge className={`${priorityColor} text-white text-xs`}>
+          <Badge style={{ backgroundColor: priorityColor, color: 'white' }} className={`text-xs`}>
             {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
           </Badge>
           

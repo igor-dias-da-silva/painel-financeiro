@@ -37,6 +37,8 @@ export interface Profile {
   first_name: string | null;
   last_name: string | null;
   bio?: string | null; // Adicionado o campo bio
+  default_priority?: 'low' | 'medium' | 'high' | 'urgent'; // Nova propriedade
+  priority_colors?: Record<string, string> | null; // Nova propriedade
   updated_at: string;
 }
 
