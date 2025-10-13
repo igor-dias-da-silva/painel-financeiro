@@ -19,7 +19,7 @@ const Settings = () => {
   const { user, isLoading: authLoading } = useAuth();
   const { theme, setTheme } = useTheme(); // Usar o hook useTheme
   const [notifications, setNotifications] = useState(true);
-  const [autoSave, setAutoSave] = useState(true);
+  // const [autoSave, setAutoSave] = useState(true); // Removido o estado de autoSave
   const [defaultPriority, setDefaultPriority] = useState('medium');
 
   const userId = user?.id;
@@ -164,17 +164,7 @@ const Settings = () => {
                   />
                 </div>
                 
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label className="dark:text-gray-200">Auto-save</Label> {/* Adicionado dark:text-gray-200 */}
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Salva automaticamente suas alterações</p> {/* Adicionado dark:text-gray-400 */}
-                  </div>
-                  <Switch
-                    checked={autoSave}
-                    onCheckedChange={setAutoSave}
-                    disabled
-                  />
-                </div>
+                {/* Removido o switch de Auto-save */}
               </CardContent>
             </Card>
 
