@@ -52,41 +52,41 @@
   }
 
   .dark {
-    --background: 0 0% 0%; /* Fundo preto */
-    --foreground: 210 40% 98%; /* Texto claro */
+    --background: 222.2 84% 4.9%; /* Fundo escuro padrão do shadcn/ui */
+    --foreground: 210 40% 98%;
 
-    --card: 0 0% 0%; /* Cartões agora são preto puro */
+    --card: 217.2 32.4% 17.5%; /* Cartões com um tom de cinza mais claro */
     --card-foreground: 210 40% 98%;
 
-    --popover: 220 10% 10%;
+    --popover: 217.2 32.4% 17.5%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 217.2 91.2% 59.8%; /* Azul vibrante para elementos primários */
-    --primary-foreground: 210 40% 98%;
+    --primary: 210 40% 98%; /* Invertido para tema escuro */
+    --primary-foreground: 222.2 47.4% 11.2%;
 
-    --secondary: 210 40% 20%; /* Cinza-azul mais escuro para elementos secundários */
+    --secondary: 217.2 32.4% 17.5%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 210 40% 25%; /* Cinza dessaturado para texto muted */
-    --muted-foreground: 215.4 16.3% 56.9%;
+    --muted: 217.2 32.4% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 210 40% 20%; /* Cinza-azul para acentos */
+    --accent: 217.2 32.4% 17.5%;
     --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 84.2% 60.2%; /* Vermelho para destrutivo */
+    --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 20%; /* Borda cinza sutil */
-    --input: 214.3 31.8% 20%; /* Input cinza sutil */
-    --ring: 217.2 91.2% 59.8%; /* Anel de foco azul vibrante */
+    --border: 217.2 32.4% 17.5%;
+    --input: 217.2 32.4% 17.5%;
+    --ring: 217.2 91.2% 59.8%;
 
-    --sidebar-background: 220 10% 5%; /* Fundo da sidebar cinza profundo */
-    --sidebar-foreground: 210 40% 98%; /* Texto da sidebar claro */
-    --sidebar-primary: 217.2 91.2% 59.8%; /* Item ativo da sidebar azul vibrante */
+    --sidebar-background: 222.2 84% 4.9%; /* Fundo da sidebar escuro */
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 217.2 91.2% 59.8%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 13% 15%; /* Acento da sidebar cinza escuro */
+    --sidebar-accent: 217.2 32.4% 17.5%;
     --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 214.3 31.8% 18%;
+    --sidebar-border: 217.2 32.4% 17.5%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }

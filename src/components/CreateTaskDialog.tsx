@@ -94,7 +94,7 @@ export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] overflow-visible"> {/* Adicionado overflow-visible aqui */}
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Nova Tarefa</DialogTitle>
         </DialogHeader>
@@ -122,13 +122,13 @@ export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
             />
           </div>
 
-          <div className="relative z-20"> {/* Increased z-index for Select components */}
+          <div className="relative">
             <Label htmlFor="column">Coluna</Label>
             <Select value={selectedColumnId} onValueChange={setSelectedColumnId} disabled={columns.length === 0}>
               <SelectTrigger>
                 <SelectValue placeholder={columns.length === 0 ? "Nenhuma coluna disponível" : "Selecione uma coluna"} />
               </SelectTrigger>
-              <SelectContent className="z-[9999]"> {/* Explicitly set a very high z-index for content */}
+              <SelectContent>
                 {columns.map(column => (
                   <SelectItem key={column.id} value={column.id}>
                     {column.title}
@@ -141,13 +141,13 @@ export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
             )}
           </div>
 
-          <div className="relative z-10"> {/* Increased z-index for Select components, lower than column */}
+          <div className="relative">
             <Label htmlFor="priority">Prioridade</Label>
             <Select value={priority} onValueChange={(value: any) => setPriority(value)}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="z-[9998]"> {/* Explicitly set a very high z-index for content */}
+              <SelectContent>
                 <SelectItem value="low">Baixa</SelectItem>
                 <SelectItem value="medium">Média</SelectItem>
                 <SelectItem value="high">Alta</SelectItem>
