@@ -95,14 +95,14 @@ const Boards = () => {
 
   return (
     <AuthGuard>
-      <div className="min-h-screen bg-gray-50 p-6">
+      <div className="min-h-screen bg-gray-50 p-6 dark:bg-background">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-8">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">Meus Quadros</h1>
-                <p className="text-gray-600 mt-1">Gerencie todos os seus quadros de tarefas</p>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Meus Quadros</h1>
+                <p className="text-gray-600 mt-1 dark:text-gray-400">Gerencie todos os seus quadros de tarefas</p>
               </div>
               
               <Button onClick={handleCreateBoard}>
@@ -149,13 +149,13 @@ const Boards = () => {
 
           {/* Boards Grid/List */}
           {filteredBoards.length === 0 ? (
-            <Card>
+            <Card className="dark:bg-card dark:border-border">
               <CardContent className="text-center py-12">
-                <div className="mx-auto h-12 w-12 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                  <Plus className="h-6 w-6 text-gray-400" />
+                <div className="mx-auto h-12 w-12 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
+                  <Plus className="h-6 w-6 text-gray-400 dark:text-gray-300" />
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhum quadro encontrado</h3>
-                <p className="text-gray-500 mb-6">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Nenhum quadro encontrado</h3>
+                <p className="text-gray-500 dark:text-gray-400 mb-6">
                   {searchTerm ? 'Nenhum quadro corresponde à sua busca' : 'Crie seu primeiro quadro para começar'}
                 </p>
                 <Button onClick={handleCreateBoard}>
@@ -171,10 +171,10 @@ const Boards = () => {
                 : 'space-y-4'
             }>
               {filteredBoards.map(board => (
-                <Card key={board.id} className="hover:shadow-md transition-shadow">
+                <Card key={board.id} className="hover:shadow-md transition-shadow dark:bg-card dark:border-border">
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
-                      <CardTitle className="text-lg line-clamp-2 cursor-pointer" onClick={() => handleViewBoard(board.id)}>
+                      <CardTitle className="text-lg line-clamp-2 cursor-pointer dark:text-gray-100" onClick={() => handleViewBoard(board.id)}>
                         {board.title}
                       </CardTitle>
                       <div className="flex space-x-1">
@@ -185,6 +185,7 @@ const Boards = () => {
                             e.stopPropagation();
                             handleViewBoard(board.id);
                           }}
+                          className="dark:text-gray-300 dark:hover:bg-gray-700"
                         >
                           <Eye className="h-3 w-3" />
                         </Button>
@@ -195,6 +196,7 @@ const Boards = () => {
                             e.stopPropagation();
                             handleEditBoard(board);
                           }}
+                          className="dark:text-gray-300 dark:hover:bg-gray-700"
                         >
                           <Edit2 className="h-3 w-3" />
                         </Button>
@@ -205,7 +207,7 @@ const Boards = () => {
                             e.stopPropagation();
                             handleDeleteBoard(board.id);
                           }}
-                          className="text-red-500 hover:text-red-700"
+                          className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:bg-gray-700"
                         >
                           <Trash2 className="h-3 w-3" />
                         </Button>
@@ -221,19 +223,19 @@ const Boards = () => {
                           {/* Placeholder for columns count, will fetch from Supabase later */}
                           {board.description ? '...' : '0'}
                         </div>
-                        <div className="text-xs text-gray-500">Colunas</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">Colunas</div>
                       </div>
                       <div className="text-center">
                         <div className="text-2xl font-bold text-green-600">
                           {/* Placeholder for tasks count, will fetch from Supabase later */}
                           {board.description ? '...' : '0'}
                         </div>
-                        <div className="text-xs text-gray-500">Tarefas</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">Tarefas</div>
                       </div>
                     </div>
 
                     {/* Last Updated */}
-                    <div className="mt-4 pt-4 border-t text-xs text-gray-500">
+                    <div className="mt-4 pt-4 border-t text-xs text-gray-500 dark:text-gray-400 dark:border-gray-700">
                       Atualizado em {new Date(board.updated_at).toLocaleDateString('pt-BR')}
                     </div>
                   </CardContent>
@@ -243,18 +245,18 @@ const Boards = () => {
           )}
 
           {/* Quick Actions */}
-          <div className="mt-8 p-6 bg-white rounded-lg shadow-sm border">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Ações Rápidas</h3>
+          <div className="mt-8 p-6 bg-card rounded-lg shadow-sm border dark:bg-card dark:border-border">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Ações Rápidas</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Button variant="outline" className="h-20 flex-col" onClick={handleCreateBoard}>
+              <Button variant="outline" className="h-20 flex-col dark:bg-secondary dark:text-secondary-foreground dark:border-border dark:hover:bg-accent" onClick={handleCreateBoard}>
                 <Plus className="h-6 w-6 mb-2" />
                 <span>Novo Quadro</span>
               </Button>
-              <Button variant="outline" className="h-20 flex-col" disabled>
+              <Button variant="outline" className="h-20 flex-col dark:bg-secondary dark:text-secondary-foreground dark:border-border dark:hover:bg-accent" disabled>
                 <List className="h-6 w-6 mb-2" />
                 <span>Importar Quadro</span>
               </Button>
-              <Button variant="outline" className="h-20 flex-col" disabled>
+              <Button variant="outline" className="h-20 flex-col dark:bg-secondary dark:text-secondary-foreground dark:border-border dark:hover:bg-accent" disabled>
                 <Filter className="h-6 w-6 mb-2" />
                 <span>Organizar Quadros</span>
               </Button>
