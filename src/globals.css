@@ -42,7 +42,7 @@
 
     --sidebar-primary-foreground: 0 0% 98%;
 
-    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent: 210 40% 90%; /* Ajustado para um tom mais escuro no modo claro */
 
     --sidebar-accent-foreground: 240 5.9% 10%;
 
