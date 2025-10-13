@@ -16,7 +16,8 @@ import { getProfile, updateProfile, getTotalCards, getBoards, Profile as Supabas
 import { showError, showSuccess } from '@/utils/toast';
 import { supabase } from '@/integrations/supabase/client';
 import { ChangePasswordDialog } from '@/components/ChangePasswordDialog';
-import { EditBioDialog } from '@/components/EditBioDialog'; // Importar o novo componente
+import { EditBioDialog } from '@/components/EditBioDialog';
+import { EditNameDialog } from '@/components/EditNameDialog'; // Importar o novo componente
 
 const Profile = () => {
   const { user, isLoading: authLoading, logout } = useAuth();
@@ -59,18 +60,19 @@ const Profile = () => {
   const [lastName, setLastName] = useState('');
   const [bio, setBio] = useState('');
   const [showChangePasswordDialog, setShowChangePasswordDialog] = useState(false);
-  const [showEditBioDialog, setShowEditBioDialog] = useState(false); // Estado para controlar o diálogo de bio
+  const [showEditBioDialog, setShowEditBioDialog] = useState(false);
+  const [showEditNameDialog, setShowEditNameDialog] = useState(false); // Estado para controlar o diálogo de nome
 
   useEffect(() => {
     if (profile) {
       setFirstName(profile.first_name || '');
       setLastName(profile.last_name || '');
-      setBio(profile.bio || ''); // Inicializa a bio do perfil
+      setBio(profile.bio || '');
     } else if (user) {
       const fullName = user.name.split(' ');
       setFirstName(fullName[0] || '');
       setLastName(fullName.slice(1).join(' ') || '');
-      setBio(''); // Se não houver perfil, a bio é vazia
+      setBio('');
     }
   }, [profile, user]);
 
@@ -86,13 +88,15 @@ const Profile = () => {
     },
   });
 
-  const handleSaveProfile = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSaveName = (newFirstName: string, newLastName: string) => {
     if (!userId) {
       showError('Usuário não autenticado.');
       return;
     }
-    updateProfileMutation.mutate({ first_name: firstName, last_name: lastName });
+    setFirstName(newFirstName);
+    setLastName(newLastName);
+    updateProfileMutation.mutate({ first_name: newFirstName, last_name: newLastName });
+    setShowEditNameDialog(false);
   };
 
   const handleSaveBio = (newBio: string) => {
@@ -100,9 +104,9 @@ const Profile = () => {
       showError('Usuário não autenticado.');
       return;
     }
-    setBio(newBio); // Atualiza o estado local imediatamente
+    setBio(newBio);
     updateProfileMutation.mutate({ bio: newBio });
-    setShowEditBioDialog(false); // Fecha o diálogo após salvar
+    setShowEditBioDialog(false);
   };
 
   const handleLogout = async () => {
@@ -111,7 +115,7 @@ const Profile = () => {
 
   const calculateStats = () => {
     const totalTasks = totalTasksCount || 0;
-    const completedTasks = allCards?.filter(card => card.column_id === 'done').length || 0; // Assuming 'done' is a column ID
+    const completedTasks = allCards?.filter(card => card.column_id === 'done').length || 0;
     const totalBoards = boards?.length || 0;
     
     const tasksByPriority = {
@@ -220,26 +224,46 @@ const Profile = () => {
                     <span>{stats.totalTasks} tarefas criadas</span>
                   </div>
                   
-                  <form onSubmit={handleSaveProfile} className="space-y-4 pt-4 border-t dark:border-border">
+                  <div className="space-y-4 pt-4 border-t dark:border-border">
                     <div>
                       <Label htmlFor="firstName" className="dark:text-foreground">Primeiro Nome</Label>
-                      <Input
-                        id="firstName"
-                        value={firstName}
-                        onChange={(e) => setFirstName(e.target.value)}
-                        className="mt-2 dark:bg-input dark:text-foreground dark:border-border"
-                        disabled={updateProfileMutation.isPending}
-                      />
+                      <div className="relative mt-2">
+                        <Input
+                          id="firstName"
+                          value={firstName}
+                          readOnly
+                          className="dark:bg-input dark:text-foreground dark:border-border"
+                        />
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="absolute bottom-0 right-0 h-full rounded-l-none dark:bg-secondary dark:text-secondary-foreground dark:border-border dark:hover:bg-accent"
+                          onClick={() => setShowEditNameDialog(true)}
+                          disabled={updateProfileMutation.isPending}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                     <div>
                       <Label htmlFor="lastName" className="dark:text-foreground">Sobrenome</Label>
-                      <Input
-                        id="lastName"
-                        value={lastName}
-                        onChange={(e) => setLastName(e.target.value)}
-                        className="mt-2 dark:bg-input dark:text-foreground dark:border-border"
-                        disabled={updateProfileMutation.isPending}
-                      />
+                      <div className="relative mt-2">
+                        <Input
+                          id="lastName"
+                          value={lastName}
+                          readOnly
+                          className="dark:bg-input dark:text-foreground dark:border-border"
+                        />
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="absolute bottom-0 right-0 h-full rounded-l-none dark:bg-secondary dark:text-secondary-foreground dark:border-border dark:hover:bg-accent"
+                          onClick={() => setShowEditNameDialog(true)}
+                          disabled={updateProfileMutation.isPending}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                     <div>
                       <Label htmlFor="bio" className="dark:text-foreground">Bio</Label>
@@ -262,13 +286,7 @@ const Profile = () => {
                         </Button>
                       </div>
                     </div>
-                    
-                    <div className="flex space-x-2">
-                      <Button type="submit" className="flex-1" disabled={updateProfileMutation.isPending}>
-                        {updateProfileMutation.isPending ? 'Salvando...' : 'Salvar Alterações'}
-                      </Button>
-                    </div>
-                  </form>
+                  </div>
                 </CardContent>
               </Card>
             </div>
@@ -386,6 +404,14 @@ const Profile = () => {
         onOpenChange={setShowEditBioDialog}
         currentBio={bio}
         onSave={handleSaveBio}
+        isLoading={updateProfileMutation.isPending}
+      />
+      <EditNameDialog
+        open={showEditNameDialog}
+        onOpenChange={setShowEditNameDialog}
+        currentFirstName={firstName}
+        currentLastName={lastName}
+        onSave={handleSaveName}
         isLoading={updateProfileMutation.isPending}
       />
     </AuthGuard>
