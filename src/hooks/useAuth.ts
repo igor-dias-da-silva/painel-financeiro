@@ -34,7 +34,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             id: user.id,
             name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuário',
             email: user.email!,
-            avatar: user.user_metadata?.avatar_url
           };
           setUser(userData);
         }
@@ -54,7 +53,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           id: session.user.id,
           name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'Usuário',
           email: session.user.email!,
-          avatar: session.user.user_metadata?.avatar_url
         };
         setUser(userData);
       } else if (event === 'SIGNED_OUT') {
@@ -82,7 +80,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           id: data.user.id,
           name: data.user.user_metadata?.full_name || data.user.email?.split('@')[0] || 'Usuário',
           email: data.user.email!,
-          avatar: data.user.user_metadata?.avatar_url
         };
         setUser(userData);
         return true;
@@ -90,8 +87,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       return false;
     } catch (error) {
-      console.error('Login error:', error);
-      return false;
+        console.error('Login error:', error);
+        return false;
     }
   };
 
@@ -117,7 +114,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           id: data.user.id,
           name: name,
           email: data.user.email!,
-          avatar: data.user.user_metadata?.avatar_url
         };
         setUser(userData);
         return true;

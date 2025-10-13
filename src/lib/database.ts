@@ -36,7 +36,6 @@ export interface Profile {
   id: string;
   first_name: string | null;
   last_name: string | null;
-  avatar_url: string | null;
   updated_at: string;
 }
 
@@ -165,38 +164,6 @@ export const getCards = async (boardId: string): Promise<Card[]> => {
     created_at: card.created_at,
     updated_at: card.updated_at,
   })) || [];
-}
-
-export const createCard = async (card: Omit<Card, 'id' | 'created_at' | 'updated_at'>): Promise<Card> => {
-  const { data, error } = await supabase
-    .from('cards')
-    .insert([card])
-    .select()
-    .single()
-  
-  if (error) throw error
-  return data
-}
-
-export const updateCard = async (id: string, updates: Partial<Card>): Promise<Card> => {
-  const { data, error } = await supabase
-    .from('cards')
-    .update(updates)
-    .eq('id', id)
-    .select()
-    .single()
-  
-  if (error) throw error
-  return data
-}
-
-export const deleteCard = async (id: string): Promise<void> => {
-  const { error } = await supabase
-    .from('cards')
-    .delete()
-    .eq('id', id)
-  
-  if (error) throw error
 }
 
 export const getTotalCards = async (userId: string): Promise<number> => {

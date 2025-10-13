@@ -5,10 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'; // AvatarImage removido
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { User, Mail, Calendar, Clock, Award, Loader2 } from 'lucide-react';
+import { User, Calendar, Clock, Award, Loader2 } from 'lucide-react'; // Mail removido
 import { AuthGuard } from '@/components/AuthGuard';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -56,18 +56,15 @@ const Profile = () => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [bio, setBio] = useState(''); // Bio is not directly in Supabase profile, keeping it local for now
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (profile) {
       setFirstName(profile.first_name || '');
       setLastName(profile.last_name || '');
-      setAvatarUrl(profile.avatar_url || null);
     } else if (user) {
       const fullName = user.name.split(' ');
       setFirstName(fullName[0] || '');
       setLastName(fullName.slice(1).join(' ') || '');
-      setAvatarUrl(user.avatar || null);
     }
   }, [profile, user]);
 
@@ -89,7 +86,7 @@ const Profile = () => {
       showError('Usuário não autenticado.');
       return;
     }
-    updateProfileMutation.mutate({ first_name: firstName, last_name: lastName, avatar_url: avatarUrl });
+    updateProfileMutation.mutate({ first_name: firstName, last_name: lastName });
   };
 
   const handleLogout = async () => {
@@ -165,8 +162,7 @@ const Profile = () => {
     );
   }
 
-  const displayName = `${firstName} ${lastName}`.trim() || user?.email?.split('@')[0] || 'Usuário';
-  const displayEmail = user?.email || 'N/A';
+  const displayName = `${firstName} ${lastName}`.trim() || user?.name || 'Usuário';
   // Use a placeholder for joinDate as `user.created_at` is not available on the `User` type from useAuth
   const joinDate = "N/A"; 
 
@@ -186,14 +182,14 @@ const Profile = () => {
                 <CardHeader className="text-center">
                   <div className="flex justify-center mb-4">
                     <Avatar className="h-24 w-24">
-                      <AvatarImage src={avatarUrl || "/placeholder.svg"} alt="Avatar" />
+                      {/* AvatarImage removido */}
                       <AvatarFallback className="text-2xl dark:bg-secondary dark:text-secondary-foreground">
                         {displayName.split(' ').map(n => n[0]).join('') || 'U'}
                       </AvatarFallback>
                     </Avatar>
                   </div>
                   <CardTitle className="text-xl dark:text-foreground">{displayName}</CardTitle>
-                  <p className="text-gray-600 dark:text-muted-foreground">{displayEmail}</p>
+                  {/* Email removido */}
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-muted-foreground">
@@ -249,7 +245,7 @@ const Profile = () => {
                       <Button type="submit" className="flex-1" disabled={updateProfileMutation.isPending}>
                         {updateProfileMutation.isPending ? 'Salvando...' : 'Salvar Alterações'}
                       </Button>
-                      <Button variant="outline" disabled className="dark:bg-secondary dark:text-secondary-foreground dark:border-border dark:hover:bg-accent">Editar Foto</Button> {/* Placeholder for avatar upload */}
+                      {/* Botão "Editar Foto" removido */}
                     </div>
                   </form>
                 </CardContent>
@@ -346,16 +342,7 @@ const Profile = () => {
                   <CardTitle className="dark:text-foreground">Configurações de Conta</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="email" className="dark:text-foreground">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={displayEmail}
-                      className="mt-1 dark:bg-input dark:text-foreground dark:border-border"
-                      disabled
-                    />
-                  </div>
+                  {/* Email input removido */}
                   
                   <div className="flex space-x-3 pt-4 border-t dark:border-border">
                     <Button variant="outline" disabled className="dark:bg-secondary dark:text-secondary-foreground dark:border-border dark:hover:bg-accent">Alterar Senha</Button> {/* Placeholder */}

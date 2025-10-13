@@ -16,7 +16,7 @@ import {
   ChevronUp,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'; // AvatarImage removido
 import { ThemeToggle } from './ThemeToggle'; // Importar ThemeToggle
 
 const navItems = [
@@ -64,7 +64,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
           onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
         >
           <Avatar>
-            <AvatarImage src={user?.avatar} alt={user?.name} />
+            {/* AvatarImage removido */}
             <AvatarFallback>{user?.name?.charAt(0) || 'U'}</AvatarFallback>
           </Avatar>
           <span className="text-sm font-medium truncate flex-1">{user?.name || 'Usuário'}</span>
@@ -126,7 +126,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
             >
               <Avatar>
-                <AvatarImage src={user?.avatar} alt={user?.name} />
+                {/* AvatarImage removido */}
                 <AvatarFallback>{user?.name?.charAt(0) || 'U'}</AvatarFallback>
               </Avatar>
               <span className="text-sm font-medium truncate flex-1">{user?.name || 'Usuário'}</span>
