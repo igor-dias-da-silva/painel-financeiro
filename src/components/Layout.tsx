@@ -155,7 +155,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
       </aside>
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="bg-white shadow-sm p-4 flex justify-between items-center dark:bg-gray-800">
+        <header className="bg-white shadow-sm p-4 flex justify-between items-center dark:bg-card"> {/* Alterado dark:bg-gray-800 para dark:bg-card */}
           <div className="md:hidden">
             <Sheet>
               <SheetTrigger asChild>
@@ -173,7 +173,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
           </h2>
           <ThemeToggle />
         </header>
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6 dark:bg-gray-900">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6 dark:bg-background"> {/* Alterado dark:bg-gray-900 para dark:bg-background */}
           {children}
         </main>
       </div>

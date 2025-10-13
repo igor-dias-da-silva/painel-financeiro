@@ -52,41 +52,41 @@
   }
 
   .dark {
-    --background: 220 13% 13%; /* Fundo cinza escuro */
-    --foreground: 210 40% 98%; /* Texto claro */
+    --background: 220 10% 15%; /* Um cinza escuro mais neutro e um pouco mais claro */
+    --foreground: 210 40% 98%;
 
-    --card: 220 13% 18%; /* Cartões cinza um pouco mais claro */
+    --card: 220 10% 20%; /* Cartões um pouco mais claros que o fundo */
     --card-foreground: 210 40% 98%;
 
-    --popover: 220 13% 18%;
+    --popover: 220 10% 20%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 217.2 91.2% 59.8%; /* Azul vibrante para elementos primários */
+    --primary: 217.2 91.2% 59.8%; /* Azul vibrante */
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 210 40% 20%; /* Cinza-azul mais escuro para elementos secundários */
+    --secondary: 220 10% 25%; /* Cinza escuro para secundário */
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 210 40% 25%; /* Cinza dessaturado para texto muted */
+    --muted: 220 10% 30%; /* Cinza para muted */
     --muted-foreground: 215.4 16.3% 56.9%;
 
-    --accent: 210 40% 20%; /* Cinza-azul para acentos */
+    --accent: 220 10% 25%; /* Cinza escuro para acentos */
     --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 84.2% 60.2%; /* Vermelho para destrutivo */
+    --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 30%; /* Borda cinza sutil */
-    --input: 214.3 31.8% 30%; /* Input cinza sutil */
-    --ring: 217.2 91.2% 59.8%; /* Anel de foco azul vibrante */
+    --border: 220 10% 35%; /* Borda cinza */
+    --input: 220 10% 25%; /* Input cinza */
+    --ring: 217.2 91.2% 59.8%;
 
-    --sidebar-background: 220 13% 10%; /* Fundo da sidebar cinza profundo */
-    --sidebar-foreground: 210 40% 98%; /* Texto da sidebar claro */
-    --sidebar-primary: 217.2 91.2% 59.8%; /* Item ativo da sidebar azul vibrante */
+    --sidebar-background: 220 10% 12%; /* Fundo da sidebar um pouco mais escuro que o background */
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 217.2 91.2% 59.8%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 13% 20%; /* Acento da sidebar cinza escuro */
+    --sidebar-accent: 220 10% 22%; /* Acento da sidebar */
     --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 214.3 31.8% 25%;
+    --sidebar-border: 220 10% 30%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
