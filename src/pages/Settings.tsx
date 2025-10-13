@@ -227,40 +227,6 @@ const Settings = () => {
                 </div>
               </CardContent>
             </Card>
-
-            {/* Sobre */}
-            <Card className="dark:bg-gray-800 dark:border-gray-700"> {/* Adicionado dark classes */}
-              <CardHeader>
-                <CardTitle className="dark:text-gray-100">Sobre</CardTitle> {/* Adicionado dark:text-gray-100 */}
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <Label className="dark:text-gray-200">Versão</Label> {/* Adicionado dark:text-gray-200 */}
-                    <p className="text-gray-600 dark:text-gray-400">1.0.0</p> {/* Adicionado dark:text-gray-400 */}
-                  </div>
-                  <div>
-                    <Label className="dark:text-gray-200">Armazenamento</Label> {/* Adicionado dark:text-gray-200 */}
-                    <p className="text-gray-600 dark:text-gray-400">Supabase</p> {/* Adicionado dark:text-gray-400 */}
-                  </div>
-                  <div>
-                    <Label className="dark:text-gray-200">Tecnologias</Label> {/* Adicionado dark:text-gray-200 */}
-                    <p className="text-gray-600 dark:text-gray-400">React, TypeScript, Tailwind CSS</p> {/* Adicionado dark:text-gray-400 */}
-                  </div>
-                  <div>
-                    <Label className="dark:text-gray-200">Desenvolvido por</Label> {/* Adicionado dark:text-gray-200 */}
-                    <p className="text-gray-600 dark:text-gray-400">Dyad AI</p> {/* Adicionado dark:text-gray-400 */}
-                  </div>
-                </div>
-                
-                <div className="pt-4 border-t dark:border-gray-700"> {/* Adicionado dark:border-gray-700 */}
-                  <p className="text-sm text-gray-600 dark:text-gray-400"> {/* Adicionado dark:text-gray-400 */}
-                    Este aplicativo é um gerenciador de tarefas Kanban completo que funciona 
-                    diretamente no seu navegador, com persistência de dados via Supabase.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </div>
