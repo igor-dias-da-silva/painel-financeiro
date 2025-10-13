@@ -38,9 +38,6 @@ export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
   const { user } = useAuth();
 
   useEffect(() => {
-    if (open && columns.length > 0) {
-      setSelectedColumnId(columns[0].id);
-    }
     if (!open) {
       setTitle('');
       setDescription('');
@@ -49,6 +46,8 @@ export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
       setTags([]);
       setNewTag('');
       setSelectedColumnId('');
+    } else if (columns.length > 0) {
+      setSelectedColumnId(columns[0].id);
     }
   }, [open, columns]);
 
@@ -94,7 +93,7 @@ export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] overflow-visible">
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Nova Tarefa</DialogTitle>
         </DialogHeader>
@@ -105,7 +104,7 @@ export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
             <Input
               id="title"
               value={title}
-              onChange={(e) => setTitle(e.targe.value)}
+              onChange={(e) => setTitle(e.target.value)}
               placeholder="Digite o título da tarefa"
               required
               className="mt-1"
@@ -126,11 +125,16 @@ export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
 
           <div>
             <Label htmlFor="column">Coluna</Label>
-            <Select value={selectedColumnId} onValueChange={setSelectedColumnId} disabled={columns.length === 0}>
+            <Select 
+              modal={false}
+              value={selectedColumnId} 
+              onValueChange={setSelectedColumnId} 
+              disabled={columns.length === 0}
+            >
               <SelectTrigger className="mt-1">
                 <SelectValue placeholder={columns.length === 0 ? "Nenhuma coluna disponível" : "Selecione uma coluna"} />
               </SelectTrigger>
-              <SelectContent position="popper">
+              <SelectContent>
                 {columns.map(column => (
                   <SelectItem key={column.id} value={column.id}>
                     {column.title}
@@ -145,11 +149,15 @@ export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
 
           <div>
             <Label htmlFor="priority">Prioridade</Label>
-            <Select value={priority} onValueChange={(value: 'low' | 'medium' | 'high' | 'urgent') => setPriority(value)}>
+            <Select 
+              modal={false}
+              value={priority} 
+              onValueChange={(value: 'low' | 'medium' | 'high' | 'urgent') => setPriority(value)}
+            >
               <SelectTrigger className="mt-1">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent position="popper">
+              <SelectContent>
                 <SelectItem value="low">Baixa</SelectItem>
                 <SelectItem value="medium">Média</SelectItem>
                 <SelectItem value="high">Alta</SelectItem>
