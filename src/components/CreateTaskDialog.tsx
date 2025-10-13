@@ -94,7 +94,7 @@ export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] overflow-visible"> {/* Adicionado overflow-visible */}
+      <DialogContent className="sm:max-w-[425px] overflow-visible"> {/* Mantido overflow-visible */}
         <DialogHeader>
           <DialogTitle>Nova Tarefa</DialogTitle>
         </DialogHeader>
@@ -122,7 +122,7 @@ export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
             />
           </div>
 
-          <div className="relative">
+          <div> {/* Removido z-index do div pai */}
             <Label htmlFor="column">Coluna</Label>
             <Select value={selectedColumnId} onValueChange={setSelectedColumnId} disabled={columns.length === 0}>
               <SelectTrigger>
@@ -141,7 +141,7 @@ export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
             )}
           </div>
 
-          <div className="relative">
+          <div> {/* Removido z-index do div pai */}
             <Label htmlFor="priority">Prioridade</Label>
             <Select value={priority} onValueChange={(value: any) => setPriority(value)}>
               <SelectTrigger>
