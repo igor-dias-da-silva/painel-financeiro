@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Task, Column } from '@/types/task';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -34,20 +34,29 @@ export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
   const [dueDate, setDueDate] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState('');
-  const [selectedColumnId, setSelectedColumnId] = useState(columns[0]?.id || '');
+  const [selectedColumnId, setSelectedColumnId] = useState('');
   const { user } = useAuth();
 
-  React.useEffect(() => {
-    if (columns.length > 0 && !selectedColumnId) {
+  useEffect(() => {
+    if (open && columns.length > 0) {
       setSelectedColumnId(columns[0].id);
     }
-  }, [columns, selectedColumnId]);
+    if (!open) {
+      setTitle('');
+      setDescription('');
+      setPriority('medium');
+      setDueDate('');
+      setTags([]);
+      setNewTag('');
+      setSelectedColumnId('');
+    }
+  }, [open, columns]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!title.trim() || !user?.id || !selectedColumnId) {
-      showError('Título da tarefa, coluna e ID do usuário são obrigatórios.');
+      showError('Título da tarefa e coluna são obrigatórios.');
       return;
     }
 
@@ -58,19 +67,10 @@ export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
       dueDate: dueDate || undefined,
       tags,
       columnId: selectedColumnId,
-      order_index: 0, // Alterado de 'order' para 'order_index'
+      order_index: 0,
     };
 
     onTaskCreate(newTask);
-    
-    // Reset form
-    setTitle('');
-    setDescription('');
-    setPriority('medium');
-    setDueDate('');
-    setTags([]);
-    setNewTag('');
-    setSelectedColumnId(columns[0]?.id || '');
     onOpenChange(false);
   };
 
@@ -99,15 +99,16 @@ export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
           <DialogTitle>Nova Tarefa</DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div>
             <Label htmlFor="title">Título *</Label>
             <Input
               id="title"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => setTitle(e.targe.value)}
               placeholder="Digite o título da tarefa"
               required
+              className="mt-1"
             />
           </div>
 
@@ -119,16 +120,17 @@ export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Digite a descrição da tarefa"
               rows={3}
+              className="mt-1"
             />
           </div>
 
-          <div className="relative">
+          <div>
             <Label htmlFor="column">Coluna</Label>
             <Select value={selectedColumnId} onValueChange={setSelectedColumnId} disabled={columns.length === 0}>
-              <SelectTrigger>
+              <SelectTrigger className="mt-1">
                 <SelectValue placeholder={columns.length === 0 ? "Nenhuma coluna disponível" : "Selecione uma coluna"} />
               </SelectTrigger>
-              <SelectContent position="popper"> {/* Adicionado position="popper" */}
+              <SelectContent position="popper">
                 {columns.map(column => (
                   <SelectItem key={column.id} value={column.id}>
                     {column.title}
@@ -141,13 +143,13 @@ export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
             )}
           </div>
 
-          <div className="relative">
+          <div>
             <Label htmlFor="priority">Prioridade</Label>
-            <Select value={priority} onValueChange={(value: any) => setPriority(value)}>
-              <SelectTrigger>
+            <Select value={priority} onValueChange={(value: 'low' | 'medium' | 'high' | 'urgent') => setPriority(value)}>
+              <SelectTrigger className="mt-1">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent position="popper"> {/* Adicionado position="popper" */}
+              <SelectContent position="popper">
                 <SelectItem value="low">Baixa</SelectItem>
                 <SelectItem value="medium">Média</SelectItem>
                 <SelectItem value="high">Alta</SelectItem>
@@ -163,12 +165,13 @@ export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
               type="date"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
+              className="mt-1"
             />
           </div>
 
           <div>
             <Label>Tags</Label>
-            <div className="flex gap-2 mb-2">
+            <div className="flex gap-2 mt-1">
               <Input
                 value={newTag}
                 onChange={(e) => setNewTag(e.target.value)}
@@ -176,15 +179,17 @@ export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
                 onKeyPress={handleKeyPress}
                 className="flex-1"
               />
-              <Button type="button" variant="outline" size="sm" onClick={addTag}>
+              <Button type="button" variant="outline" size="icon" onClick={addTag}>
                 <Plus className="h-4 w-4" />
               </Button>
             </div>
-            <div className="flex flex-wrap gap-1">
+            <div className="flex flex-wrap gap-1 mt-2">
               {tags.map(tag => (
-                <Badge key={tag} variant="secondary" className="cursor-pointer" onClick={() => removeTag(tag)}>
+                <Badge key={tag} variant="secondary">
                   {tag}
-                  <X className="h-3 w-3 ml-1" />
+                  <button type="button" onClick={() => removeTag(tag)} className="ml-1 rounded-full hover:bg-gray-300">
+                    <X className="h-3 w-3" />
+                  </button>
                 </Badge>
               ))}
             </div>
