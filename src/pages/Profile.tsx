@@ -143,7 +143,7 @@ const Profile = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center dark:bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
       </div>
     );
@@ -151,11 +151,11 @@ const Profile = () => {
 
   if (profileError) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card className="p-6 text-center">
-          <CardTitle className="text-red-600 mb-4">Erro ao carregar perfil</CardTitle>
+      <div className="min-h-screen flex items-center justify-center dark:bg-background">
+        <Card className="p-6 text-center dark:bg-card dark:border-border">
+          <CardTitle className="text-red-600 mb-4 dark:text-red-400">Erro ao carregar perfil</CardTitle>
           <CardContent>
-            <p className="text-gray-600">Não foi possível carregar seus dados de perfil. Tente novamente mais tarde.</p>
+            <p className="text-gray-600 dark:text-gray-300">Não foi possível carregar seus dados de perfil. Tente novamente mais tarde.</p>
             <Button onClick={() => queryClient.invalidateQueries({ queryKey: ['profile', userId] })} className="mt-4">
               Recarregar
             </Button>
@@ -172,74 +172,74 @@ const Profile = () => {
 
   return (
     <AuthGuard>
-      <div className="min-h-screen bg-gray-50 p-4">
+      <div className="min-h-screen bg-gray-50 p-4 dark:bg-background">
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">Perfil</h1>
-            <p className="text-gray-600">Gerencie suas informações pessoais e estatísticas</p>
+            <h1 className="text-3xl font-bold text-gray-800 dark:text-foreground mb-2">Perfil</h1>
+            <p className="text-gray-600 dark:text-muted-foreground">Gerencie suas informações pessoais e estatísticas</p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Informações Pessoais */}
             <div className="lg:col-span-1">
-              <Card>
+              <Card className="dark:bg-card dark:border-border">
                 <CardHeader className="text-center">
                   <div className="flex justify-center mb-4">
                     <Avatar className="h-24 w-24">
                       <AvatarImage src={avatarUrl || "/placeholder.svg"} alt="Avatar" />
-                      <AvatarFallback className="text-2xl">
+                      <AvatarFallback className="text-2xl dark:bg-secondary dark:text-secondary-foreground">
                         {displayName.split(' ').map(n => n[0]).join('') || 'U'}
                       </AvatarFallback>
                     </Avatar>
                   </div>
-                  <CardTitle className="text-xl">{displayName}</CardTitle>
-                  <p className="text-gray-600">{displayEmail}</p>
+                  <CardTitle className="text-xl dark:text-foreground">{displayName}</CardTitle>
+                  <p className="text-gray-600 dark:text-muted-foreground">{displayEmail}</p>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="flex items-center space-x-2 text-sm text-gray-600">
+                  <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-muted-foreground">
                     <Calendar className="h-4 w-4" />
                     <span>Membro desde {joinDate}</span>
                   </div>
                   
-                  <div className="flex items-center space-x-2 text-sm text-gray-600">
+                  <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-muted-foreground">
                     <Award className="h-4 w-4" />
                     <span>{stats.totalBoards} quadros criados</span>
                   </div>
                   
-                  <div className="flex items-center space-x-2 text-sm text-gray-600">
+                  <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-muted-foreground">
                     <Clock className="h-4 w-4" />
                     <span>{stats.totalTasks} tarefas criadas</span>
                   </div>
                   
-                  <form onSubmit={handleSaveProfile} className="space-y-4 pt-4 border-t">
+                  <form onSubmit={handleSaveProfile} className="space-y-4 pt-4 border-t dark:border-border">
                     <div>
-                      <Label htmlFor="firstName">Primeiro Nome</Label>
+                      <Label htmlFor="firstName" className="dark:text-foreground">Primeiro Nome</Label>
                       <Input
                         id="firstName"
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
-                        className="mt-2"
+                        className="mt-2 dark:bg-input dark:text-foreground dark:border-border"
                         disabled={updateProfileMutation.isPending}
                       />
                     </div>
                     <div>
-                      <Label htmlFor="lastName">Sobrenome</Label>
+                      <Label htmlFor="lastName" className="dark:text-foreground">Sobrenome</Label>
                       <Input
                         id="lastName"
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
-                        className="mt-2"
+                        className="mt-2 dark:bg-input dark:text-foreground dark:border-border"
                         disabled={updateProfileMutation.isPending}
                       />
                     </div>
                     <div>
-                      <Label htmlFor="bio">Bio</Label>
+                      <Label htmlFor="bio" className="dark:text-foreground">Bio</Label>
                       <Textarea
                         id="bio"
                         value={bio}
                         onChange={(e) => setBio(e.target.value)}
                         placeholder="Conte um pouco sobre você..."
-                        className="mt-2"
+                        className="mt-2 dark:bg-input dark:text-foreground dark:border-border"
                         rows={3}
                         disabled={updateProfileMutation.isPending}
                       />
@@ -249,7 +249,7 @@ const Profile = () => {
                       <Button type="submit" className="flex-1" disabled={updateProfileMutation.isPending}>
                         {updateProfileMutation.isPending ? 'Salvando...' : 'Salvar Alterações'}
                       </Button>
-                      <Button variant="outline" disabled>Editar Foto</Button> {/* Placeholder for avatar upload */}
+                      <Button variant="outline" disabled className="dark:bg-secondary dark:text-secondary-foreground dark:border-border dark:hover:bg-accent">Editar Foto</Button> {/* Placeholder for avatar upload */}
                     </div>
                   </form>
                 </CardContent>
@@ -259,36 +259,36 @@ const Profile = () => {
             {/* Estatísticas e Detalhes */}
             <div className="lg:col-span-2 space-y-6">
               {/* Estatísticas Gerais */}
-              <Card>
+              <Card className="dark:bg-card dark:border-border">
                 <CardHeader>
-                  <CardTitle>Estatísticas de Atividade</CardTitle>
+                  <CardTitle className="dark:text-foreground">Estatísticas de Atividade</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="text-center">
                       <div className="text-2xl font-bold text-blue-600">{stats.totalBoards}</div>
-                      <div className="text-sm text-gray-600">Quadros</div>
+                      <div className="text-sm text-gray-600 dark:text-muted-foreground">Quadros</div>
                     </div>
                     <div className="text-center">
                       <div className="text-2xl font-bold text-green-600">{stats.totalTasks}</div>
-                      <div className="text-sm text-gray-600">Tarefas</div>
+                      <div className="text-sm text-gray-600 dark:text-muted-foreground">Tarefas</div>
                     </div>
                     <div className="text-center">
                       <div className="text-2xl font-bold text-purple-600">{stats.completedTasks}</div>
-                      <div className="text-sm text-gray-600">Concluídas</div>
+                      <div className="text-sm text-gray-600 dark:text-muted-foreground">Concluídas</div>
                     </div>
                     <div className="text-center">
                       <div className="text-2xl font-bold text-orange-600">{stats.completionRate}%</div>
-                      <div className="text-sm text-gray-600">Taxa</div>
+                      <div className="text-sm text-gray-600 dark:text-muted-foreground">Taxa</div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
               {/* Prioridades Mais Usadas */}
-              <Card>
+              <Card className="dark:bg-card dark:border-border">
                 <CardHeader>
-                  <CardTitle>Prioridades Mais Usadas</CardTitle>
+                  <CardTitle className="dark:text-foreground">Prioridades Mais Usadas</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
@@ -296,11 +296,11 @@ const Profile = () => {
                       <div key={priority} className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">
                           <div className={`w-3 h-3 rounded-full ${priorityColors[priority as keyof typeof priorityColors]}`}></div>
-                          <span className="text-sm font-medium">{priorityLabels[priority as keyof typeof priorityLabels]}</span>
+                          <span className="text-sm font-medium dark:text-foreground">{priorityLabels[priority as keyof typeof priorityLabels]}</span>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <span className="text-lg font-semibold">{count}</span>
-                          <span className="text-sm text-gray-500">tarefas</span>
+                          <span className="text-lg font-semibold dark:text-foreground">{count}</span>
+                          <span className="text-sm text-gray-500 dark:text-muted-foreground">tarefas</span>
                         </div>
                       </div>
                     ))}
@@ -309,30 +309,30 @@ const Profile = () => {
               </Card>
 
               {/* Atividade Recente */}
-              <Card>
+              <Card className="dark:bg-card dark:border-border">
                 <CardHeader>
-                  <CardTitle>Atividade Recente</CardTitle>
+                  <CardTitle className="dark:text-foreground">Atividade Recente</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
                     {/* Fetching recent boards for display */}
                     {boards?.slice(0, 3).map(board => (
-                      <div key={board.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div key={board.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg dark:bg-secondary dark:border-border">
                         <div>
-                          <div className="font-medium">{board.title}</div>
-                          <div className="text-sm text-gray-600">
+                          <div className="font-medium dark:text-foreground">{board.title}</div>
+                          <div className="text-sm text-gray-600 dark:text-muted-foreground">
                             {/* Placeholder for tasks/columns count, will fetch from Supabase later */}
                             ... tarefas • ... colunas
                           </div>
                         </div>
-                        <Badge variant="outline">
+                        <Badge variant="outline" className="dark:bg-accent dark:text-accent-foreground dark:border-border">
                           {new Date(board.updated_at).toLocaleDateString('pt-BR')}
                         </Badge>
                       </div>
                     ))}
                     
                     {(boards?.length === 0 || !boards) && (
-                      <div className="text-center py-8 text-gray-500">
+                      <div className="text-center py-8 text-gray-500 dark:text-muted-foreground">
                         Nenhuma atividade recente
                       </div>
                     )}
@@ -341,24 +341,24 @@ const Profile = () => {
               </Card>
 
               {/* Configurações de Conta */}
-              <Card>
+              <Card className="dark:bg-card dark:border-border">
                 <CardHeader>
-                  <CardTitle>Configurações de Conta</CardTitle>
+                  <CardTitle className="dark:text-foreground">Configurações de Conta</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email" className="dark:text-foreground">Email</Label>
                     <Input
                       id="email"
                       type="email"
                       value={displayEmail}
-                      className="mt-1"
+                      className="mt-1 dark:bg-input dark:text-foreground dark:border-border"
                       disabled
                     />
                   </div>
                   
-                  <div className="flex space-x-3 pt-4">
-                    <Button variant="outline" disabled>Alterar Senha</Button> {/* Placeholder */}
+                  <div className="flex space-x-3 pt-4 border-t dark:border-border">
+                    <Button variant="outline" disabled className="dark:bg-secondary dark:text-secondary-foreground dark:border-border dark:hover:bg-accent">Alterar Senha</Button> {/* Placeholder */}
                     <Button variant="destructive" onClick={handleLogout}>Sair</Button>
                   </div>
                 </CardContent>

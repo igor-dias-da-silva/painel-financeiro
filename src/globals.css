@@ -52,41 +52,41 @@
   }
 
   .dark {
-    --background: 220 10% 15%; /* Um cinza escuro mais neutro e um pouco mais claro */
-    --foreground: 210 40% 98%;
+    --background: 0 0% 0%; /* Fundo preto */
+    --foreground: 210 40% 98%; /* Texto claro */
 
-    --card: 220 10% 20%; /* Cartões um pouco mais claros que o fundo */
+    --card: 220 10% 10%; /* Cartões cinza muito escuro */
     --card-foreground: 210 40% 98%;
 
-    --popover: 220 10% 20%;
+    --popover: 220 10% 10%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 217.2 91.2% 59.8%; /* Azul vibrante */
+    --primary: 217.2 91.2% 59.8%; /* Azul vibrante para elementos primários */
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 220 10% 25%; /* Cinza escuro para secundário */
+    --secondary: 210 40% 20%; /* Cinza-azul mais escuro para elementos secundários */
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 220 10% 30%; /* Cinza para muted */
+    --muted: 210 40% 25%; /* Cinza dessaturado para texto muted */
     --muted-foreground: 215.4 16.3% 56.9%;
 
-    --accent: 220 10% 25%; /* Cinza escuro para acentos */
+    --accent: 210 40% 20%; /* Cinza-azul para acentos */
     --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 84.2% 60.2%; /* Vermelho para destrutivo */
     --destructive-foreground: 210 40% 98%;
 
-    --border: 220 10% 35%; /* Borda cinza */
-    --input: 220 10% 25%; /* Input cinza */
-    --ring: 217.2 91.2% 59.8%;
+    --border: 214.3 31.8% 20%; /* Borda cinza sutil */
+    --input: 214.3 31.8% 20%; /* Input cinza sutil */
+    --ring: 217.2 91.2% 59.8%; /* Anel de foco azul vibrante */
 
-    --sidebar-background: 220 10% 12%; /* Fundo da sidebar um pouco mais escuro que o background */
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 217.2 91.2% 59.8%;
+    --sidebar-background: 220 10% 5%; /* Fundo da sidebar cinza profundo */
+    --sidebar-foreground: 210 40% 98%; /* Texto da sidebar claro */
+    --sidebar-primary: 217.2 91.2% 59.8%; /* Item ativo da sidebar azul vibrante */
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 10% 22%; /* Acento da sidebar */
+    --sidebar-accent: 220 13% 15%; /* Acento da sidebar cinza escuro */
     --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 220 10% 30%;
+    --sidebar-border: 214.3 31.8% 18%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
