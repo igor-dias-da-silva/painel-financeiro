@@ -93,7 +93,7 @@ export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] overflow-visible">
         <DialogHeader>
           <DialogTitle>Nova Tarefa</DialogTitle>
         </DialogHeader>
@@ -134,7 +134,7 @@ export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
               <SelectTrigger className="mt-1">
                 <SelectValue placeholder={columns.length === 0 ? "Nenhuma coluna disponível" : "Selecione uma coluna"} />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent position="popper">
                 {columns.map(column => (
                   <SelectItem key={column.id} value={column.id}>
                     {column.title}
@@ -155,9 +155,9 @@ export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
               onValueChange={(value: 'low' | 'medium' | 'high' | 'urgent') => setPriority(value)}
             >
               <SelectTrigger className="mt-1">
-                <SelectValue />
+                <SelectValue placeholder="Selecione a prioridade" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent position="popper">
                 <SelectItem value="low">Baixa</SelectItem>
                 <SelectItem value="medium">Média</SelectItem>
                 <SelectItem value="high">Alta</SelectItem>
