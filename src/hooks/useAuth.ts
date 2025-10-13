@@ -135,6 +135,21 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
+  const updateUserPassword = async (newPassword: string): Promise<boolean> => {
+    try {
+      const { data, error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) {
+        console.error('Error updating password:', error);
+        return false;
+      }
+      console.log('Password updated successfully:', data);
+      return true;
+    } catch (error) {
+      console.error('Error updating password:', error);
+      return false;
+    }
+  };
+
   const value: AuthState = {
     user,
     isAuthenticated: !!user,
@@ -142,6 +157,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     login,
     register,
     logout,
+    updateUserPassword,
   };
 
   return React.createElement(AuthContext.Provider, { value }, children);

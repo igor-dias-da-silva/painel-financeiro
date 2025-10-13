@@ -15,6 +15,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getProfile, updateProfile, getTotalCards, getBoards, Profile as SupabaseProfile, Board, Card as SupabaseCard } from '@/lib/database';
 import { showError, showSuccess } from '@/utils/toast';
 import { supabase } from '@/integrations/supabase/client'; // Import supabase client
+import { ChangePasswordDialog } from '@/components/ChangePasswordDialog'; // Importar o novo componente
 
 const Profile = () => {
   const { user, isLoading: authLoading, logout } = useAuth();
@@ -56,6 +57,7 @@ const Profile = () => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [bio, setBio] = useState(''); // Bio is not directly in Supabase profile, keeping it local for now
+  const [showChangePasswordDialog, setShowChangePasswordDialog] = useState(false); // Estado para controlar o diálogo
 
   useEffect(() => {
     if (profile) {
@@ -345,7 +347,13 @@ const Profile = () => {
                   {/* Email input removido */}
                   
                   <div className="flex space-x-3 pt-4 border-t dark:border-border">
-                    <Button variant="outline" disabled className="dark:bg-secondary dark:text-secondary-foreground dark:border-border dark:hover:bg-accent">Alterar Senha</Button> {/* Placeholder */}
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setShowChangePasswordDialog(true)} // Habilitar e abrir diálogo
+                      className="dark:bg-secondary dark:text-secondary-foreground dark:border-border dark:hover:bg-accent"
+                    >
+                      Alterar Senha
+                    </Button>
                     <Button variant="destructive" onClick={handleLogout}>Sair</Button>
                   </div>
                 </CardContent>
@@ -354,6 +362,10 @@ const Profile = () => {
           </div>
         </div>
       </div>
+      <ChangePasswordDialog
+        open={showChangePasswordDialog}
+        onOpenChange={setShowChangePasswordDialog}
+      />
     </AuthGuard>
   );
 };

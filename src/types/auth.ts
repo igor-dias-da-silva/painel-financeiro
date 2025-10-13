@@ -11,4 +11,5 @@ export interface AuthState {
   login: (email: string, password: string) => Promise<boolean>;
   register: (name: string, email: string, password: string) => Promise<boolean>;
   logout: () => void;
+  updateUserPassword: (newPassword: string) => Promise<boolean>;
 }
