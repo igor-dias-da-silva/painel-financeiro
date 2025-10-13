@@ -36,6 +36,7 @@ export interface Profile {
   id: string;
   first_name: string | null;
   last_name: string | null;
+  bio?: string | null; // Adicionado o campo bio
   updated_at: string;
 }
 

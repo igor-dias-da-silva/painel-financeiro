@@ -5,17 +5,18 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'; // AvatarImage removido
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { User, Calendar, Clock, Award, Loader2 } from 'lucide-react'; // Mail removido
+import { User, Calendar, Clock, Award, Loader2, Edit } from 'lucide-react';
 import { AuthGuard } from '@/components/AuthGuard';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getProfile, updateProfile, getTotalCards, getBoards, Profile as SupabaseProfile, Board, Card as SupabaseCard } from '@/lib/database';
 import { showError, showSuccess } from '@/utils/toast';
-import { supabase } from '@/integrations/supabase/client'; // Import supabase client
-import { ChangePasswordDialog } from '@/components/ChangePasswordDialog'; // Importar o novo componente
+import { supabase } from '@/integrations/supabase/client';
+import { ChangePasswordDialog } from '@/components/ChangePasswordDialog';
+import { EditBioDialog } from '@/components/EditBioDialog'; // Importar o novo componente
 
 const Profile = () => {
   const { user, isLoading: authLoading, logout } = useAuth();
@@ -56,17 +57,20 @@ const Profile = () => {
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [bio, setBio] = useState(''); // Bio is not directly in Supabase profile, keeping it local for now
-  const [showChangePasswordDialog, setShowChangePasswordDialog] = useState(false); // Estado para controlar o diálogo
+  const [bio, setBio] = useState('');
+  const [showChangePasswordDialog, setShowChangePasswordDialog] = useState(false);
+  const [showEditBioDialog, setShowEditBioDialog] = useState(false); // Estado para controlar o diálogo de bio
 
   useEffect(() => {
     if (profile) {
       setFirstName(profile.first_name || '');
       setLastName(profile.last_name || '');
+      setBio(profile.bio || ''); // Inicializa a bio do perfil
     } else if (user) {
       const fullName = user.name.split(' ');
       setFirstName(fullName[0] || '');
       setLastName(fullName.slice(1).join(' ') || '');
+      setBio(''); // Se não houver perfil, a bio é vazia
     }
   }, [profile, user]);
 
@@ -91,6 +95,16 @@ const Profile = () => {
     updateProfileMutation.mutate({ first_name: firstName, last_name: lastName });
   };
 
+  const handleSaveBio = (newBio: string) => {
+    if (!userId) {
+      showError('Usuário não autenticado.');
+      return;
+    }
+    setBio(newBio); // Atualiza o estado local imediatamente
+    updateProfileMutation.mutate({ bio: newBio });
+    setShowEditBioDialog(false); // Fecha o diálogo após salvar
+  };
+
   const handleLogout = async () => {
     await logout();
   };
@@ -98,7 +112,7 @@ const Profile = () => {
   const calculateStats = () => {
     const totalTasks = totalTasksCount || 0;
     const completedTasks = allCards?.filter(card => card.column_id === 'done').length || 0; // Assuming 'done' is a column ID
-    const totalBoards = boards?.length || 0; // Use boards from useQuery
+    const totalBoards = boards?.length || 0;
     
     const tasksByPriority = {
       urgent: 0,
@@ -165,7 +179,6 @@ const Profile = () => {
   }
 
   const displayName = `${firstName} ${lastName}`.trim() || user?.name || 'Usuário';
-  // Use a placeholder for joinDate as `user.created_at` is not available on the `User` type from useAuth
   const joinDate = "N/A"; 
 
   return (
@@ -184,14 +197,12 @@ const Profile = () => {
                 <CardHeader className="text-center">
                   <div className="flex justify-center mb-4">
                     <Avatar className="h-24 w-24">
-                      {/* AvatarImage removido */}
                       <AvatarFallback className="text-2xl dark:bg-secondary dark:text-secondary-foreground">
                         {displayName.split(' ').map(n => n[0]).join('') || 'U'}
                       </AvatarFallback>
                     </Avatar>
                   </div>
                   <CardTitle className="text-xl dark:text-foreground">{displayName}</CardTitle>
-                  {/* Email removido */}
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-muted-foreground">
@@ -232,22 +243,30 @@ const Profile = () => {
                     </div>
                     <div>
                       <Label htmlFor="bio" className="dark:text-foreground">Bio</Label>
-                      <Textarea
-                        id="bio"
-                        value={bio}
-                        onChange={(e) => setBio(e.target.value)}
-                        placeholder="Conte um pouco sobre você..."
-                        className="mt-2 dark:bg-input dark:text-foreground dark:border-border"
-                        rows={3}
-                        disabled={updateProfileMutation.isPending}
-                      />
+                      <div className="relative mt-2">
+                        <Textarea
+                          id="bio"
+                          value={bio || 'Nenhuma biografia definida.'}
+                          readOnly
+                          className="dark:bg-input dark:text-foreground dark:border-border min-h-[80px]"
+                          rows={3}
+                        />
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="absolute bottom-2 right-2 dark:bg-secondary dark:text-secondary-foreground dark:border-border dark:hover:bg-accent"
+                          onClick={() => setShowEditBioDialog(true)}
+                          disabled={updateProfileMutation.isPending}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                     
                     <div className="flex space-x-2">
                       <Button type="submit" className="flex-1" disabled={updateProfileMutation.isPending}>
                         {updateProfileMutation.isPending ? 'Salvando...' : 'Salvar Alterações'}
                       </Button>
-                      {/* Botão "Editar Foto" removido */}
                     </div>
                   </form>
                 </CardContent>
@@ -313,13 +332,11 @@ const Profile = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {/* Fetching recent boards for display */}
                     {boards?.slice(0, 3).map(board => (
                       <div key={board.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg dark:bg-secondary dark:border-border">
                         <div>
                           <div className="font-medium dark:text-foreground">{board.title}</div>
                           <div className="text-sm text-gray-600 dark:text-muted-foreground">
-                            {/* Placeholder for tasks/columns count, will fetch from Supabase later */}
                             ... tarefas • ... colunas
                           </div>
                         </div>
@@ -344,12 +361,10 @@ const Profile = () => {
                   <CardTitle className="dark:text-foreground">Configurações de Conta</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {/* Email input removido */}
-                  
                   <div className="flex space-x-3 pt-4 border-t dark:border-border">
                     <Button 
                       variant="outline" 
-                      onClick={() => setShowChangePasswordDialog(true)} // Habilitar e abrir diálogo
+                      onClick={() => setShowChangePasswordDialog(true)}
                       className="dark:bg-secondary dark:text-secondary-foreground dark:border-border dark:hover:bg-accent"
                     >
                       Alterar Senha
@@ -365,6 +380,13 @@ const Profile = () => {
       <ChangePasswordDialog
         open={showChangePasswordDialog}
         onOpenChange={setShowChangePasswordDialog}
+      />
+      <EditBioDialog
+        open={showEditBioDialog}
+        onOpenChange={setShowEditBioDialog}
+        currentBio={bio}
+        onSave={handleSaveBio}
+        isLoading={updateProfileMutation.isPending}
       />
     </AuthGuard>
   );
