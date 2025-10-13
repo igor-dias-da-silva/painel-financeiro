@@ -52,42 +52,42 @@
   }
 
   .dark {
-    --background: 240 10% 3.9%; /* Fundo roxo muito escuro */
+    --background: 220 13% 13%; /* Fundo cinza escuro */
     --foreground: 210 40% 98%; /* Texto claro */
 
-    --card: 240 10% 7%; /* Cartões roxos escuros */
+    --card: 220 13% 18%; /* Cartões cinza um pouco mais claro */
     --card-foreground: 210 40% 98%;
 
-    --popover: 240 10% 7%;
+    --popover: 220 13% 18%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 262 83% 58%; /* Roxo vibrante para elementos primários */
+    --primary: 217.2 91.2% 59.8%; /* Azul vibrante para elementos primários */
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 262 40% 15%; /* Roxo mais escuro para elementos secundários */
+    --secondary: 210 40% 20%; /* Cinza-azul mais escuro para elementos secundários */
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 262 20% 10%; /* Roxo dessaturado para texto muted */
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 210 40% 25%; /* Cinza dessaturado para texto muted */
+    --muted-foreground: 215.4 16.3% 56.9%;
 
-    --accent: 262 40% 15%; /* Roxo para acentos */
+    --accent: 210 40% 20%; /* Cinza-azul para acentos */
     --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 62.8% 30.6%; /* Vermelho para destrutivo */
+    --destructive: 0 84.2% 60.2%; /* Vermelho para destrutivo */
     --destructive-foreground: 210 40% 98%;
 
-    --border: 262 20% 20%; /* Borda roxa sutil */
-    --input: 262 20% 20%; /* Input roxo sutil */
-    --ring: 262 83% 58%; /* Anel de foco roxo vibrante */
+    --border: 214.3 31.8% 30%; /* Borda cinza sutil */
+    --input: 214.3 31.8% 30%; /* Input cinza sutil */
+    --ring: 217.2 91.2% 59.8%; /* Anel de foco azul vibrante */
 
-    --sidebar-background: 262 80% 10%; /* Fundo da sidebar roxo profundo */
+    --sidebar-background: 220 13% 10%; /* Fundo da sidebar cinza profundo */
     --sidebar-foreground: 210 40% 98%; /* Texto da sidebar claro */
-    --sidebar-primary: 262 83% 58%; /* Item ativo da sidebar roxo vibrante */
+    --sidebar-primary: 217.2 91.2% 59.8%; /* Item ativo da sidebar azul vibrante */
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 262 40% 15%; /* Acento da sidebar roxo escuro */
+    --sidebar-accent: 220 13% 20%; /* Acento da sidebar cinza escuro */
     --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 262 20% 20%;
-    --sidebar-ring: 262 83% 58%;
+    --sidebar-border: 214.3 31.8% 25%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
 
