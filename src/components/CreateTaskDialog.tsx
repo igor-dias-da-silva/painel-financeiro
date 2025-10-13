@@ -94,7 +94,7 @@ export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] overflow-visible"> {/* Adicionado overflow-visible aqui */}
         <DialogHeader>
           <DialogTitle>Nova Tarefa</DialogTitle>
         </DialogHeader>
@@ -128,7 +128,7 @@ export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
               <SelectTrigger>
                 <SelectValue placeholder={columns.length === 0 ? "Nenhuma coluna disponível" : "Selecione uma coluna"} />
               </SelectTrigger>
-              <SelectContent className="z-50"> {/* Explicitly set z-index for content */}
+              <SelectContent className="z-[9999]"> {/* Explicitly set a very high z-index for content */}
                 {columns.map(column => (
                   <SelectItem key={column.id} value={column.id}>
                     {column.title}
@@ -147,7 +147,7 @@ export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="z-50"> {/* Explicitly set z-index for content */}
+              <SelectContent className="z-[9998]"> {/* Explicitly set a very high z-index for content */}
                 <SelectItem value="low">Baixa</SelectItem>
                 <SelectItem value="medium">Média</SelectItem>
                 <SelectItem value="high">Alta</SelectItem>
