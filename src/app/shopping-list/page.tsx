@@ -76,19 +76,48 @@ const ShoppingListPage = () => {
 
   const updateItemMutation = useMutation({
     mutationFn: ({ itemId, updates }: { itemId: string, updates: Partial<DbShoppingItem> }) => updateShoppingItem(itemId, updates),
-    onSuccess: () => {
+    onMutate: async ({ itemId, updates }) => {
+      await queryClient.cancelQueries({ queryKey: ['shoppingItems', budget?.id] });
+      const previousItems = queryClient.getQueryData(['shoppingItems', budget?.id]);
+      queryClient.setQueryData(['shoppingItems', budget?.id], (old: DbShoppingItem[] | undefined) => {
+        if (!old) return [];
+        return old.map(item => 
+          item.id === itemId ? { ...item, ...updates } : item
+        );
+      });
+      return { previousItems };
+    },
+    onError: (err, variables, context) => {
+      if (context?.previousItems) {
+        queryClient.setQueryData(['shoppingItems', budget?.id], context.previousItems);
+      }
+      showError('Erro ao atualizar item.');
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['shoppingItems', budget?.id] });
     },
-    onError: () => showError('Erro ao atualizar item.'),
   });
 
   const deleteItemMutation = useMutation({
     mutationFn: (itemId: string) => deleteShoppingItem(itemId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['shoppingItems', budget?.id] });
-      showSuccess('Item removido!');
+    onMutate: async (itemId) => {
+      await queryClient.cancelQueries({ queryKey: ['shoppingItems', budget?.id] });
+      const previousItems = queryClient.getQueryData(['shoppingItems', budget?.id]);
+      queryClient.setQueryData(['shoppingItems', budget?.id], (old: DbShoppingItem[] | undefined) => {
+        if (!old) return [];
+        return old.filter(item => item.id !== itemId);
+      });
+      return { previousItems };
     },
-    onError: () => showError('Erro ao remover item.'),
+    onError: (err, variables, context) => {
+      if (context?.previousItems) {
+        queryClient.setQueryData(['shoppingItems', budget?.id], context.previousItems);
+      }
+      showError('Erro ao remover item.');
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['shoppingItems', budget?.id] });
+    },
   });
 
   const totalExpenses = useMemo(() => {
