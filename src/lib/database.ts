@@ -7,6 +7,9 @@ export interface Profile {
   bio?: string | null;
   default_priority?: 'low' | 'medium' | 'high' | 'urgent';
   priority_colors?: Record<string, string> | null;
+  subscription_plan?: 'free' | 'premium';
+  subscription_status?: 'active' | 'cancelled' | 'past_due';
+  subscription_ends_at?: string | null;
   updated_at: string;
 }
 

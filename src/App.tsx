@@ -10,6 +10,7 @@ import Help from "./pages/Help";
 import NotFound from "./pages/NotFound";
 import ShoppingListPage from "./app/shopping-list/page";
 import BillsPage from "./pages/BillsPage";
+import PricingPage from "./pages/PricingPage";
 
 function App() {
   return (
@@ -36,6 +37,13 @@ function App() {
           <AuthGuard>
             <Layout>
               <BillsPage />
+            </Layout>
+          </AuthGuard>
+        } />
+        <Route path="/pricing" element={
+          <AuthGuard>
+            <Layout>
+              <PricingPage />
             </Layout>
           </AuthGuard>
         } />

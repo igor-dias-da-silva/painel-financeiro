@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Edit, Calendar } from 'lucide-react';
+import { Loader2, Edit, Calendar, Crown, Zap } from 'lucide-react';
 import { AuthGuard } from '@/components/AuthGuard';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -114,6 +114,28 @@ const Profile = () => {
   const displayName = `${firstName} ${lastName}`.trim() || user?.name || 'Usuário';
   const joinDate = "N/A";
 
+  const getPlanIcon = (plan: string) => {
+    if (plan === 'premium') return <Crown className="h-5 w-5 text-yellow-500" />;
+    return <Zap className="h-5 w-5 text-blue-500" />;
+  };
+
+  const getPlanName = (plan: string) => {
+    if (plan === 'premium') return 'Premium';
+    return 'Gratuito';
+  };
+
+  const getPlanStatus = (status: string) => {
+    switch (status) {
+      case 'active': return { text: 'Ativo', color: 'text-green-600' };
+      case 'cancelled': return { text: 'Cancelado', color: 'text-red-600' };
+      case 'past_due': return { text: 'Atrasado', color: 'text-yellow-600' };
+      default: return { text: 'Desconhecido', color: 'text-gray-600' };
+    }
+  };
+
+  const planStatus = getPlanStatus(profile?.subscription_status || 'active');
+  const planName = getPlanName(profile?.subscription_plan || 'free');
+
   return (
     <AuthGuard>
       <div className="min-h-screen bg-gray-50 p-4 dark:bg-background">
@@ -135,11 +157,21 @@ const Profile = () => {
                     </Avatar>
                   </div>
                   <CardTitle className="text-xl dark:text-foreground">{displayName}</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-muted-foreground">
+                  <div className="flex items-center justify-center space-x-2 text-sm text-gray-600 dark:text-muted-foreground">
                     <Calendar className="h-4 w-4" />
                     <span>Membro desde {joinDate}</span>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-secondary rounded-lg">
+                    <div className="flex items-center space-x-2">
+                      {getPlanIcon(profile?.subscription_plan || 'free')}
+                      <span className="font-medium dark:text-foreground">Plano</span>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-semibold dark:text-foreground">{planName}</div>
+                      <div className={`text-sm ${planStatus.color}`}>{planStatus.text}</div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>

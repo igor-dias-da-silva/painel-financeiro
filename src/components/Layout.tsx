@@ -15,6 +15,7 @@ import {
   ChevronUp,
   ShoppingCart,
   Receipt,
+  Crown,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -24,6 +25,7 @@ const navItems = [
   { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
   { name: 'Lista de Compras', icon: ShoppingCart, path: '/shopping-list' },
   { name: 'Contas a Pagar', icon: Receipt, path: '/bills' },
+  { name: 'Planos', icon: Crown, path: '/pricing' },
   { name: 'Configurações', icon: Settings, path: '/settings' },
   { name: 'Perfil', icon: User, path: '/profile' },
   { name: 'Ajuda', icon: HelpCircle, path: '/help' },
