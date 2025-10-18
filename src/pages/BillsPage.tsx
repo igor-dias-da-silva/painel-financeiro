@@ -146,7 +146,7 @@ const BillsPage = () => {
         <h1 className="text-3xl font-bold">Contas a Pagar</h1>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         <div className="lg:col-span-1 space-y-6">
           <Card>
             <CardHeader>
