@@ -117,17 +117,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         return false;
       }
 
-      if (data.user) {
-        const userData: User = {
-          id: data.user.id,
-          name: name,
-          email: data.user.email!,
-        };
-        setUser(userData);
-        return true;
-      }
-
-      return false;
+      // Retorna sucesso se o usuário foi criado, mesmo que precise confirmar o e-mail.
+      // Não fazemos o login automático aqui.
+      return data.user !== null;
     } catch (error) {
       console.error('Register error:', error);
       return false;

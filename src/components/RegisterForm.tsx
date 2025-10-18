@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Eye, EyeOff, User, Mail, Lock } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { showSuccess } from '@/utils/toast';
 
 interface RegisterFormProps {
   onToggleMode: () => void;
@@ -45,7 +46,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
     try {
       const success = await register(name, email, password);
       if (success) {
-        navigate('/dashboard');
+        showSuccess('Conta criada! Verifique seu e-mail para confirmar e poder fazer login.');
+        onToggleMode(); // Muda para a tela de login
       } else {
         setError('Erro ao criar conta. O email pode já estar em uso.');
       }
