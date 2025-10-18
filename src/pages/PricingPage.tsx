@@ -10,9 +10,17 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getProfile, updateProfile } from '@/lib/database';
 import { showError, showSuccess } from '@/utils/toast';
 import { AuthGuard } from '@/components/AuthGuard';
+import { useProfile } from '@/hooks/useProfile';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const PricingPage = () => {
   const { user, isLoading: authLoading } = useAuth();
+  const { isAdmin } = useProfile();
   const queryClient = useQueryClient();
   const [activatingPlan, setActivatingPlan] = useState<'free' | 'premium' | null>(null);
 
@@ -41,6 +49,11 @@ const PricingPage = () => {
       showError('Você precisa estar logado para assinar um plano.');
       return;
     }
+
+    if (isAdmin && plan === 'free') {
+      showError('Administradores devem permanecer em um plano premium.');
+      return;
+    }
     
     setActivatingPlan(plan);
 
@@ -51,14 +64,12 @@ const PricingPage = () => {
         return;
       }
       
-      // Ativa o teste de 1 dia
       updateProfileMutation.mutate({ 
         subscription_plan: 'premium',
         subscription_status: 'active',
-        subscription_ends_at: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString() // Expira em 1 dia
+        subscription_ends_at: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString()
       });
     } else {
-      // Reverte para o plano gratuito
       updateProfileMutation.mutate({ 
         subscription_plan: 'free',
         subscription_status: 'active',
@@ -69,6 +80,11 @@ const PricingPage = () => {
 
   const handleCancelSubscription = () => {
     if (!user) return;
+
+    if (isAdmin) {
+      showError('Administradores não podem cancelar a assinatura premium.');
+      return;
+    }
     
     updateProfileMutation.mutate({ 
       subscription_plan: 'free',
@@ -170,7 +186,7 @@ const PricingPage = () => {
                     </p>
                   </div>
                   {isPremium && (
-                    <Button variant="outline" onClick={handleCancelSubscription} disabled={updateProfileMutation.isPending}>
+                    <Button variant="outline" onClick={handleCancelSubscription} disabled={updateProfileMutation.isPending || isAdmin}>
                       Cancelar Assinatura
                     </Button>
                   )}
@@ -183,7 +199,26 @@ const PricingPage = () => {
             {plans.map((plan) => {
               const Icon = plan.icon;
               const isCurrentPlan = currentPlan === plan.id;
+              const isFreePlanButtonForAdmin = isAdmin && plan.id === 'free';
               
+              const ctaButton = (
+                <Button 
+                  className="w-full" 
+                  variant={plan.ctaVariant}
+                  onClick={() => handleSubscribe(plan.id as 'free' | 'premium')}
+                  disabled={isLoading || isCurrentPlan || updateProfileMutation.isPending || isFreePlanButtonForAdmin}
+                  style={isFreePlanButtonForAdmin ? { pointerEvents: 'none' } : {}}
+                >
+                  {isCurrentPlan ? (
+                    'Plano Atual'
+                  ) : activatingPlan === plan.id ? (
+                    <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Ativando...</>
+                  ) : (
+                    plan.cta
+                  )}
+                </Button>
+              );
+
               return (
                 <Card 
                   key={plan.id} 
@@ -239,20 +274,20 @@ const PricingPage = () => {
                       </div>
                     )}
 
-                    <Button 
-                      className="w-full" 
-                      variant={plan.ctaVariant}
-                      onClick={() => handleSubscribe(plan.id as 'free' | 'premium')}
-                      disabled={isLoading || isCurrentPlan || updateProfileMutation.isPending}
-                    >
-                      {isCurrentPlan ? (
-                        'Plano Atual'
-                      ) : activatingPlan === plan.id ? (
-                        <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Ativando...</>
-                      ) : (
-                        plan.cta
-                      )}
-                    </Button>
+                    {isFreePlanButtonForAdmin ? (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="w-full">{ctaButton}</div>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Administradores não podem usar o plano gratuito.</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    ) : (
+                      ctaButton
+                    )}
                   </CardContent>
                 </Card>
               );
