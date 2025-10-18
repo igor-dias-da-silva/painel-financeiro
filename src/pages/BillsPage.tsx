@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { X, Plus, Receipt, Loader2, ShoppingCart } from 'lucide-react';
@@ -201,7 +200,8 @@ const BillsPage = () => {
               <CardTitle>Minhas Contas</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto">
+              {/* Desktop View */}
+              <div className="hidden md:block overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -249,6 +249,47 @@ const BillsPage = () => {
                     )}
                   </TableBody>
                 </Table>
+              </div>
+              {/* Mobile View */}
+              <div className="md:hidden space-y-4">
+                {displayBills.length > 0 ? (
+                  displayBills.map(bill => {
+                    const isVirtual = 'isVirtual' in bill && bill.isVirtual;
+                    return (
+                      <div key={bill.id} className={`p-4 rounded-lg border ${bill.is_paid ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' : 'bg-card'}`}>
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-start gap-4">
+                            <Checkbox checked={bill.is_paid} onCheckedChange={() => handleTogglePaid(bill)} disabled={isVirtual} className="mt-1" />
+                            <div>
+                              <div className={`font-medium ${bill.is_paid ? 'line-through text-muted-foreground' : ''}`}>
+                                <div className="flex items-center">
+                                  {isVirtual && <ShoppingCart className="h-4 w-4 mr-2 text-primary" />}
+                                  {bill.name}
+                                </div>
+                              </div>
+                              <div className="text-sm text-muted-foreground">
+                                Vence em: {format(new Date(bill.due_date), 'dd/MM/yyyy')}
+                              </div>
+                              {isVirtual && <div className="text-xs text-muted-foreground">Total de {shoppingData?.purchasedExpenses === shoppingData?.totalExpenses ? 'comprados' : 'previstos'}</div>}
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className={`font-semibold text-lg ${bill.is_paid ? 'line-through text-muted-foreground' : ''}`}>{formatCurrency(bill.amount)}</div>
+                            {!isVirtual && (
+                              <Button variant="ghost" size="icon" onClick={() => deleteBillMutation.mutate(bill.id)} className="h-8 w-8 mt-1">
+                                <X className="h-4 w-4 text-red-500" />
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="text-center py-10 text-muted-foreground">
+                    Nenhuma conta cadastrada.
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
