@@ -98,6 +98,12 @@ const ShoppingListPage = () => {
     return items?.reduce((total, item) => total + Number(item.price), 0) || 0;
   }, [items]);
 
+  const purchasedExpenses = useMemo(() => {
+    return items
+      ?.filter(item => item.purchased)
+      .reduce((total, item) => total + Number(item.price), 0) || 0;
+  }, [items]);
+
   const remainingBalance = useMemo(() => {
     return (budget?.amount || 0) - totalExpenses;
   }, [budget, totalExpenses]);
@@ -183,8 +189,12 @@ const ShoppingListPage = () => {
                 <span className="font-semibold text-lg">{formatCurrency(budget?.amount || 0)}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Gastos Previstos:</span>
-                <span className="font-semibold text-lg text-red-500">{formatCurrency(totalExpenses)}</span>
+                <span className="text-muted-foreground">Total da Lista:</span>
+                <span className="font-semibold text-lg text-orange-500">{formatCurrency(totalExpenses)}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Total Gasto (Comprados):</span>
+                <span className="font-semibold text-lg text-red-500">{formatCurrency(purchasedExpenses)}</span>
               </div>
               <Separator />
               <div className="flex justify-between items-center">
