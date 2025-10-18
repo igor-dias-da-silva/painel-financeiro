@@ -76,11 +76,8 @@ const ShoppingListPage = () => {
 
   const updateItemMutation = useMutation({
     mutationFn: ({ itemId, updates }: { itemId: string, updates: Partial<DbShoppingItem> }) => updateShoppingItem(itemId, updates),
-    onSuccess: (updatedItem) => {
-      queryClient.setQueryData(['shoppingItems', budget?.id], (oldData: DbShoppingItem[] | undefined) => {
-        if (!oldData) return [updatedItem];
-        return oldData.map(item => item.id === updatedItem.id ? updatedItem : item);
-      });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['shoppingItems', budget?.id] });
     },
     onError: () => showError('Erro ao atualizar item.'),
   });
