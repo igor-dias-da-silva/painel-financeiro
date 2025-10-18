@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,42 +10,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getProfile, updateProfile } from '@/lib/database';
 import { showError, showSuccess } from '@/utils/toast';
 import { AuthGuard } from '@/components/AuthGuard';
-import { supabase } from '@/integrations/supabase/client';
-import { useLocation, useNavigate } from 'react-router-dom';
-
-const MERCADO_PAGO_FUNCTION_URL = 'https://ruubwpgemhyzsrbqspnj.supabase.co/functions/v1/create-payment-preference';
 
 const PricingPage = () => {
   const { user, isLoading: authLoading } = useAuth();
   const queryClient = useQueryClient();
-  const [isPaymentLoading, setIsPaymentLoading] = useState(false);
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const paymentStatus = params.get('payment');
-
-    if (paymentStatus) {
-      switch (paymentStatus) {
-        case 'success':
-          showSuccess('Pagamento aprovado! Seu plano Premium está ativo.');
-          queryClient.invalidateQueries({ queryKey: ['profile', user?.id] });
-          break;
-        case 'pending':
-          showError('Pagamento pendente. Seu plano será ativado assim que o pagamento for confirmado.');
-          break;
-        case 'failure':
-          showError('Pagamento falhou. Por favor, tente novamente.');
-          break;
-        case 'error':
-          showError('Ocorreu um erro inesperado durante o processamento do pagamento.');
-          break;
-      }
-      // Limpa os parâmetros da URL após exibir a mensagem
-      navigate(location.pathname, { replace: true });
-    }
-  }, [location.search, navigate, queryClient, user?.id]);
+  const [activatingPlan, setActivatingPlan] = useState<'free' | 'premium' | null>(null);
 
   const { data: profile, isLoading: profileLoading } = useQuery({
     queryKey: ['profile', user?.id],
@@ -55,61 +24,41 @@ const PricingPage = () => {
 
   const updateProfileMutation = useMutation({
     mutationFn: (updates: any) => updateProfile(user!.id, updates),
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['profile', user?.id] });
-      showSuccess('Plano atualizado com sucesso!');
+      if (variables.subscription_plan === 'premium') {
+        showSuccess('Teste Premium ativado por 1 dia!');
+      } else {
+        showSuccess('Plano atualizado com sucesso!');
+      }
     },
     onError: () => showError('Erro ao atualizar plano.'),
+    onSettled: () => setActivatingPlan(null),
   });
 
-  const handleSubscribe = async (plan: 'free' | 'premium') => {
+  const handleSubscribe = (plan: 'free' | 'premium') => {
     if (!user) {
       showError('Você precisa estar logado para assinar um plano.');
       return;
     }
     
+    setActivatingPlan(plan);
+
     if (plan === 'premium') {
-      setIsPaymentLoading(true);
-      try {
-        const session = await supabase.auth.getSession();
-        const accessToken = session.data.session?.access_token;
-
-        if (!accessToken) {
-          throw new Error('Sessão de usuário não encontrada.');
-        }
-
-        const response = await fetch(MERCADO_PAGO_FUNCTION_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify({ 
-            userId: user.id, 
-            planId: 'premium',
-            origin: window.location.origin // Envia a URL base do app
-          }),
-        });
-
-        const data = await response.json();
-        
-        if (!response.ok || data.error) {
-          throw new Error(data.error || `Falha ao criar preferência de pagamento. Status: ${response.status}`);
-        }
-
-        if (data.init_point) {
-          // Redireciona o usuário para a página de checkout do Mercado Pago
-          window.location.href = data.init_point;
-        } else {
-          throw new Error('URL de checkout não recebida do servidor.');
-        }
-
-      } catch (error: any) {
-        console.error('Erro na integração com Mercado Pago:', error);
-        showError(`Erro ao iniciar pagamento: ${error.message}`);
-        setIsPaymentLoading(false);
+      if (profile?.subscription_plan === 'premium') {
+        showSuccess('Você já possui o plano Premium.');
+        setActivatingPlan(null);
+        return;
       }
+      
+      // Ativa o teste de 1 dia
+      updateProfileMutation.mutate({ 
+        subscription_plan: 'premium',
+        subscription_status: 'active',
+        subscription_ends_at: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString() // Expira em 1 dia
+      });
     } else {
+      // Reverte para o plano gratuito
       updateProfileMutation.mutate({ 
         subscription_plan: 'free',
         subscription_status: 'active',
@@ -128,7 +77,7 @@ const PricingPage = () => {
     });
   };
 
-  const isLoading = authLoading || profileLoading || updateProfileMutation.isPending;
+  const isLoading = authLoading || profileLoading;
 
   const plans = [
     {
@@ -156,10 +105,10 @@ const PricingPage = () => {
     },
     {
       id: 'premium',
-      name: 'Premium',
-      price: 'R$ 19,90',
-      period: 'por mês',
-      description: 'Desbloqueie todos os recursos e recursos avançados',
+      name: 'Premium (Teste)',
+      price: 'Grátis',
+      period: 'por 1 dia',
+      description: 'Teste todos os recursos premium gratuitamente por 24 horas',
       icon: Crown,
       features: [
         'Tudo do plano gratuito',
@@ -173,7 +122,7 @@ const PricingPage = () => {
       ],
       limitations: [],
       featured: true,
-      cta: 'Assinar Agora',
+      cta: 'Iniciar Teste Gratuito',
       ctaVariant: 'default' as const,
       popular: true
     }
@@ -182,7 +131,7 @@ const PricingPage = () => {
   const currentPlan = profile?.subscription_plan || 'free';
   const isPremium = currentPlan === 'premium';
 
-  if (isLoading && !isPaymentLoading) {
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -294,10 +243,12 @@ const PricingPage = () => {
                       className="w-full" 
                       variant={plan.ctaVariant}
                       onClick={() => handleSubscribe(plan.id as 'free' | 'premium')}
-                      disabled={isLoading || isCurrentPlan || isPaymentLoading}
+                      disabled={isLoading || isCurrentPlan || updateProfileMutation.isPending}
                     >
-                      {isPaymentLoading && plan.id === 'premium' ? (
-                        <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Redirecionando...</>
+                      {isCurrentPlan ? (
+                        'Plano Atual'
+                      ) : activatingPlan === plan.id ? (
+                        <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Ativando...</>
                       ) : (
                         plan.cta
                       )}
