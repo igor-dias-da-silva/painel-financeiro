@@ -11,6 +11,7 @@ import Settings from "./pages/Settings"; // Import Settings page
 import Profile from "./pages/Profile"; // Import Profile page
 import Help from "./pages/Help"; // Import Help page
 import NotFound from "./pages/NotFound";
+import ShoppingListPage from "./app/shopping-list/page";
 
 function App() {
   return (
@@ -37,6 +38,20 @@ function App() {
           <AuthGuard>
             <Layout>
               <BoardView /> {/* New route for individual board view */}
+            </Layout>
+          </AuthGuard>
+        } />
+        <Route path="/kanban" element={
+          <AuthGuard>
+            <Layout>
+              <BoardView />
+            </Layout>
+          </AuthGuard>
+        } />
+        <Route path="/shopping-list" element={
+          <AuthGuard>
+            <Layout>
+              <ShoppingListPage />
             </Layout>
           </AuthGuard>
         } />

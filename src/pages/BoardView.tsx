@@ -1,155 +1,100 @@
 "use client";
 
-import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { KanbanBoard } from '@/components/KanbanBoard';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft, Loader2 } from 'lucide-react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getBoards, updateBoard, deleteBoard, Board, getColumns, getCards, Column as SupabaseColumn, Card as SupabaseCard } from '@/lib/database';
-import { useAuth } from '@/hooks/useAuth';
-import { showError, showSuccess } from '@/utils/toast';
-import { AuthGuard } from '@/components/AuthGuard';
-import { Task } from '@/types/task';
+import { Header } from '@/components/Header';
+import { Board, Column, Task } from '@/types';
 
-const fetchFullBoardData = async (boardId: string, userId: string): Promise<Board & { columns: SupabaseColumn[]; tasks: Task[] }> => {
-  console.log('Fetching full board data for boardId:', boardId, 'userId:', userId);
-
-  if (!userId) {
-    console.error('Error: userId is undefined in fetchFullBoardData');
-    throw new Error('ID do usuário não disponível.');
+// Mock data - in a real app, this would come from an API
+const initialBoards: Board[] = [
+  {
+    id: 'board-1',
+    name: 'Project Phoenix',
+    columns: [
+      { id: 'col-1', title: 'To Do', taskIds: ['task-1', 'task-2'] },
+      { id: 'col-2', title: 'In Progress', taskIds: ['task-3'] },
+      { id: 'col-3', title: 'Done', taskIds: ['task-4'] },
+    ],
+    tasks: [
+      { id: 'task-1', content: 'Analyze project requirements' },
+      { id: 'task-2', content: 'Create wireframes' },
+      { id: 'task-3', content: 'Develop main feature' },
+      { id: 'task-4', content: 'Deploy to production' },
+    ]
+  },
+  {
+    id: 'board-2',
+    name: 'Marketing Campaign',
+    columns: [
+        { id: 'mcol-1', title: 'Ideas', taskIds: ['mtask-1'] },
+        { id: 'mcol-2', title: 'Executing', taskIds: [] },
+        { id: 'mcol-3', title: 'Completed', taskIds: ['mtask-2'] },
+    ],
+    tasks: [
+        { id: 'mtask-1', content: 'Brainstorm Q3 initiatives' },
+        { id: 'mtask-2', content: 'Launch social media ads' },
+    ]
   }
-  if (!boardId) {
-    console.error('Error: boardId is undefined in fetchFullBoardData');
-    throw new Error('ID do quadro não disponível.');
-  }
+];
 
-  try {
-    const boardData = await getBoards(userId);
-    console.log('Fetched boards:', boardData);
-    const board = boardData.find(b => b.id === boardId);
-    if (!board) {
-      console.error('Error: Board not found for boardId:', boardId);
-      throw new Error('Quadro não encontrado.');
-    }
-    console.log('Found board:', board);
 
-    const columns = await getColumns(boardId);
-    console.log('Fetched columns:', columns);
+export default function BoardView() {
+  const [boards, setBoards] = useState<Board[]>(initialBoards);
+  const [selectedBoardId, setSelectedBoardId] = useState<string | null>(initialBoards[0]?.id || null);
 
-    const cards = await getCards(boardId);
-    console.log('Fetched cards:', cards);
-
-    const tasks: Task[] = cards.map(card => ({
-      id: card.id,
-      title: card.title,
-      description: card.description || undefined,
-      priority: card.priority || 'medium', 
-      dueDate: card.due_date || undefined, 
-      tags: card.tags || [], 
-      columnId: card.column_id,
-      order_index: card.order_index, // Alterado de 'order' para 'order_index'
-    }));
-    console.log('Mapped tasks:', tasks);
-
-    return { ...board, columns, tasks };
-  } catch (err: any) {
-    console.error('Error fetching full board data:', err.message);
-    throw new Error(`Erro ao carregar dados do quadro: ${err.message}`);
-  }
-};
-
-const BoardView = () => {
-  const { boardId } = useParams<{ boardId: string }>();
-  const navigate = useNavigate();
-  const { user, isLoading: authLoading } = useAuth();
-  const queryClient = useQueryClient();
-
-  const { data: board, isLoading, isError, error } = useQuery<Board & { columns: SupabaseColumn[]; tasks: Task[] }>({
-    queryKey: ['fullBoard', boardId, user?.id],
-    queryFn: () => fetchFullBoardData(boardId!, user!.id),
-    enabled: !!boardId && !!user?.id,
-  });
-
-  const updateBoardMutation = useMutation({
-    mutationFn: (updatedBoard: Board) => updateBoard(updatedBoard.id, updatedBoard),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['fullBoard', boardId, user?.id] });
-      queryClient.invalidateQueries({ queryKey: ['boards', user?.id] }); // Invalidate board list too
-      showSuccess('Quadro atualizado com sucesso!');
-    },
-    onError: (err) => {
-      console.error('Erro ao atualizar quadro:', err);
-      showError('Erro ao atualizar quadro. Tente novamente.');
-    },
-  });
-
-  const deleteBoardMutation = useMutation({
-    mutationFn: deleteBoard,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['boards', user?.id] });
-      showSuccess('Quadro excluído com sucesso!');
-      navigate('/boards');
-    },
-    onError: (err) => {
-      console.error('Erro ao excluir quadro:', err);
-      showError('Erro ao excluir quadro. Tente novamente.');
-    },
-  });
+  const handleCreateBoard = (name: string) => {
+    const newBoard: Board = {
+      id: `board-${Date.now()}`,
+      name,
+      columns: [
+        { id: 'new-col-1', title: 'To Do', taskIds: [] },
+        { id: 'new-col-2', title: 'In Progress', taskIds: [] },
+        { id: 'new-col-3', title: 'Done', taskIds: [] },
+      ],
+      tasks: [],
+    };
+    setBoards(prev => [...prev, newBoard]);
+    setSelectedBoardId(newBoard.id);
+  };
 
   const handleBoardUpdate = (updatedBoard: Board) => {
-    updateBoardMutation.mutate(updatedBoard);
+    setBoards(prev => prev.map(b => b.id === updatedBoard.id ? updatedBoard : b));
   };
 
   const handleDeleteBoard = (id: string) => {
-    if (confirm('Tem certeza que deseja excluir este quadro? Todas as tarefas e colunas serão perdidas.')) {
-      deleteBoardMutation.mutate(id);
+    setBoards(prev => prev.filter(b => b.id !== id));
+    if (selectedBoardId === id) {
+      setSelectedBoardId(boards[0]?.id || null);
     }
   };
 
-  const handleBackToBoards = () => {
-    navigate('/boards');
-  };
-
-  if (authLoading || isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-      </div>
-    );
-  }
-
-  if (isError || !board) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">Erro ao carregar quadro</h1>
-          <p className="text-gray-600 mb-4">{error?.message || 'Quadro não encontrado ou inacessível.'}</p>
-          <Button onClick={handleBackToBoards}>Voltar aos Quadros</Button>
-        </div>
-      </div>
-    );
-  }
+  const board = boards.find(b => b.id === selectedBoardId);
 
   return (
-    <AuthGuard>
-      <div className="p-4">
-        <Button 
-          variant="outline" 
-          onClick={handleBackToBoards}
-          className="mb-4"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Voltar aos Quadros
-        </Button>
-        <KanbanBoard
-          board={board}
-          onBoardUpdate={handleBoardUpdate}
-          onDeleteBoard={handleDeleteBoard}
-        />
-      </div>
-    </AuthGuard>
+    <div className="flex flex-col h-screen">
+      <Header
+        boards={boards}
+        selectedBoardId={selectedBoardId}
+        onSelectBoard={setSelectedBoardId}
+        onCreateBoard={handleCreateBoard}
+      />
+      <main className="flex-1 overflow-hidden">
+        {board ? (
+          <KanbanBoard
+            key={board.id}
+            boardId={board.id}
+          />
+        ) : (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center">
+              <h2 className="text-2xl font-semibold">No Board Selected</h2>
+              <p className="text-muted-foreground">
+                Please select a board from the dropdown or create a new one.
+              </p>
+            </div>
+          </div>
+        )}
+      </main>
+    </div>
   );
-};
-
-export default BoardView;
+}
