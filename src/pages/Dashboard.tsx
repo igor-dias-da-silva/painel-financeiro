@@ -19,16 +19,17 @@ const Dashboard = () => {
   const currentMonth = currentDate.getMonth() + 1;
   const currentYear = currentDate.getFullYear();
 
-  const { data: bills, isLoading: billsLoading } = useQuery({
+  const { data: bills, isLoading: billsLoading, error: billsError } = useQuery({
     queryKey: ['bills', userId],
     queryFn: () => getBills(userId!),
     enabled: !!userId,
   });
 
-  const { data: shoppingData, isLoading: shoppingLoading } = useQuery({
+  const { data: shoppingData, isLoading: shoppingLoading, error: shoppingError } = useQuery({
     queryKey: ['monthlyShoppingSummary', userId, currentMonth, currentYear],
     queryFn: async () => {
-      const budget = await getOrCreateBudget(userId!, currentMonth, currentYear);
+      if (!userId) return null;
+      const budget = await getOrCreateBudget(userId, currentMonth, currentYear);
       const items = await getShoppingItems(budget.id);
       const totalExpenses = items.reduce((sum, item) => sum + Number(item.price), 0);
       return { budget, totalExpenses };
@@ -38,7 +39,19 @@ const Dashboard = () => {
 
   const isLoading = authLoading || billsLoading || shoppingLoading;
 
-  const pendingBills = bills?.filter(bill => !bill.is_paid) || [];
+  // Verifica se há erros nas queries e exibe uma mensagem
+  if (billsError) {
+    console.error('Erro ao carregar contas:', billsError);
+  }
+  if (shoppingError) {
+    console.error('Erro ao carregar dados de compras:', shoppingError);
+  }
+
+  // Garante que os dados sejam arrays vazios se forem undefined
+  const safeBills = bills || [];
+  const safeShoppingData = shoppingData || { budget: { amount: 0 }, totalExpenses: 0 };
+
+  const pendingBills = safeBills.filter(bill => !bill.is_paid);
   const pendingBillsTotal = pendingBills.reduce((sum, bill) => sum + Number(bill.amount), 0);
 
   const formatCurrency = (value: number) => {
@@ -93,8 +106,8 @@ const Dashboard = () => {
             <ShoppingCart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-500">{formatCurrency(shoppingData?.totalExpenses || 0)}</div>
-            <p className="text-xs text-muted-foreground">Orçamento de {formatCurrency(shoppingData?.budget.amount || 0)}</p>
+            <div className="text-2xl font-bold text-orange-500">{formatCurrency(safeShoppingData.totalExpenses)}</div>
+            <p className="text-xs text-muted-foreground">Orçamento de {formatCurrency(safeShoppingData.budget.amount)}</p>
           </CardContent>
         </Card>
       </div>

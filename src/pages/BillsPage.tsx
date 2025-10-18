@@ -30,24 +30,29 @@ const BillsPage = () => {
   const currentYear = currentDate.getFullYear();
 
   // Fetch regular bills
-  const { data: bills, isLoading: billsLoading } = useQuery({
+  const { data: bills, isLoading: billsLoading, error: billsError } = useQuery({
     queryKey: ['bills', user?.id],
     queryFn: () => getBills(user!.id),
     enabled: !!user,
   });
 
   // Fetch shopping list data for the current month
-  const { data: shoppingData, isLoading: shoppingLoading } = useQuery({
+  const { data: shoppingData, isLoading: shoppingLoading, error: shoppingError } = useQuery({
     queryKey: ['monthlyShoppingSummary', user?.id, currentMonth, currentYear],
     queryFn: async () => {
-      const budget = await getOrCreateBudget(user!.id, currentMonth, currentYear);
+      if (!user?.id) return null;
+      const budget = await getOrCreateBudget(user.id, currentMonth, currentYear);
       const items = await getShoppingItems(budget.id);
       const totalExpenses = items.reduce((sum, item) => sum + Number(item.price), 0);
       const purchasedExpenses = items.filter(i => i.purchased).reduce((sum, item) => sum + Number(item.price), 0);
-      return { totalExpenses, purchasedExpenses };
+      return { totalExpenses, purchasedExpenses, budget };
     },
     enabled: !!user,
   });
+
+  // Log errors for debugging
+  if (billsError) console.error('Bills Error:', billsError);
+  if (shoppingError) console.error('Shopping Error:', shoppingError);
 
   const addBillMutation = useMutation({
     mutationFn: (newBill: Omit<Bill, 'id' | 'created_at'>) => addBill(newBill),
@@ -76,7 +81,7 @@ const BillsPage = () => {
   const displayBills = useMemo(() => {
     const allBills: (Bill & { isVirtual?: boolean })[] = bills ? [...bills] : [];
 
-    if (shoppingData && shoppingData.totalExpenses > 0) {
+    if (shoppingData && shoppingData.totalExpenses > 0 && shoppingData.budget) {
       const shoppingBill: Bill & { isVirtual?: boolean } = {
         id: 'shopping-list-bill',
         user_id: user!.id,
@@ -221,7 +226,7 @@ const BillsPage = () => {
                                 {isVirtual && <ShoppingCart className="h-4 w-4 mr-2 text-primary" />}
                                 {bill.name}
                               </div>
-                              {isVirtual && <div className="text-xs text-muted-foreground">Total de {shoppingData?.totalExpenses === shoppingData?.purchasedExpenses ? 'comprados' : 'previstos'}</div>}
+                              {isVirtual && <div className="text-xs text-muted-foreground">Total de {shoppingData?.purchasedExpenses === shoppingData?.totalExpenses ? 'comprados' : 'previstos'}</div>}
                             </TableCell>
                             <TableCell className={bill.is_paid ? 'line-through text-muted-foreground' : ''}>{format(new Date(bill.due_date), 'dd/MM/yyyy')}</TableCell>
                             <TableCell className={`text-right font-semibold ${bill.is_paid ? 'line-through text-muted-foreground' : ''}`}>{formatCurrency(bill.amount)}</TableCell>
