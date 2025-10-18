@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
-import { X, Plus, ShoppingCart, Loader2, Save, FileDown } from 'lucide-react';
+import { X, Plus, ShoppingCart, Loader2, Save, FileDown, Share2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
@@ -133,6 +133,47 @@ const ShoppingListPage = () => {
     updateItemMutation.mutate({ itemId: id, updates: { purchased: !currentStatus } });
   };
 
+  const formatCurrency = (value: number) => {
+    return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  };
+
+  const handleShareList = async () => {
+    const itemsText = items?.map(item => 
+      `${item.purchased ? '[x]' : '[ ]'} ${item.name} - ${formatCurrency(Number(item.price))}`
+    ).join('\n') || 'Nenhum item na lista.';
+
+    const shareText = `
+🛒 *Lista de Compras (${currentMonth}/${currentYear})*
+
+*Resumo:*
+- Orçamento: ${formatCurrency(budget?.amount || 0)}
+- Total Gasto: ${formatCurrency(purchasedExpenses)}
+- Saldo Restante: ${formatCurrency(remainingBalance)}
+
+*Itens:*
+${itemsText}
+    `;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Lista de Compras - ${currentMonth}/${currentYear}`,
+          text: shareText,
+        });
+        showSuccess('Lista compartilhada!');
+      } catch (error) {
+        console.log('Erro ao compartilhar:', error);
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(shareText);
+        showSuccess('Lista copiada para a área de transferência!');
+      } catch (error) {
+        showError('Não foi possível copiar a lista.');
+      }
+    }
+  };
+
   const handleExportPDF = () => {
     if (!exportRef.current) return;
 
@@ -161,10 +202,6 @@ const ShoppingListPage = () => {
       });
   };
 
-  const formatCurrency = (value: number) => {
-    return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-  };
-
   const isLoading = authLoading || budgetLoading || itemsLoading;
 
   if (isLoading) {
@@ -182,10 +219,16 @@ const ShoppingListPage = () => {
           <ShoppingCart className="h-8 w-8 mr-3 text-primary" />
           <h1 className="text-3xl font-bold">Lista de Compras e Orçamento</h1>
         </div>
-        <Button onClick={handleExportPDF} disabled={isExporting} variant="outline">
-          {isExporting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <FileDown className="h-4 w-4 mr-2" />}
-          Exportar PDF
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={handleShareList} variant="outline">
+            <Share2 className="h-4 w-4 mr-2" />
+            Compartilhar
+          </Button>
+          <Button onClick={handleExportPDF} disabled={isExporting} variant="outline">
+            {isExporting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <FileDown className="h-4 w-4 mr-2" />}
+            Exportar PDF
+          </Button>
+        </div>
       </div>
 
       <div ref={exportRef} className="grid gap-8 md:grid-cols-3">
