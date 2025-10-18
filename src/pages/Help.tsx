@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,33 +21,38 @@ import { AuthGuard } from '@/components/AuthGuard';
 
 const Help = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState('guide');
+  const [activeTab, setActiveTab] = useState('faq');
 
   const faqs = [
     {
-      question: 'Como criar um novo quadro?',
-      answer: 'Clique no botão "Novo Quadro" na página principal ou use o menu de navegação para acessar a lista de quadros.',
-      category: 'criação'
+      question: 'Como adiciono uma nova conta a pagar?',
+      answer: 'Na página "Contas a Pagar", preencha os campos no card "Adicionar Nova Conta" e clique no botão para salvar.',
+      category: 'Contas'
     },
     {
-      question: 'Como adicionar tarefas a um quadro?',
-      answer: 'Dentro de um quadro, clique no botão "Nova Tarefa" e preencha os campos obrigatórios como título e prioridade.',
-      category: 'tarefas'
+      question: 'Como defino meu orçamento para a lista de compras?',
+      answer: 'Acesse a "Lista de Compras". No card "Meu Orçamento", insira o valor desejado e clique no ícone de salvar.',
+      category: 'Compras'
     },
     {
-      question: 'Como mover tarefas entre colunas?',
-      answer: 'Arraste e solte as tarefas entre as colunas usando o mouse. Você também pode reorganizar as tarefas dentro da mesma coluna.',
-      category: 'organização'
+      question: 'Como marco uma conta como paga?',
+      answer: 'Na lista de "Minhas Contas", clique na caixa de seleção ao lado da conta que deseja marcar como paga.',
+      category: 'Contas'
     },
     {
-      question: 'Como filtrar tarefas por prioridade?',
-      answer: 'Use os filtros de prioridade na parte superior do quadro para mostrar apenas tarefas com prioridade específica.',
-      category: 'filtros'
+      question: 'Onde posso ver um resumo das minhas finanças?',
+      answer: 'O Dashboard principal oferece um resumo visual do total de contas a pagar e dos gastos do mês com compras.',
+      category: 'Dashboard'
     },
     {
-      question: 'Como exportar meus dados?',
-      answer: 'Vá para a página de Configurações e clique em "Exportar Dados" para baixar um arquivo JSON com todos os seus quadros e tarefas.',
-      category: 'dados'
+      question: 'Meus dados financeiros estão seguros?',
+      answer: 'Sim. Seus dados são armazenados de forma segura e associados apenas à sua conta. Ninguém mais tem acesso às suas informações.',
+      category: 'Segurança'
+    },
+    {
+      question: 'Posso editar meu nome ou biografia?',
+      answer: 'Sim, na página de "Perfil" você pode clicar nos botões de edição para atualizar seu nome e biografia a qualquer momento.',
+      category: 'Perfil'
     }
   ];
 
@@ -59,19 +64,19 @@ const Help = () => {
   const guides = [
     {
       title: 'Primeiros Passos',
-      description: 'Aprenda a criar seu primeiro quadro e adicionar tarefas',
+      description: 'Aprenda a configurar seu orçamento e adicionar contas',
       icon: Plus,
       duration: '5 min'
     },
     {
-      title: 'Organização Avançada',
-      description: 'Dicas para organizar suas tarefas de forma eficiente',
+      title: 'Gerenciando suas Contas',
+      description: 'Dicas para manter suas contas sempre em dia',
       icon: CheckCircle,
       duration: '10 min'
     },
     {
-      title: 'Colaboração em Equipe',
-      description: 'Como usar o Kanban para trabalho em equipe',
+      title: 'Otimizando Compras',
+      description: 'Como usar a lista de compras para economizar',
       icon: MessageCircle,
       duration: '15 min'
     }
@@ -83,7 +88,7 @@ const Help = () => {
         <div className="max-w-6xl mx-auto">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-800 dark:text-foreground mb-2">Central de Ajuda</h1>
-            <p className="text-gray-600 dark:text-muted-foreground">Encontre respostas para suas dúvidas e aprenda a usar o aplicativo</p>
+            <p className="text-gray-600 dark:text-muted-foreground">Encontre respostas para suas dúvidas e aprenda a usar o FinanDash</p>
           </div>
 
           {/* Barra de Pesquisa */}
@@ -103,20 +108,20 @@ const Help = () => {
           <div className="mb-8">
             <div className="flex space-x-1 bg-gray-200 dark:bg-secondary p-1 rounded-lg max-w-md mx-auto">
               <Button
-                variant={activeTab === 'guide' ? 'default' : 'ghost'}
-                onClick={() => setActiveTab('guide')}
-                className="flex-1"
-              >
-                <BookOpen className="h-4 w-4 mr-2" />
-                Guia
-              </Button>
-              <Button
                 variant={activeTab === 'faq' ? 'default' : 'ghost'}
                 onClick={() => setActiveTab('faq')}
                 className="flex-1"
               >
                 <HelpCircle className="h-4 w-4 mr-2" />
                 Perguntas Frequentes
+              </Button>
+              <Button
+                variant={activeTab === 'guide' ? 'default' : 'ghost'}
+                onClick={() => setActiveTab('guide')}
+                className="flex-1"
+              >
+                <BookOpen className="h-4 w-4 mr-2" />
+                Guia
               </Button>
               <Button
                 variant={activeTab === 'contact' ? 'default' : 'ghost'}
@@ -135,7 +140,7 @@ const Help = () => {
               <div className="text-center mb-8">
                 <h2 className="text-2xl font-bold text-gray-800 dark:text-foreground mb-4">Guia do Usuário</h2>
                 <p className="text-gray-600 dark:text-muted-foreground max-w-2xl mx-auto">
-                  Aprenda passo a passo como usar todas as funcionalidades do aplicativo Kanban
+                  Aprenda passo a passo como usar todas as funcionalidades do FinanDash
                 </p>
               </div>
 
@@ -305,7 +310,7 @@ const Help = () => {
                         <Mail className="h-5 w-5 text-blue-600 dark:text-primary" />
                         <div>
                           <div className="font-medium dark:text-foreground">Email</div>
-                          <div className="text-sm text-gray-600 dark:text-muted-foreground">suporte@kanbanapp.com</div>
+                          <div className="text-sm text-gray-600 dark:text-muted-foreground">suporte@finandash.com</div>
                         </div>
                       </div>
                       
