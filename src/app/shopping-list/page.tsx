@@ -21,8 +21,9 @@ import {
 } from '@/lib/shopping';
 import { showError, showSuccess } from '@/utils/toast';
 import { AuthGuard } from '@/components/AuthGuard';
+import { MainLayout } from '@/components/MainLayout';
 
-const ShoppingListPage = () => {
+const ShoppingListPageContent = () => {
   const { user, isLoading: authLoading } = useAuth();
   const queryClient = useQueryClient();
   
@@ -139,127 +140,135 @@ const ShoppingListPage = () => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-screen">
+      <div className="flex justify-center items-center h-full">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <AuthGuard>
-      <div className="container mx-auto p-4 md:p-8">
-        <div className="flex items-center mb-6">
-          <ShoppingCart className="h-8 w-8 mr-3 text-primary" />
-          <h1 className="text-3xl font-bold">Lista de Compras e Orçamento</h1>
+    <div className="container mx-auto p-4 md:p-8">
+      <div className="flex items-center mb-6">
+        <ShoppingCart className="h-8 w-8 mr-3 text-primary" />
+        <h1 className="text-3xl font-bold">Lista de Compras e Orçamento</h1>
+      </div>
+
+      <div className="grid gap-8 md:grid-cols-3">
+        {/* Coluna de Orçamento e Totais */}
+        <div className="md:col-span-1 space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Meu Orçamento ({currentMonth}/{currentYear})</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <Label htmlFor="salary">Salário / Orçamento Mensal</Label>
+                <Input
+                  id="salary"
+                  type="number"
+                  placeholder="R$ 0,00"
+                  value={localSalary}
+                  onChange={handleBudgetChange}
+                  onBlur={handleBudgetBlur}
+                  disabled={updateBudgetMutation.isPending}
+                />
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Resumo Financeiro</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Orçamento Total:</span>
+                <span className="font-semibold text-lg">{formatCurrency(budget?.amount || 0)}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Gastos Previstos:</span>
+                <span className="font-semibold text-lg text-red-500">{formatCurrency(totalExpenses)}</span>
+              </div>
+              <Separator />
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Saldo Restante:</span>
+                <span className={`font-bold text-xl ${remainingBalance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {formatCurrency(remainingBalance)}
+                </span>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        <div className="grid gap-8 md:grid-cols-3">
-          {/* Coluna de Orçamento e Totais */}
-          <div className="md:col-span-1 space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Meu Orçamento ({currentMonth}/{currentYear})</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <Label htmlFor="salary">Salário / Orçamento Mensal</Label>
-                  <Input
-                    id="salary"
-                    type="number"
-                    placeholder="R$ 0,00"
-                    value={localSalary}
-                    onChange={handleBudgetChange}
-                    onBlur={handleBudgetBlur}
-                    disabled={updateBudgetMutation.isPending}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>Resumo Financeiro</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Orçamento Total:</span>
-                  <span className="font-semibold text-lg">{formatCurrency(budget?.amount || 0)}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Gastos Previstos:</span>
-                  <span className="font-semibold text-lg text-red-500">{formatCurrency(totalExpenses)}</span>
-                </div>
-                <Separator />
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Saldo Restante:</span>
-                  <span className={`font-bold text-xl ${remainingBalance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {formatCurrency(remainingBalance)}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Coluna da Lista de Compras */}
-          <div className="md:col-span-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Itens da Lista</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex gap-2 mb-4">
-                  <Input
-                    placeholder="Nome do item"
-                    value={newItemName}
-                    onChange={(e) => setNewItemName(e.target.value)}
-                    disabled={addItemMutation.isPending}
-                  />
-                  <Input
-                    type="number"
-                    placeholder="Preço (R$)"
-                    value={newItemPrice}
-                    onChange={(e) => setNewItemPrice(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleAddItem()}
-                    className="w-32"
-                    disabled={addItemMutation.isPending}
-                  />
-                  <Button onClick={handleAddItem} disabled={addItemMutation.isPending}>
-                    {addItemMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-                  </Button>
-                </div>
-                <Separator className="my-4" />
-                <div className="space-y-3 h-96 overflow-y-auto pr-2">
-                  {items?.length === 0 ? (
-                    <p className="text-center text-muted-foreground py-8">Sua lista de compras está vazia.</p>
-                  ) : (
-                    items?.map(item => (
-                      <div key={item.id} className="flex items-center gap-3 p-2 rounded-md hover:bg-muted">
-                        <Checkbox
-                          id={`item-${item.id}`}
-                          checked={item.purchased}
-                          onCheckedChange={() => handleTogglePurchased(item.id, item.purchased)}
-                          disabled={updateItemMutation.isPending}
-                        />
-                        <Label
-                          htmlFor={`item-${item.id}`}
-                          className={`flex-1 text-base ${item.purchased ? 'line-through text-muted-foreground' : ''}`}
-                        >
-                          {item.name}
-                        </Label>
-                        <span className={`font-semibold ${item.purchased ? 'line-through text-muted-foreground' : ''}`}>
-                          {formatCurrency(Number(item.price))}
-                        </span>
-                        <Button variant="ghost" size="icon" onClick={() => deleteItemMutation.mutate(item.id)} disabled={deleteItemMutation.isPending}>
-                          <X className="h-4 w-4 text-red-500" />
-                        </Button>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+        {/* Coluna da Lista de Compras */}
+        <div className="md:col-span-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Itens da Lista</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex gap-2 mb-4">
+                <Input
+                  placeholder="Nome do item"
+                  value={newItemName}
+                  onChange={(e) => setNewItemName(e.target.value)}
+                  disabled={addItemMutation.isPending}
+                />
+                <Input
+                  type="number"
+                  placeholder="Preço (R$)"
+                  value={newItemPrice}
+                  onChange={(e) => setNewItemPrice(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleAddItem()}
+                  className="w-32"
+                  disabled={addItemMutation.isPending}
+                />
+                <Button onClick={handleAddItem} disabled={addItemMutation.isPending}>
+                  {addItemMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+                </Button>
+              </div>
+              <Separator className="my-4" />
+              <div className="space-y-3 h-96 overflow-y-auto pr-2">
+                {items?.length === 0 ? (
+                  <p className="text-center text-muted-foreground py-8">Sua lista de compras está vazia.</p>
+                ) : (
+                  items?.map(item => (
+                    <div key={item.id} className="flex items-center gap-3 p-2 rounded-md hover:bg-muted">
+                      <Checkbox
+                        id={`item-${item.id}`}
+                        checked={item.purchased}
+                        onCheckedChange={() => handleTogglePurchased(item.id, item.purchased)}
+                        disabled={updateItemMutation.isPending}
+                      />
+                      <Label
+                        htmlFor={`item-${item.id}`}
+                        className={`flex-1 text-base ${item.purchased ? 'line-through text-muted-foreground' : ''}`}
+                      >
+                        {item.name}
+                      </Label>
+                      <span className={`font-semibold ${item.purchased ? 'line-through text-muted-foreground' : ''}`}>
+                        {formatCurrency(Number(item.price))}
+                      </span>
+                      <Button variant="ghost" size="icon" onClick={() => deleteItemMutation.mutate(item.id)} disabled={deleteItemMutation.isPending}>
+                        <X className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
+    </div>
+  );
+}
+
+const ShoppingListPage = () => {
+  return (
+    <AuthGuard>
+      <MainLayout>
+        <ShoppingListPageContent />
+      </MainLayout>
     </AuthGuard>
   );
 };
