@@ -10,6 +10,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getProfile, updateProfile } from '@/lib/database';
 import { showError, showSuccess } from '@/utils/toast';
 import { AuthGuard } from '@/components/AuthGuard';
+import { supabase } from '@/integrations/supabase/client'; // Importação adicionada
 
 // URL da Edge Function do Mercado Pago
 const MERCADO_PAGO_FUNCTION_URL = 'https://ruubwpgemhyzsrbqspnj.supabase.co/functions/v1/create-payment-preference';
@@ -43,11 +44,18 @@ const PricingPage = () => {
     if (plan === 'premium') {
       setIsPaymentLoading(true);
       try {
+        const session = await supabase.auth.getSession();
+        const accessToken = session.data.session?.access_token;
+
+        if (!accessToken) {
+          throw new Error('Sessão de usuário não encontrada.');
+        }
+
         const response = await fetch(MERCADO_PAGO_FUNCTION_URL, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': \`Bearer \${(await supabase.auth.getSession()).data.session?.access_token}\`,
+            'Authorization': `Bearer ${accessToken}`, // Uso de template literal corrigido
           },
           body: JSON.stringify({ userId: user.id, planId: 'premium' }),
         });

@@ -53,15 +53,14 @@ serve(async (req) => {
       ],
       payer: {
         // O Mercado Pago precisa de um email para o pagador
-        // Idealmente, você buscaria o email do usuário no Supabase aqui
-        // Para o MVP, usaremos um placeholder ou o ID do usuário
-        email: \`user-\${userId}@finandash.com\`, 
+        // Usamos um template literal Deno/JS normal aqui
+        email: `user-${userId}@finandash.com`, 
       },
       // URL para onde o usuário será redirecionado após o pagamento
       back_urls: {
-        success: \`https://ruubwpgemhyzsrbqspnj.supabase.co/functions/v1/payment-success?user_id=\${userId}\`,
-        failure: \`https://ruubwpgemhyzsrbqspnj.supabase.co/functions/v1/payment-failure?user_id=\${userId}\`,
-        pending: \`https://ruubwpgemhyzsrbqspnj.supabase.co/functions/v1/payment-pending?user_id=\${userId}\`,
+        success: `https://ruubwpgemhyzsrbqspnj.supabase.co/functions/v1/payment-success?user_id=${userId}`,
+        failure: `https://ruubwpgemhyzsrbqspnj.supabase.co/functions/v1/payment-failure?user_id=${userId}`,
+        pending: `https://ruubwpgemhyzsrbqspnj.supabase.co/functions/v1/payment-pending?user_id=${userId}`,
       },
       auto_return: "approved",
       external_reference: userId, // Usamos o ID do usuário como referência externa
