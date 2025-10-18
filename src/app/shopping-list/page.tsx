@@ -1,13 +1,15 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
-import { X, Plus, ShoppingCart, Loader2, Save } from 'lucide-react';
+import { X, Plus, ShoppingCart, Loader2, Save, FileDown } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
@@ -28,33 +30,31 @@ const ShoppingListPage = () => {
   const [newItemName, setNewItemName] = useState('');
   const [newItemPrice, setNewItemPrice] = useState('');
   const [localSalary, setLocalSalary] = useState<number | string>('');
+  const [isExporting, setIsExporting] = useState(false);
+  const exportRef = useRef<HTMLDivElement>(null);
 
   const currentDate = new Date();
-  const currentMonth = currentDate.getMonth() + 1; // JS months are 0-indexed
+  const currentMonth = currentDate.getMonth() + 1;
   const currentYear = currentDate.getFullYear();
 
-  // Fetch budget for the current month
   const { data: budget, isLoading: budgetLoading } = useQuery({
     queryKey: ['shoppingBudget', user?.id, currentMonth, currentYear],
     queryFn: () => getOrCreateBudget(user!.id, currentMonth, currentYear),
     enabled: !!user,
   });
 
-  // Fetch shopping items for the current budget
   const { data: items, isLoading: itemsLoading } = useQuery({
     queryKey: ['shoppingItems', budget?.id],
     queryFn: () => getShoppingItems(budget!.id),
     enabled: !!budget,
   });
 
-  // Effect to sync local salary state with fetched budget data
   useEffect(() => {
     if (budget) {
       setLocalSalary(budget.amount);
     }
   }, [budget]);
 
-  // Mutation to update budget
   const updateBudgetMutation = useMutation({
     mutationFn: (amount: number) => updateBudgetAmount(budget!.id, amount),
     onSuccess: () => {
@@ -64,7 +64,6 @@ const ShoppingListPage = () => {
     onError: () => showError('Erro ao atualizar orçamento.'),
   });
 
-  // Mutation to add an item
   const addItemMutation = useMutation({
     mutationFn: (newItem: Omit<DbShoppingItem, 'id' | 'created_at'>) => addShoppingItem(newItem),
     onSuccess: () => {
@@ -75,7 +74,6 @@ const ShoppingListPage = () => {
     onError: () => showError('Erro ao adicionar item.'),
   });
 
-  // Mutation to update an item
   const updateItemMutation = useMutation({
     mutationFn: ({ itemId, updates }: { itemId: string, updates: Partial<DbShoppingItem> }) => updateShoppingItem(itemId, updates),
     onSuccess: () => {
@@ -84,7 +82,6 @@ const ShoppingListPage = () => {
     onError: () => showError('Erro ao atualizar item.'),
   });
 
-  // Mutation to delete an item
   const deleteItemMutation = useMutation({
     mutationFn: (itemId: string) => deleteShoppingItem(itemId),
     onSuccess: () => {
@@ -136,6 +133,34 @@ const ShoppingListPage = () => {
     updateItemMutation.mutate({ itemId: id, updates: { purchased: !currentStatus } });
   };
 
+  const handleExportPDF = () => {
+    if (!exportRef.current) return;
+
+    setIsExporting(true);
+    const input = exportRef.current;
+
+    html2canvas(input, { scale: 2 })
+      .then((canvas) => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const canvasWidth = canvas.width;
+        const canvasHeight = canvas.height;
+        const ratio = canvasWidth / canvasHeight;
+        const imgWidth = pdfWidth;
+        const imgHeight = imgWidth / ratio;
+
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+        pdf.save(`lista-de-compras-${currentMonth}-${currentYear}.pdf`);
+        setIsExporting(false);
+        showSuccess('PDF exportado com sucesso!');
+      })
+      .catch(() => {
+        showError('Erro ao exportar para PDF.');
+        setIsExporting(false);
+      });
+  };
+
   const formatCurrency = (value: number) => {
     return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   };
@@ -152,12 +177,18 @@ const ShoppingListPage = () => {
 
   return (
     <div className="container mx-auto p-4 md:p-8">
-      <div className="flex items-center mb-6">
-        <ShoppingCart className="h-8 w-8 mr-3 text-primary" />
-        <h1 className="text-3xl font-bold">Lista de Compras e Orçamento</h1>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center">
+          <ShoppingCart className="h-8 w-8 mr-3 text-primary" />
+          <h1 className="text-3xl font-bold">Lista de Compras e Orçamento</h1>
+        </div>
+        <Button onClick={handleExportPDF} disabled={isExporting} variant="outline">
+          {isExporting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <FileDown className="h-4 w-4 mr-2" />}
+          Exportar PDF
+        </Button>
       </div>
 
-      <div className="grid gap-8 md:grid-cols-3">
+      <div ref={exportRef} className="grid gap-8 md:grid-cols-3">
         {/* Coluna de Orçamento e Totais */}
         <div className="md:col-span-1 space-y-6">
           <Card>
