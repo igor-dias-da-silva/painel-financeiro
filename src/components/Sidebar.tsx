@@ -6,9 +6,9 @@ import { SidebarLink } from './SidebarLink';
 import { Separator } from './ui/separator';
 
 const links = [
-  { href: '/', icon: <Home size={20} />, label: 'Home' },
-  { href: '/kanban', icon: <KanbanSquare size={20} />, label: 'Kanban Board' },
-  { href: '/shopping-list', icon: <ShoppingCart size={20} />, label: 'Shopping List' },
+  { href: '/', icon: <Home size={20} />, label: 'Início' },
+  { href: '/kanban', icon: <KanbanSquare size={20} />, label: 'Quadro Kanban' },
+  { href: '/shopping-list', icon: <ShoppingCart size={20} />, label: 'Lista de Compras' },
 ];
 
 export const Sidebar = () => {
@@ -36,7 +36,7 @@ export const Sidebar = () => {
       <Separator className="my-4" />
       <div className="absolute bottom-4">
         <SidebarLink href="/settings" icon={<Settings size={20} />} active={pathname === '/settings'}>
-          Settings
+          Configurações
         </SidebarLink>
       </div>
     </aside>
