@@ -12,6 +12,8 @@ import { showError, showSuccess } from '@/utils/toast';
 import { AuthGuard } from '@/components/AuthGuard';
 import { supabase } from '@/integrations/supabase/client';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { MercadoPagoPayment } from '@/components/MercadoPagoPayment';
 
 const MERCADO_PAGO_FUNCTION_URL = 'https://ruubwpgemhyzsrbqspnj.supabase.co/functions/v1/create-payment-preference';
 
@@ -19,6 +21,8 @@ const PricingPage = () => {
   const { user, isLoading: authLoading } = useAuth();
   const queryClient = useQueryClient();
   const [isPaymentLoading, setIsPaymentLoading] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [preferenceId, setPreferenceId] = useState<string | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -47,7 +51,7 @@ const PricingPage = () => {
 
   const { data: profile, isLoading: profileLoading } = useQuery({
     queryKey: ['profile', user?.id],
-    queryFn: () => getProfile(user!.id),
+    fn: () => getProfile(user!.id),
     enabled: !!user,
   });
 
@@ -87,16 +91,15 @@ const PricingPage = () => {
 
         const data = await response.json();
         
-        console.log('Response from Edge Function:', { status: response.status, body: data });
-
         if (!response.ok || data.error) {
           throw new Error(data.error || `Falha ao criar preferência de pagamento. Status: ${response.status}`);
         }
 
-        if (data.init_point) {
-          window.location.href = data.init_point;
+        if (data.preferenceId) {
+          setPreferenceId(data.preferenceId);
+          setIsPaymentModalOpen(true);
         } else {
-          throw new Error('URL de pagamento não recebida do servidor.');
+          throw new Error('ID da preferência não recebido do servidor.');
         }
 
       } catch (error: any) {
@@ -124,7 +127,7 @@ const PricingPage = () => {
     });
   };
 
-  const isLoading = authLoading || profileLoading || updateProfileMutation.isPending || isPaymentLoading;
+  const isLoading = authLoading || profileLoading || updateProfileMutation.isPending;
 
   const plans = [
     {
@@ -178,7 +181,7 @@ const PricingPage = () => {
   const currentPlan = profile?.subscription_plan || 'free';
   const isPremium = currentPlan === 'premium';
 
-  if (isLoading && !isPaymentLoading) {
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -290,10 +293,10 @@ const PricingPage = () => {
                       className="w-full" 
                       variant={plan.ctaVariant}
                       onClick={() => handleSubscribe(plan.id as 'free' | 'premium')}
-                      disabled={isLoading || isCurrentPlan}
+                      disabled={isLoading || isCurrentPlan || isPaymentLoading}
                     >
                       {isPaymentLoading && plan.id === 'premium' ? (
-                        <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Redirecionando...</>
+                        <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Preparando...</>
                       ) : (
                         plan.cta
                       )}
@@ -303,49 +306,22 @@ const PricingPage = () => {
               );
             })}
           </div>
-
-          <div className="mt-16">
-            <h2 className="text-2xl font-bold text-center mb-8 dark:text-foreground">Perguntas Frequentes</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-              <Card className="dark:bg-card dark:border-border">
-                <CardContent className="p-6">
-                  <h3 className="font-semibold mb-2 dark:text-foreground">Posso cancelar a qualquer momento?</h3>
-                  <p className="text-sm text-gray-600 dark:text-muted-foreground">
-                    Sim, você pode cancelar sua assinatura premium a qualquer momento. Seu plano será revertido para o gratuito no próximo ciclo de faturamento.
-                  </p>
-                </CardContent>
-              </Card>
-              
-              <Card className="dark:bg-card dark:border-border">
-                <CardContent className="p-6">
-                  <h3 className="font-semibold mb-2 dark:text-foreground">Quais métodos de pagamento são aceitos?</h3>
-                  <p className="text-sm text-gray-600 dark:text-muted-foreground">
-                    Aceitamos todos os principais cartões de crédito, débito e boletos bancários. A segurança das suas informações é nossa prioridade.
-                  </p>
-                </CardContent>
-              </Card>
-              
-              <Card className="dark:bg-card dark:border-border">
-                <CardContent className="p-6">
-                  <h3 className="font-semibold mb-2 dark:text-foreground">Meus dados são seguros?</h3>
-                  <p className="text-sm text-gray-600 dark:text-muted-foreground">
-                    Sim, usamos criptografia de ponta a ponta e armazenamos seus dados em servidores seguros com backup diário.
-                  </p>
-                </CardContent>
-              </Card>
-              
-              <Card className="dark:bg-card dark:border-border">
-                <CardContent className="p-6">
-                  <h3 className="font-semibold mb-2 dark:text-foreground">E se eu não gostar do plano premium?</h3>
-                  <p className="text-sm text-gray-600 dark:text-muted-foreground">
-                    Oferecemos garantia de devolução de 7 dias. Se não estiver satisfeito, entre em contato com nosso suporte para reembolso.
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
         </div>
       </div>
+      <Dialog open={isPaymentModalOpen} onOpenChange={setIsPaymentModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Efetuar Pagamento</DialogTitle>
+          </DialogHeader>
+          {preferenceId ? (
+            <MercadoPagoPayment preferenceId={preferenceId} />
+          ) : (
+            <div className="flex justify-center items-center h-32">
+              <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </AuthGuard>
   );
 };

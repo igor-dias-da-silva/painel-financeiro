@@ -6,8 +6,6 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  console.log('--- create-payment-preference function invoked ---');
-
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -48,7 +46,6 @@ serve(async (req) => {
       external_reference: userId,
     };
 
-    console.log('Sending request to Mercado Pago API...');
     const response = await fetch('https://api.mercadopago.com/checkout/preferences', {
       method: 'POST',
       headers: {
@@ -65,14 +62,12 @@ serve(async (req) => {
       throw new Error(`Mercado Pago API responded with status ${response.status}`);
     }
     
-    console.log('Mercado Pago preference response received:', result);
-
-    if (!result.init_point) {
-      console.error('Error: init_point not found in Mercado Pago response.');
-      throw new Error('Failed to get payment URL from provider.');
+    if (!result.id) {
+      console.error('Error: preference ID not found in Mercado Pago response.');
+      throw new Error('Failed to get preference ID from provider.');
     }
 
-    return new Response(JSON.stringify({ init_point: result.init_point }), {
+    return new Response(JSON.stringify({ preferenceId: result.id }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     });
