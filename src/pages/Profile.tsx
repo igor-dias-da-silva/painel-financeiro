@@ -183,6 +183,20 @@ const Profile = () => {
                   <CardTitle className="dark:text-foreground">Informações Pessoais</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {/* Adicionado campo de ID do Usuário para depuração */}
+                  {userId && (
+                    <div>
+                      <Label htmlFor="userId" className="dark:text-foreground">ID do Usuário (Para Admin/Debug)</Label>
+                      <Input
+                        id="userId"
+                        value={userId}
+                        readOnly
+                        className="mt-2 text-xs dark:bg-input dark:text-foreground dark:border-border"
+                      />
+                    </div>
+                  )}
+                  {/* Fim do campo de ID do Usuário */}
+                  
                   <div>
                     <Label htmlFor="fullName" className="dark:text-foreground">Nome e Sobrenome</Label>
                     <div className="relative mt-2">
