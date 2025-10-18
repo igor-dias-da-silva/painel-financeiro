@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Eye, EyeOff, User, Mail, Lock } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -47,7 +47,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
       if (success) {
         navigate('/dashboard');
       } else {
-        setError('Erro ao criar conta');
+        setError('Erro ao criar conta. O email pode já estar em uso.');
       }
     } catch (err) {
       setError('Ocorreu um erro ao criar conta');
@@ -57,10 +57,10 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto">
+    <Card className="w-full border-0 shadow-none">
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl font-bold">Criar Conta</CardTitle>
-        <p className="text-gray-600">Cadastre-se para começar a usar o Kanban</p>
+        <CardTitle className="text-2xl font-bold">Crie sua conta</CardTitle>
+        <CardDescription>É rápido e fácil. Comece a organizar suas finanças hoje!</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -73,7 +73,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Seu nome"
+                placeholder="Seu nome completo"
                 className="pl-10"
                 required
               />
@@ -105,7 +105,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
+                placeholder="Mínimo 6 caracteres"
                 className="pl-10 pr-10"
                 required
               />
@@ -128,7 +128,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
                 type={showConfirmPassword ? 'text' : 'password'}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="••••••••"
+                placeholder="Repita a senha"
                 className="pl-10 pr-10"
                 required
               />
@@ -152,13 +152,14 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
             {isLoading ? 'Criando conta...' : 'Criar Conta'}
           </Button>
 
-          <div className="text-center">
+          <div className="text-center text-sm">
+            Já tem uma conta?{' '}
             <button
               type="button"
               onClick={onToggleMode}
-              className="text-sm text-blue-600 hover:text-blue-800"
+              className="font-semibold text-primary hover:underline"
             >
-              Já tem uma conta? Faça login
+              Faça login
             </button>
           </div>
         </form>

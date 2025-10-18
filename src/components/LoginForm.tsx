@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -43,10 +43,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto">
+    <Card className="w-full border-0 shadow-none">
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl font-bold">Login</CardTitle>
-        <p className="text-gray-600">Entre na sua conta para continuar</p>
+        <CardTitle className="text-2xl font-bold">Bem-vindo de volta!</CardTitle>
+        <CardDescription>Entre na sua conta para continuar</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -99,13 +99,14 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
             {isLoading ? 'Entrando...' : 'Entrar'}
           </Button>
 
-          <div className="text-center">
+          <div className="text-center text-sm">
+            Não tem uma conta?{' '}
             <button
               type="button"
               onClick={onToggleMode}
-              className="text-sm text-blue-600 hover:text-blue-800"
+              className="font-semibold text-primary hover:underline"
             >
-              Não tem uma conta? Cadastre-se
+              Cadastre-se
             </button>
           </div>
         </form>

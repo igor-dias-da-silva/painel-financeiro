@@ -2,8 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthGuard } from "./components/AuthGuard";
 import { Layout } from "./components/Layout";
 import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
+import AuthPage from "./pages/AuthPage";
 import Dashboard from "./pages/Dashboard";
 import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
@@ -17,8 +16,8 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<AuthPage />} />
+        <Route path="/register" element={<AuthPage />} />
         <Route path="/dashboard" element={
           <AuthGuard>
             <Layout>
