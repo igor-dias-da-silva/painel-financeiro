@@ -212,7 +212,7 @@ const BillsPage = () => {
                       return (
                         <TableRow key={bill.id} className={bill.is_paid ? 'bg-green-50 dark:bg-green-900/20' : ''}>
                           <TableCell>
-                            <Checkbox checked={bill.is_paid} onCheckedChange={() => handleTogglePaid(bill)} disabled={isVirtual} />
+                            <Checkbox checked={!!bill.is_paid} onCheckedChange={() => handleTogglePaid(bill)} disabled={isVirtual} />
                           </TableCell>
                           <TableCell className={`font-medium ${bill.is_paid ? 'line-through text-muted-foreground' : ''}`}>
                             <div className="flex items-center">
