@@ -52,7 +52,6 @@ serve(async (req) => {
         failure: `${origin}/pricing?payment=failure`,
         pending: `${origin}/pricing?payment=pending`,
       },
-      auto_return: "approved",
       external_reference: userId,
       notification_url: `https://ruubwpgemhyzsrbqspnj.supabase.co/functions/v1/payment-webhook?source_news=webhooks`,
     };
