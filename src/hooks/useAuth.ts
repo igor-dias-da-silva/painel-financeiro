@@ -3,6 +3,7 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { User, AuthState } from '@/types/auth';
 import { supabase } from '@/integrations/supabase/client';
+import { AuthApiError } from '@supabase/supabase-js';
 
 const AuthContext = createContext<AuthState | undefined>(undefined);
 
@@ -28,7 +29,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         const { data: { user }, error } = await supabase.auth.getUser();
         
         if (error) {
-          console.error('Error checking auth:', error);
+          if (error instanceof AuthApiError && (error.status === 401 || error.status === 403)) {
+            console.warn('Session expired, signing out.');
+            await supabase.auth.signOut();
+            setUser(null);
+          } else {
+            console.error('Error checking auth:', error);
+          }
         } else if (user) {
           const userData: User = {
             id: user.id,
@@ -39,6 +46,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         }
       } catch (error) {
         console.error('Error in auth check:', error);
+        setUser(null);
       } finally {
         setIsLoading(false);
       }
