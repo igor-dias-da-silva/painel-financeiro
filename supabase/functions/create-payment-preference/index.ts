@@ -1,9 +1,16 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Inicializa o cliente Supabase com a chave de Service Role para buscar dados do usuário
+const supabaseAdmin = createClient(
+  Deno.env.get('SUPABASE_URL')!,
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+);
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -25,6 +32,15 @@ serve(async (req) => {
       return new Response('Bad Request: Invalid user or plan ID', { status: 400, headers: corsHeaders });
     }
 
+    // Busca o e-mail real do usuário no Supabase Auth
+    const { data: userData, error: userError } = await supabaseAdmin
+      .auth.admin.getUserById(userId);
+
+    if (userError || !userData.user || !userData.user.email) {
+      throw new Error(`User or user email not found: ${userError?.message || 'Unknown error'}`);
+    }
+    const userEmail = userData.user.email;
+
     const preferenceBody = {
       items: [
         {
@@ -35,12 +51,11 @@ serve(async (req) => {
         },
       ],
       payer: {
-        email: `user-${userId}@finandash.com`,
+        email: userEmail, // Usando o e-mail real do usuário
       },
-      // Adicionando configuração explícita de métodos de pagamento
       payment_methods: {
-        excluded_payment_types: [], // Garante que nenhum tipo de pagamento seja excluído
-        installments: 1, // Você pode ajustar o número de parcelas se desejar
+        excluded_payment_types: [],
+        installments: 1,
       },
       back_urls: {
         success: `https://ruubwpgemhyzsrbqspnj.supabase.co/functions/v1/payment-success?user_id=${userId}`,
@@ -49,6 +64,7 @@ serve(async (req) => {
       },
       auto_return: "approved",
       external_reference: userId,
+      purpose: 'wallet_purchase', // Adicionando o propósito da transação
     };
 
     const response = await fetch('https://api.mercadopago.com/checkout/preferences', {

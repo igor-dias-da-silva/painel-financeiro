@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -65,9 +65,12 @@ export const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Alterar Senha</DialogTitle>
+          <DialogDescription>
+            Digite e confirme sua nova senha. A senha deve ter no mínimo 6 caracteres.
+          </DialogDescription>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 pt-4">
           <div>
             <Label htmlFor="newPassword">Nova Senha</Label>
             <div className="relative">
