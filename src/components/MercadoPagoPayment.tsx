@@ -10,7 +10,7 @@ interface MercadoPagoPaymentProps {
 }
 
 // IMPORTANTE: Substitua pela sua Chave Pública do Mercado Pago
-const MERCADO_PAGO_PUBLIC_KEY = 'SUBSTITUA_PELA_SUA_CHAVE_PUBLICA';
+const MERCADO_PAGO_PUBLIC_KEY = 'APP_USR-e1fd3592-390b-4c7d-a3fa-c3797923ab12';
 
 export const MercadoPagoPayment: React.FC<MercadoPagoPaymentProps> = ({ preferenceId }) => {
   
