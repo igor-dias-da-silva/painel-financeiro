@@ -140,14 +140,14 @@ const BillsPage = () => {
   }
 
   return (
-    <div className="container mx-auto p-4 md:p-0">
+    <div className="container mx-auto p-4 md:p-6">
       <div className="flex items-center mb-6">
         <Receipt className="h-8 w-8 mr-3 text-primary" />
         <h1 className="text-3xl font-bold">Contas a Pagar</h1>
       </div>
 
-      <div className="grid gap-8 md:grid-cols-3">
-        <div className="md:col-span-1 space-y-6">
+      <div className="grid gap-8 lg:grid-cols-3">
+        <div className="lg:col-span-1 space-y-6">
           <Card>
             <CardHeader>
               <CardTitle>Adicionar Nova Conta</CardTitle>
@@ -190,7 +190,7 @@ const BillsPage = () => {
           </Card>
         </div>
 
-        <div className="md:col-span-2">
+        <div className="lg:col-span-2">
           <Card>
             <CardHeader>
               <CardTitle>Minhas Contas</CardTitle>
