@@ -34,7 +34,7 @@ export const CreateTaskDialog = ({ isOpen, onClose }: CreateTaskDialogProps) => 
       handleClose();
     },
     onError: (error) => {
-      showError('Failed to create task.', error.message);
+      showError(`Failed to create task: ${error.message}`);
     },
   });
 
