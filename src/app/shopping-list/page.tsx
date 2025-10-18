@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
-import { X, Plus, ShoppingCart, Loader2 } from 'lucide-react';
+import { X, Plus, ShoppingCart, Loader2, Save } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
@@ -105,14 +105,14 @@ const ShoppingListPage = () => {
   }, [items]);
 
   const remainingBalance = useMemo(() => {
-    return (budget?.amount || 0) - totalExpenses;
-  }, [budget, totalExpenses]);
+    return (budget?.amount || 0) - purchasedExpenses;
+  }, [budget, purchasedExpenses]);
 
   const handleBudgetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLocalSalary(e.target.value);
   };
 
-  const handleBudgetBlur = () => {
+  const handleSaveBudget = () => {
     const newAmount = parseFloat(String(localSalary));
     if (!isNaN(newAmount) && newAmount !== budget?.amount) {
       updateBudgetMutation.mutate(newAmount);
@@ -167,15 +167,19 @@ const ShoppingListPage = () => {
             <CardContent>
               <div className="space-y-2">
                 <Label htmlFor="salary">Salário / Orçamento Mensal</Label>
-                <Input
-                  id="salary"
-                  type="number"
-                  placeholder="R$ 0,00"
-                  value={localSalary}
-                  onChange={handleBudgetChange}
-                  onBlur={handleBudgetBlur}
-                  disabled={updateBudgetMutation.isPending}
-                />
+                <div className="flex items-center gap-2">
+                  <Input
+                    id="salary"
+                    type="number"
+                    placeholder="R$ 0,00"
+                    value={localSalary}
+                    onChange={handleBudgetChange}
+                    disabled={updateBudgetMutation.isPending}
+                  />
+                  <Button onClick={handleSaveBudget} disabled={updateBudgetMutation.isPending} size="sm">
+                    {updateBudgetMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -189,7 +193,7 @@ const ShoppingListPage = () => {
                 <span className="font-semibold text-lg">{formatCurrency(budget?.amount || 0)}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Total da Lista:</span>
+                <span className="text-muted-foreground">Gastos Previstos:</span>
                 <span className="font-semibold text-lg text-orange-500">{formatCurrency(totalExpenses)}</span>
               </div>
               <div className="flex justify-between items-center">
