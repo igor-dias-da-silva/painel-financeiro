@@ -19,11 +19,23 @@ const AdminDashboard = () => {
   });
 
   const updateRoleMutation = useMutation({
-    mutationFn: ({ userId, newRole }: { userId: string, newRole: 'user' | 'admin' }) => 
-      updateProfile(userId, { role: newRole }),
+    mutationFn: ({ userId, newRole }: { userId: string, newRole: 'user' | 'admin' }) => {
+      const updates: Partial<Profile> = { role: newRole };
+      if (newRole === 'admin') {
+        updates.subscription_plan = 'premium';
+        updates.subscription_status = 'active';
+        updates.subscription_ends_at = null; // Admin premium não expira
+      } else {
+        // Ao rebaixar, volta para o plano gratuito
+        updates.subscription_plan = 'free';
+        updates.subscription_status = 'active';
+        updates.subscription_ends_at = null;
+      }
+      return updateProfile(userId, updates);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['allProfiles'] });
-      showSuccess('Função do usuário atualizada com sucesso!');
+      showSuccess('Função e plano do usuário atualizados com sucesso!');
     },
     onError: () => showError('Erro ao atualizar a função do usuário.'),
   });
@@ -110,7 +122,7 @@ const AdminDashboard = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Nome</TableHead>
-                  <TableHead>ID do Usuário</TableHead> {/* Corrigido para ID do Usuário */}
+                  <TableHead>ID do Usuário</TableHead>
                   <TableHead>Plano</TableHead>
                   <TableHead>Função</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
@@ -122,7 +134,7 @@ const AdminDashboard = () => {
                     <TableCell className="font-medium">
                       {profile.first_name} {profile.last_name}
                     </TableCell>
-                    <TableCell className="text-xs font-mono text-muted-foreground">{profile.id}</TableCell> {/* Exibindo o ID */}
+                    <TableCell className="text-xs font-mono text-muted-foreground">{profile.id}</TableCell>
                     <TableCell>
                       <Badge variant={profile.subscription_plan === 'premium' ? 'default' : 'outline'}>
                         {profile.subscription_plan || 'free'}
