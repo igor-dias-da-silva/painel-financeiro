@@ -244,7 +244,7 @@ ${itemsText}
   }
 
   return (
-    <div className="container mx-auto p-4 md:p-0">
+    <div className="container mx-auto p-4">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
         <div className="flex items-center">
           <ShoppingCart className="h-8 w-8 mr-3 text-primary" />
@@ -262,9 +262,9 @@ ${itemsText}
         </div>
       </div>
 
-      <div ref={exportRef} className="grid gap-8 md:grid-cols-3">
+      <div ref={exportRef} className="grid gap-8 lg:grid-cols-3">
         {/* Coluna de Orçamento e Totais */}
-        <div className="md:col-span-1 space-y-6">
+        <div className="lg:col-span-1 space-y-6">
           <Card>
             <CardHeader>
               <CardTitle>Meu Orçamento ({currentMonth}/{currentYear})</CardTitle>
@@ -317,7 +317,7 @@ ${itemsText}
         </div>
 
         {/* Coluna da Lista de Compras */}
-        <div className="md:col-span-2">
+        <div className="lg:col-span-2">
           <Card>
             <CardHeader>
               <CardTitle>Itens da Lista</CardTitle>
@@ -344,7 +344,7 @@ ${itemsText}
                 </Button>
               </div>
               <Separator className="my-4" />
-              <div className="space-y-3 h-96 overflow-y-auto pr-2">
+              <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-2">
                 {items?.length === 0 ? (
                   <p className="text-center text-muted-foreground py-8">Sua lista de compras está vazia.</p>
                 ) : (
