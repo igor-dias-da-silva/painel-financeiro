@@ -11,6 +11,7 @@ export interface Profile {
   subscription_status?: 'active' | 'cancelled' | 'past_due';
   subscription_ends_at?: string | null;
   updated_at: string;
+  role: 'user' | 'admin'; // Adicionado o campo role
 }
 
 // Profiles

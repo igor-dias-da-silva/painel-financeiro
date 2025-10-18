@@ -16,10 +16,12 @@ import {
   ShoppingCart,
   Receipt,
   Crown,
+  Shield, // Adicionado Shield para Admin
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ThemeToggle } from './ThemeToggle';
+import { useProfile } from '@/hooks/useProfile'; // Importando useProfile
 
 const navItems = [
   { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
@@ -35,6 +37,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const { user, logout } = useAuth();
+  const { isAdmin } = useProfile(); // Usando useProfile para verificar o admin
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -43,13 +46,18 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     navigate('/login');
   };
 
+  const adminNavItem = { name: 'Admin', icon: Shield, path: '/admin' };
+  
+  // Adiciona o item Admin se o usuário for administrador
+  const fullNavItems = isAdmin ? [...navItems, adminNavItem] : navItems;
+
   const SidebarContent = () => (
     <div className="flex flex-col h-full bg-sidebar-background text-sidebar-foreground border-r border-sidebar-border">
       <div className="p-4 border-b border-sidebar-border">
         <h1 className="text-2xl font-bold">FinanDash</h1>
       </div>
       <nav className="flex-1 p-4 space-y-2">
-        {navItems.map((item) => (
+        {fullNavItems.map((item) => (
           <Link
             key={item.name}
             to={item.path}
@@ -108,7 +116,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             </Button>
           </div>
           <nav className="flex-1 p-4 space-y-2">
-            {navItems.map((item) => (
+            {fullNavItems.map((item) => (
               <Link
                 key={item.name}
                 to={item.path}
@@ -170,7 +178,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             </Sheet>
           </div>
           <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
-            {navItems.find(item => item.path === location.pathname)?.name || 'Página'}
+            {fullNavItems.find(item => item.path === location.pathname)?.name || 'Página'}
           </h2>
           <ThemeToggle />
         </header>

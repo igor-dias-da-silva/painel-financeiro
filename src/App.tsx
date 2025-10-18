@@ -11,6 +11,8 @@ import NotFound from "./pages/NotFound";
 import ShoppingListPage from "./app/shopping-list/page";
 import BillsPage from "./pages/BillsPage";
 import PricingPage from "./pages/PricingPage";
+import AdminDashboard from "./pages/AdminDashboard";
+import { AdminGuard } from "./components/AdminGuard";
 
 function App() {
   return (
@@ -66,6 +68,15 @@ function App() {
             <Layout>
               <Help />
             </Layout>
+          </AuthGuard>
+        } />
+        <Route path="/admin" element={
+          <AuthGuard>
+            <AdminGuard>
+              <Layout>
+                <AdminDashboard />
+              </Layout>
+            </AdminGuard>
           </AuthGuard>
         } />
         <Route path="*" element={<NotFound />} />
