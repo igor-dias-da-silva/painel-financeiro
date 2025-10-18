@@ -23,11 +23,18 @@ export const MercadoPagoPayment: React.FC<MercadoPagoPaymentProps> = ({ preferen
   }, []);
 
   const initialization = {
-    amount: 19.90, // Readicionado para atender à validação do SDK
+    amount: 19.90,
     preferenceId: preferenceId,
   };
 
   const customization = {
+    paymentMethods: {
+      ticket: "all",
+      bankTransfer: "all",
+      creditCard: "all",
+      debitCard: "all",
+      mercadoPago: "all",
+    },
     visual: {
       style: {
         theme: document.documentElement.classList.contains('dark') ? 'dark' : 'default',
@@ -48,13 +55,6 @@ export const MercadoPagoPayment: React.FC<MercadoPagoPaymentProps> = ({ preferen
     // Callback para quando o brick estiver pronto
   };
 
-  const onRender = (containerId: string, paymentMethods: any) => {
-    console.log('--- MÉTODOS DE PAGAMENTO DISPONÍVEIS ---');
-    console.log('Container ID:', containerId);
-    console.log('Métodos retornados pelo Mercado Pago:', paymentMethods);
-    console.log('-----------------------------------------');
-  };
-
   return (
     <div>
       {preferenceId ? (
@@ -64,7 +64,6 @@ export const MercadoPagoPayment: React.FC<MercadoPagoPaymentProps> = ({ preferen
           onSubmit={onSubmit}
           onError={onError}
           onReady={onReady}
-          onRender={onRender}
         />
       ) : (
         <div className="flex justify-center items-center h-48">
