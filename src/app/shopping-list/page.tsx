@@ -162,14 +162,16 @@ ${itemsText}
         });
         showSuccess('Lista compartilhada!');
       } catch (error) {
-        console.log('Erro ao compartilhar:', error);
+        console.error('Erro ao compartilhar:', error);
+        showError('Não foi possível abrir a janela de compartilhamento.');
       }
     } else {
       try {
         await navigator.clipboard.writeText(shareText);
         showSuccess('Lista copiada para a área de transferência!');
       } catch (error) {
-        showError('Não foi possível copiar a lista.');
+        console.error('Erro ao copiar:', error);
+        showError('Não foi possível copiar a lista para a área de transferência.');
       }
     }
   };
