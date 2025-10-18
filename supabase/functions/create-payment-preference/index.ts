@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { MercadoPagoConfig, Preference } from 'https://esm.sh/mercadopago@2.0.8';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -15,23 +14,16 @@ serve(async (req) => {
 
   try {
     const ACCESS_TOKEN = Deno.env.get('MERCADO_PAGO_ACCESS_TOKEN');
-    console.log('Checking for MERCADO_PAGO_ACCESS_TOKEN...');
     if (!ACCESS_TOKEN) {
-      console.error("FATAL: MERCADO_PAGO_ACCESS_TOKEN secret is not set or readable.");
+      console.error("FATAL: MERCADO_PAGO_ACCESS_TOKEN secret is not set.");
       return new Response(JSON.stringify({ error: 'Server configuration error: Payment provider token is missing.' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500,
       });
     }
-    console.log('MERCADO_PAGO_ACCESS_TOKEN found.');
-
-    const client = new MercadoPagoConfig({ accessToken: ACCESS_TOKEN, options: { timeout: 5000 } });
 
     const { userId, planId } = await req.json();
-    console.log(`Request body parsed successfully. UserID: ${userId}, PlanID: ${planId}`);
-
     if (!userId || planId !== 'premium') {
-      console.warn(`Invalid request body. UserID: ${userId}, PlanID: ${planId}`);
       return new Response('Bad Request: Invalid user or plan ID', { status: 400, headers: corsHeaders });
     }
 
@@ -56,11 +48,24 @@ serve(async (req) => {
       external_reference: userId,
     };
 
-    console.log('Creating Mercado Pago preference with body:', JSON.stringify(preferenceBody, null, 2));
-    const preference = new Preference(client);
-    const result = await preference.create({ body: preferenceBody });
+    console.log('Sending request to Mercado Pago API...');
+    const response = await fetch('https://api.mercadopago.com/checkout/preferences', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${ACCESS_TOKEN}`
+      },
+      body: JSON.stringify(preferenceBody)
+    });
 
-    console.log('Mercado Pago preference response received:', JSON.stringify(result, null, 2));
+    const result = await response.json();
+
+    if (!response.ok) {
+      console.error('Mercado Pago API error response:', result);
+      throw new Error(`Mercado Pago API responded with status ${response.status}`);
+    }
+    
+    console.log('Mercado Pago preference response received:', result);
 
     if (!result.init_point) {
       console.error('Error: init_point not found in Mercado Pago response.');
