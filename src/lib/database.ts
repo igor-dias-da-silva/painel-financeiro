@@ -20,9 +20,11 @@ export const getProfile = async (userId: string): Promise<Profile | null> => {
     .from('profiles')
     .select('*')
     .eq('id', userId)
+    .limit(1) // Garante que apenas um registro seja retornado
     .single();
 
-  if (error && error.code !== 'PGRST116') { // PGRST116 means no rows found
+  if (error && error.code !== 'PGRST116') { // PGRST116 significa que nenhuma linha foi encontrada
+    console.error("Erro ao buscar perfil:", error);
     throw error;
   }
   return data || null;
