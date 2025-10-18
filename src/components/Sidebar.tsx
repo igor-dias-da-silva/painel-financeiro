@@ -5,29 +5,37 @@ import { Home, KanbanSquare, Settings, ShoppingCart } from 'lucide-react';
 import { SidebarLink } from './SidebarLink';
 import { Separator } from './ui/separator';
 
+const links = [
+  { href: '/', icon: <Home size={20} />, label: 'Home' },
+  { href: '/kanban', icon: <KanbanSquare size={20} />, label: 'Kanban Board' },
+  { href: '/shopping-list', icon: <ShoppingCart size={20} />, label: 'Shopping List' },
+];
+
 export const Sidebar = () => {
   const pathname = usePathname();
 
   return (
-    <aside className="w-64 h-screen bg-background border-r fixed top-0 left-0 flex flex-col">
-      <div className="p-4">
-        <h1 className="text-2xl font-bold text-primary">TaskFlow</h1>
+    <aside className="fixed top-0 left-0 z-40 w-64 h-screen p-4 border-r bg-card text-card-foreground">
+      <div className="flex items-center mb-6">
+        <KanbanSquare className="w-8 h-8 mr-2 text-primary" />
+        <h1 className="text-2xl font-bold">TaskFlow</h1>
       </div>
-      <nav className="flex flex-col p-4 space-y-2">
-        <SidebarLink href="/" icon={<Home />} active={pathname === '/'}>
-          Início
-        </SidebarLink>
-        <SidebarLink href="/boards" icon={<KanbanSquare />} active={pathname.startsWith('/boards')}>
-          Quadros
-        </SidebarLink>
-        <SidebarLink href="/shopping-list" icon={<ShoppingCart />} active={pathname.startsWith('/shopping-list')}>
-          Lista de Compras
-        </SidebarLink>
+      <nav className="space-y-2">
+        {links.map(link => (
+          <SidebarLink
+            key={link.href}
+            href={link.href}
+            icon={link.icon}
+            active={pathname === link.href}
+          >
+            {link.label}
+          </SidebarLink>
+        ))}
       </nav>
-      <div className="mt-auto p-4">
-        <Separator className="mb-4" />
-        <SidebarLink href="/settings" icon={<Settings />} active={pathname === '/settings'}>
-          Configurações
+      <Separator className="my-4" />
+      <div className="absolute bottom-4">
+        <SidebarLink href="/settings" icon={<Settings size={20} />} active={pathname === '/settings'}>
+          Settings
         </SidebarLink>
       </div>
     </aside>
