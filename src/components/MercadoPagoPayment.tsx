@@ -9,7 +9,6 @@ interface MercadoPagoPaymentProps {
   preferenceId: string;
 }
 
-// IMPORTANTE: Substitua pela sua Chave Pública do Mercado Pago
 const MERCADO_PAGO_PUBLIC_KEY = 'APP_USR-e1fd3592-390b-4c7d-a3fa-c3797923ab12';
 
 export const MercadoPagoPayment: React.FC<MercadoPagoPaymentProps> = ({ preferenceId }) => {
@@ -42,9 +41,6 @@ export const MercadoPagoPayment: React.FC<MercadoPagoPaymentProps> = ({ preferen
   };
 
   const onSubmit = async (param: any) => {
-    // O onSubmit é chamado, mas o redirecionamento é tratado
-    // pelos back_urls que definimos na preferência.
-    // O SDK do Mercado Pago cuida do envio dos dados.
     console.log('Pagamento enviado:', param);
   };
 
@@ -57,6 +53,14 @@ export const MercadoPagoPayment: React.FC<MercadoPagoPaymentProps> = ({ preferen
     // Callback para quando o brick estiver pronto
   };
 
+  // Adicionando callback de renderização para diagnóstico
+  const onRender = (containerId: string, paymentMethods: any) => {
+    console.log('--- MÉTODOS DE PAGAMENTO DISPONÍVEIS ---');
+    console.log('Container ID:', containerId);
+    console.log('Métodos retornados pelo Mercado Pago:', paymentMethods);
+    console.log('-----------------------------------------');
+  };
+
   return (
     <div>
       {preferenceId ? (
@@ -66,6 +70,7 @@ export const MercadoPagoPayment: React.FC<MercadoPagoPaymentProps> = ({ preferen
           onSubmit={onSubmit}
           onError={onError}
           onReady={onReady}
+          onRender={onRender} // Adicionando o callback aqui
         />
       ) : (
         <div className="flex justify-center items-center h-48">
