@@ -110,7 +110,7 @@ const AdminDashboard = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Nome</TableHead>
-                  <TableHead>Email</TableHead>
+                  <TableHead>ID do Usuário</TableHead> {/* Corrigido para ID do Usuário */}
                   <TableHead>Plano</TableHead>
                   <TableHead>Função</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
@@ -122,7 +122,7 @@ const AdminDashboard = () => {
                     <TableCell className="font-medium">
                       {profile.first_name} {profile.last_name}
                     </TableCell>
-                    <TableCell>{profile.id}</TableCell> {/* Usando ID como placeholder para email, pois o email não está na tabela profiles */}
+                    <TableCell className="text-xs font-mono text-muted-foreground">{profile.id}</TableCell> {/* Exibindo o ID */}
                     <TableCell>
                       <Badge variant={profile.subscription_plan === 'premium' ? 'default' : 'outline'}>
                         {profile.subscription_plan || 'free'}
