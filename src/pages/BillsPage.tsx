@@ -8,13 +8,14 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { X, Plus, Receipt, Loader2, Calendar, DollarSign } from 'lucide-react';
+import { X, Plus, Receipt, Loader2, ShoppingCart } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getBills, addBill, updateBill, deleteBill, Bill } from '@/lib/bills';
+import { getOrCreateBudget, getShoppingItems } from '@/lib/shopping';
 import { showError, showSuccess } from '@/utils/toast';
 import { DatePicker } from '@/components/ui/date-picker';
-import { format } from 'date-fns';
+import { format, endOfMonth } from 'date-fns';
 
 const BillsPage = () => {
   const { user, isLoading: authLoading } = useAuth();
@@ -24,9 +25,27 @@ const BillsPage = () => {
   const [newBillAmount, setNewBillAmount] = useState('');
   const [newBillDueDate, setNewBillDueDate] = useState<Date | undefined>(new Date());
 
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth() + 1;
+  const currentYear = currentDate.getFullYear();
+
+  // Fetch regular bills
   const { data: bills, isLoading: billsLoading } = useQuery({
     queryKey: ['bills', user?.id],
     queryFn: () => getBills(user!.id),
+    enabled: !!user,
+  });
+
+  // Fetch shopping list data for the current month
+  const { data: shoppingData, isLoading: shoppingLoading } = useQuery({
+    queryKey: ['monthlyShoppingSummary', user?.id, currentMonth, currentYear],
+    queryFn: async () => {
+      const budget = await getOrCreateBudget(user!.id, currentMonth, currentYear);
+      const items = await getShoppingItems(budget.id);
+      const totalExpenses = items.reduce((sum, item) => sum + Number(item.price), 0);
+      const purchasedExpenses = items.filter(i => i.purchased).reduce((sum, item) => sum + Number(item.price), 0);
+      return { totalExpenses, purchasedExpenses };
+    },
     enabled: !!user,
   });
 
@@ -44,51 +63,46 @@ const BillsPage = () => {
 
   const updateBillMutation = useMutation({
     mutationFn: ({ billId, updates }: { billId: string, updates: Partial<Bill> }) => updateBill(billId, updates),
-    onMutate: async ({ billId, updates }) => {
-      await queryClient.cancelQueries({ queryKey: ['bills', user?.id] });
-      const previousBills = queryClient.getQueryData(['bills', user?.id]);
-      queryClient.setQueryData(['bills', user?.id], (old: Bill[] | undefined) => 
-        old ? old.map(bill => bill.id === billId ? { ...bill, ...updates } : bill) : []
-      );
-      return { previousBills };
-    },
-    onError: (err, vars, context) => {
-      if (context?.previousBills) {
-        queryClient.setQueryData(['bills', user?.id], context.previousBills);
-      }
-      showError('Erro ao atualizar conta.');
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['bills', user?.id] });
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['bills', user?.id] }),
+    onError: () => showError('Erro ao atualizar conta.'),
   });
 
   const deleteBillMutation = useMutation({
     mutationFn: (billId: string) => deleteBill(billId),
-    onMutate: async (billId) => {
-      await queryClient.cancelQueries({ queryKey: ['bills', user?.id] });
-      const previousBills = queryClient.getQueryData(['bills', user?.id]);
-      queryClient.setQueryData(['bills', user?.id], (old: Bill[] | undefined) => 
-        old ? old.filter(bill => bill.id !== billId) : []
-      );
-      return { previousBills };
-    },
-    onError: (err, vars, context) => {
-      if (context?.previousBills) {
-        queryClient.setQueryData(['bills', user?.id], context.previousBills);
-      }
-      showError('Erro ao deletar conta.');
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['bills', user?.id] });
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['bills', user?.id] }),
+    onError: () => showError('Erro ao deletar conta.'),
   });
 
+  const displayBills = useMemo(() => {
+    const allBills = [...(bills || [])];
+    if (shoppingData && shoppingData.totalExpenses > 0) {
+      const shoppingBill: Bill & { isVirtual?: boolean } = {
+        id: 'shopping-list-bill',
+        user_id: user!.id,
+        name: 'Compras do Mês',
+        amount: shoppingData.totalExpenses,
+        due_date: format(endOfMonth(currentDate), 'yyyy-MM-dd'),
+        is_paid: shoppingData.purchasedExpenses === shoppingData.totalExpenses,
+        created_at: currentDate.toISOString(),
+        isVirtual: true,
+      };
+      allBills.push(shoppingBill);
+    }
+    return allBills.sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime());
+  }, [bills, shoppingData, user, currentDate]);
+
   const { totalPaid, totalPending } = useMemo(() => {
-    const paid = bills?.filter(b => b.is_paid).reduce((sum, b) => sum + Number(b.amount), 0) || 0;
-    const pending = bills?.filter(b => !b.is_paid).reduce((sum, b) => sum + Number(b.amount), 0) || 0;
-    return { totalPaid: paid, totalPending: pending };
-  }, [bills]);
+    const regularPaid = bills?.filter(b => b.is_paid).reduce((sum, b) => sum + Number(b.amount), 0) || 0;
+    const regularPending = bills?.filter(b => !b.is_paid).reduce((sum, b) => sum + Number(b.amount), 0) || 0;
+    
+    const shoppingPaid = shoppingData?.purchasedExpenses || 0;
+    const shoppingPending = (shoppingData?.totalExpenses || 0) - shoppingPaid;
+
+    return { 
+      totalPaid: regularPaid + shoppingPaid, 
+      totalPending: regularPending + shoppingPending 
+    };
+  }, [bills, shoppingData]);
 
   const handleAddBill = (e: React.FormEvent) => {
     e.preventDefault();
@@ -114,7 +128,7 @@ const BillsPage = () => {
     return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   };
 
-  const isLoading = authLoading || billsLoading;
+  const isLoading = authLoading || billsLoading || shoppingLoading;
 
   if (isLoading) {
     return (
@@ -184,7 +198,7 @@ const BillsPage = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[50px]">Paga</TableHead>
+                    <TableHead className="w-[50px]">Status</TableHead>
                     <TableHead>Descrição</TableHead>
                     <TableHead>Vencimento</TableHead>
                     <TableHead className="text-right">Valor</TableHead>
@@ -192,22 +206,33 @@ const BillsPage = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {bills && bills.length > 0 ? (
-                    bills.map(bill => (
-                      <TableRow key={bill.id} className={bill.is_paid ? 'bg-green-50 dark:bg-green-900/20' : ''}>
-                        <TableCell>
-                          <Checkbox checked={bill.is_paid} onCheckedChange={() => handleTogglePaid(bill)} />
-                        </TableCell>
-                        <TableCell className={`font-medium ${bill.is_paid ? 'line-through text-muted-foreground' : ''}`}>{bill.name}</TableCell>
-                        <TableCell className={bill.is_paid ? 'line-through text-muted-foreground' : ''}>{format(new Date(bill.due_date), 'dd/MM/yyyy')}</TableCell>
-                        <TableCell className={`text-right font-semibold ${bill.is_paid ? 'line-through text-muted-foreground' : ''}`}>{formatCurrency(bill.amount)}</TableCell>
-                        <TableCell>
-                          <Button variant="ghost" size="icon" onClick={() => deleteBillMutation.mutate(bill.id)}>
-                            <X className="h-4 w-4 text-red-500" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))
+                  {displayBills.length > 0 ? (
+                    displayBills.map(bill => {
+                      const isVirtual = 'isVirtual' in bill && bill.isVirtual;
+                      return (
+                        <TableRow key={bill.id} className={bill.is_paid ? 'bg-green-50 dark:bg-green-900/20' : ''}>
+                          <TableCell>
+                            <Checkbox checked={bill.is_paid} onCheckedChange={() => handleTogglePaid(bill)} disabled={isVirtual} />
+                          </TableCell>
+                          <TableCell className={`font-medium ${bill.is_paid ? 'line-through text-muted-foreground' : ''}`}>
+                            <div className="flex items-center">
+                              {isVirtual && <ShoppingCart className="h-4 w-4 mr-2 text-primary" />}
+                              {bill.name}
+                            </div>
+                            {isVirtual && <div className="text-xs text-muted-foreground">Total de {shoppingData?.totalExpenses === shoppingData?.purchasedExpenses ? 'comprados' : 'previstos'}</div>}
+                          </TableCell>
+                          <TableCell className={bill.is_paid ? 'line-through text-muted-foreground' : ''}>{format(new Date(bill.due_date), 'dd/MM/yyyy')}</TableCell>
+                          <TableCell className={`text-right font-semibold ${bill.is_paid ? 'line-through text-muted-foreground' : ''}`}>{formatCurrency(bill.amount)}</TableCell>
+                          <TableCell>
+                            {!isVirtual && (
+                              <Button variant="ghost" size="icon" onClick={() => deleteBillMutation.mutate(bill.id)}>
+                                <X className="h-4 w-4 text-red-500" />
+                              </Button>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
                   ) : (
                     <TableRow>
                       <TableCell colSpan={5} className="text-center h-24">
