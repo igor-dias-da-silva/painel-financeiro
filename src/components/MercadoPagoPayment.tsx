@@ -23,7 +23,7 @@ export const MercadoPagoPayment: React.FC<MercadoPagoPaymentProps> = ({ preferen
   }, []);
 
   const initialization = {
-    // O 'amount' foi removido daqui, pois já está definido na preferência de pagamento.
+    amount: 19.90, // Readicionado para atender à validação do SDK
     preferenceId: preferenceId,
   };
 
