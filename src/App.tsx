@@ -13,6 +13,7 @@ import BillsPage from "./pages/BillsPage";
 import PricingPage from "./pages/PricingPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import { AdminGuard } from "./components/AdminGuard";
+import UpdatePassword from "./pages/UpdatePassword";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<AuthPage />} />
         <Route path="/register" element={<AuthPage />} />
+        <Route path="/update-password" element={<UpdatePassword />} />
         <Route path="/dashboard" element={
           <AuthGuard>
             <Layout>
