@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, auseState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -44,7 +44,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   const SidebarContent = () => (
     <div className="flex flex-col h-full bg-sidebar-background text-sidebar-foreground border-r border-sidebar-border">
       <div className="p-4 border-b border-sidebar-border">
-        <h1 className="text-2xl font-bold">Kanban</h1>
+        <h1 className="text-2xl font-bold">FinanDash</h1>
       </div>
       <nav className="flex-1 p-4 space-y-2">
         {navItems.map((item) => (
@@ -100,7 +100,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
       >
         <div className="flex flex-col h-full bg-sidebar-background text-sidebar-foreground border-r border-sidebar-border">
           <div className="p-4 border-b flex items-center justify-between border-sidebar-border">
-            <h1 className="text-2xl font-bold">Kanban</h1>
+            <h1 className="text-2xl font-bold">FinanDash</h1>
             <Button variant="ghost" size="icon" onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="text-sidebar-foreground hover:bg-sidebar-accent">
               <Menu className="h-6 w-6" />
             </Button>
@@ -172,7 +172,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
           </h2>
           <ThemeToggle />
         </header>
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6 dark:bg-background">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-4 md:p-6 dark:bg-background">
           {children}
         </main>
       </div>

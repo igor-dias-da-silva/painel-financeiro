@@ -139,7 +139,7 @@ const BillsPage = () => {
   }
 
   return (
-    <div className="container mx-auto p-4 md:p-8">
+    <div className="container mx-auto p-4 md:p-0">
       <div className="flex items-center mb-6">
         <Receipt className="h-8 w-8 mr-3 text-primary" />
         <h1 className="text-3xl font-bold">Contas a Pagar</h1>
@@ -195,53 +195,55 @@ const BillsPage = () => {
               <CardTitle>Minhas Contas</CardTitle>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[50px]">Status</TableHead>
-                    <TableHead>Descrição</TableHead>
-                    <TableHead>Vencimento</TableHead>
-                    <TableHead className="text-right">Valor</TableHead>
-                    <TableHead className="w-[50px]"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {displayBills.length > 0 ? (
-                    displayBills.map(bill => {
-                      const isVirtual = 'isVirtual' in bill && bill.isVirtual;
-                      return (
-                        <TableRow key={bill.id} className={bill.is_paid ? 'bg-green-50 dark:bg-green-900/20' : ''}>
-                          <TableCell>
-                            <Checkbox checked={!!bill.is_paid} onCheckedChange={() => handleTogglePaid(bill)} disabled={isVirtual} />
-                          </TableCell>
-                          <TableCell className={`font-medium ${bill.is_paid ? 'line-through text-muted-foreground' : ''}`}>
-                            <div className="flex items-center">
-                              {isVirtual && <ShoppingCart className="h-4 w-4 mr-2 text-primary" />}
-                              {bill.name}
-                            </div>
-                            {isVirtual && <div className="text-xs text-muted-foreground">Total de {shoppingData?.totalExpenses === shoppingData?.purchasedExpenses ? 'comprados' : 'previstos'}</div>}
-                          </TableCell>
-                          <TableCell className={bill.is_paid ? 'line-through text-muted-foreground' : ''}>{format(new Date(bill.due_date), 'dd/MM/yyyy')}</TableCell>
-                          <TableCell className={`text-right font-semibold ${bill.is_paid ? 'line-through text-muted-foreground' : ''}`}>{formatCurrency(bill.amount)}</TableCell>
-                          <TableCell>
-                            {!isVirtual && (
-                              <Button variant="ghost" size="icon" onClick={() => deleteBillMutation.mutate(bill.id)}>
-                                <X className="h-4 w-4 text-red-500" />
-                              </Button>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })
-                  ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center h-24">
-                        Nenhuma conta cadastrada.
-                      </TableCell>
+                      <TableHead className="w-[50px]">Status</TableHead>
+                      <TableHead>Descrição</TableHead>
+                      <TableHead>Vencimento</TableHead>
+                      <TableHead className="text-right">Valor</TableHead>
+                      <TableHead className="w-[50px]"></TableHead>
                     </TableRow>
-                  )}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {displayBills.length > 0 ? (
+                      displayBills.map(bill => {
+                        const isVirtual = 'isVirtual' in bill && bill.isVirtual;
+                        return (
+                          <TableRow key={bill.id} className={bill.is_paid ? 'bg-green-50 dark:bg-green-900/20' : ''}>
+                            <TableCell>
+                              <Checkbox checked={!!bill.is_paid} onCheckedChange={() => handleTogglePaid(bill)} disabled={isVirtual} />
+                            </TableCell>
+                            <TableCell className={`font-medium ${bill.is_paid ? 'line-through text-muted-foreground' : ''}`}>
+                              <div className="flex items-center">
+                                {isVirtual && <ShoppingCart className="h-4 w-4 mr-2 text-primary" />}
+                                {bill.name}
+                              </div>
+                              {isVirtual && <div className="text-xs text-muted-foreground">Total de {shoppingData?.totalExpenses === shoppingData?.purchasedExpenses ? 'comprados' : 'previstos'}</div>}
+                            </TableCell>
+                            <TableCell className={bill.is_paid ? 'line-through text-muted-foreground' : ''}>{format(new Date(bill.due_date), 'dd/MM/yyyy')}</TableCell>
+                            <TableCell className={`text-right font-semibold ${bill.is_paid ? 'line-through text-muted-foreground' : ''}`}>{formatCurrency(bill.amount)}</TableCell>
+                            <TableCell>
+                              {!isVirtual && (
+                                <Button variant="ghost" size="icon" onClick={() => deleteBillMutation.mutate(bill.id)}>
+                                  <X className="h-4 w-4 text-red-500" />
+                                </Button>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center h-24">
+                          Nenhuma conta cadastrada.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
             </CardContent>
           </Card>
         </div>
