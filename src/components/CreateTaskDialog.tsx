@@ -1,213 +1,157 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { Task, Column } from '@/types/task';
+import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Plus, X } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
-import { showError } from '@/utils/toast';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { createTask } from '@/lib/tasks';
+import { showError, showSuccess } from '@/utils/toast';
+import { useBoardStore } from '@/store/boardStore';
 
 interface CreateTaskDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  boardId: string;
-  columns: Column[];
-  onTaskCreate: (task: Omit<Task, 'id'>) => void;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
-  open,
-  onOpenChange,
-  boardId,
-  columns,
-  onTaskCreate,
-}) => {
+export const CreateTaskDialog = ({ isOpen, onClose }: CreateTaskDialogProps) => {
+  const queryClient = useQueryClient();
+  const columns = useBoardStore(state => state.columns);
+  
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [selectedColumnId, setSelectedColumnId] = useState<string>('');
   const [priority, setPriority] = useState<'low' | 'medium' | 'high' | 'urgent'>('medium');
-  const [dueDate, setDueDate] = useState('');
-  const [tags, setTags] = useState<string[]>([]);
-  const [newTag, setNewTag] = useState('');
-  const [selectedColumnId, setSelectedColumnId] = useState('');
-  const { user } = useAuth();
 
-  useEffect(() => {
-    if (!open) {
-      setTitle('');
-      setDescription('');
-      setPriority('medium');
-      setDueDate('');
-      setTags([]);
-      setNewTag('');
-      setSelectedColumnId('');
-    } else if (columns.length > 0) {
-      setSelectedColumnId(columns[0].id);
-    }
-  }, [open, columns]);
+  const { mutate, isPending } = useMutation({
+    mutationFn: createTask,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      showSuccess('Task created successfully!');
+      handleClose();
+    },
+    onError: (error) => {
+      showError('Failed to create task.', error.message);
+    },
+  });
+
+  const handleClose = () => {
+    // Reset form fields
+    setTitle('');
+    setDescription('');
+    setSelectedColumnId('');
+    setPriority('medium');
+    onClose();
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!title.trim() || !user?.id || !selectedColumnId) {
-      showError('Título da tarefa e coluna são obrigatórios.');
+    if (!title || !selectedColumnId) {
+      showError('Title and column are required.');
       return;
     }
-
-    const newTask: Omit<Task, 'id'> = {
-      title: title.trim(),
-      description: description.trim() || undefined,
+    mutate({
+      title,
+      description,
+      column_id: selectedColumnId,
       priority,
-      dueDate: dueDate || undefined,
-      tags,
-      columnId: selectedColumnId,
-      order_index: 0,
-    };
-
-    onTaskCreate(newTask);
-    onOpenChange(false);
+    });
   };
 
-  const addTag = () => {
-    if (newTag.trim() && !tags.includes(newTag.trim())) {
-      setTags([...tags, newTag.trim()]);
-      setNewTag('');
-    }
-  };
-
-  const removeTag = (tagToRemove: string) => {
-    setTags(tags.filter(tag => tag !== tagToRemove));
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      addTag();
+  // Set default column when dialog opens
+  const handleOpenChange = (open: boolean) => {
+    if (open) {
+      if (columns.length > 0 && !selectedColumnId) {
+        setSelectedColumnId(columns[0].id);
+      }
+    } else {
+      handleClose();
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] overflow-visible">
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Nova Tarefa</DialogTitle>
+          <DialogTitle>Create New Task</DialogTitle>
         </DialogHeader>
-        
-        <form onSubmit={handleSubmit} className="space-y-4 py-4">
-          <div>
-            <Label htmlFor="title">Título *</Label>
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Digite o título da tarefa"
-              required
-              className="mt-1"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="description">Descrição</Label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Digite a descrição da tarefa"
-              rows={3}
-              className="mt-1"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="column">Coluna</Label>
-            <Select 
-              modal={false}
-              value={selectedColumnId} 
-              onValueChange={setSelectedColumnId} 
-              disabled={columns.length === 0}
-            >
-              <SelectTrigger className="mt-1">
-                <SelectValue placeholder={columns.length === 0 ? "Nenhuma coluna disponível" : "Selecione uma coluna"} />
-              </SelectTrigger>
-              <SelectContent position="popper">
-                {columns.map(column => (
-                  <SelectItem key={column.id} value={column.id}>
-                    {column.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {columns.length === 0 && (
-              <p className="text-sm text-red-500 mt-1">Crie uma coluna no quadro antes de adicionar tarefas.</p>
-            )}
-          </div>
-
-          <div>
-            <Label htmlFor="priority">Prioridade</Label>
-            <Select 
-              modal={false}
-              value={priority} 
-              onValueChange={(value: 'low' | 'medium' | 'high' | 'urgent') => setPriority(value)}
-            >
-              <SelectTrigger className="mt-1">
-                <SelectValue placeholder="Selecione a prioridade" />
-              </SelectTrigger>
-              <SelectContent position="popper">
-                <SelectItem value="low">Baixa</SelectItem>
-                <SelectItem value="medium">Média</SelectItem>
-                <SelectItem value="high">Alta</SelectItem>
-                <SelectItem value="urgent">Urgente</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label htmlFor="dueDate">Data de Vencimento</Label>
-            <Input
-              id="dueDate"
-              type="date"
-              value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
-              className="mt-1"
-            />
-          </div>
-
-          <div>
-            <Label>Tags</Label>
-            <div className="flex gap-2 mt-1">
+        <form onSubmit={handleSubmit}>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="title" className="text-right">
+                Title
+              </Label>
               <Input
-                value={newTag}
-                onChange={(e) => setNewTag(e.target.value)}
-                placeholder="Adicionar tag"
-                onKeyPress={handleKeyPress}
-                className="flex-1"
+                id="title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="col-span-3"
+                required
               />
-              <Button type="button" variant="outline" size="icon" onClick={addTag}>
-                <Plus className="h-4 w-4" />
-              </Button>
             </div>
-            <div className="flex flex-wrap gap-1 mt-2">
-              {tags.map(tag => (
-                <Badge key={tag} variant="secondary">
-                  {tag}
-                  <button type="button" onClick={() => removeTag(tag)} className="ml-1 rounded-full hover:bg-gray-300">
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>
-              ))}
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="description" className="text-right">
+                Description
+              </Label>
+              <Textarea
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="col-span-3"
+                rows={4}
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="column" className="text-right">
+                Column
+              </Label>
+              <Select
+                value={selectedColumnId}
+                onValueChange={setSelectedColumnId}
+                disabled={columns.length === 0}
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select a column" />
+                </SelectTrigger>
+                <SelectContent>
+                  {columns.map((col) => (
+                    <SelectItem key={col.id} value={col.id}>
+                      {col.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="priority" className="text-right">
+                Priority
+              </Label>
+              <Select
+                value={priority}
+                onValueChange={(value: 'low' | 'medium' | 'high' | 'urgent') => setPriority(value)}
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select priority" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Low</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                  <SelectItem value="urgent">Urgent</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
-
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancelar
+            <Button type="button" variant="ghost" onClick={handleClose}>
+              Cancel
             </Button>
-            <Button type="submit">Criar Tarefa</Button>
+            <Button type="submit" disabled={isPending}>
+              {isPending ? 'Creating...' : 'Create Task'}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
