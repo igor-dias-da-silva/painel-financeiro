@@ -76,8 +76,11 @@ const ShoppingListPage = () => {
 
   const updateItemMutation = useMutation({
     mutationFn: ({ itemId, updates }: { itemId: string, updates: Partial<DbShoppingItem> }) => updateShoppingItem(itemId, updates),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['shoppingItems', budget?.id] });
+    onSuccess: (updatedItem) => {
+      queryClient.setQueryData(['shoppingItems', budget?.id], (oldData: DbShoppingItem[] | undefined) => {
+        if (!oldData) return [updatedItem];
+        return oldData.map(item => item.id === updatedItem.id ? updatedItem : item);
+      });
     },
     onError: () => showError('Erro ao atualizar item.'),
   });
@@ -102,7 +105,7 @@ const ShoppingListPage = () => {
   }, [items]);
 
   const remainingBalance = useMemo(() => {
-    return (budget?.amount || 0) - purchasedExpenses;
+    return Number(budget?.amount || 0) - purchasedExpenses;
   }, [budget, purchasedExpenses]);
 
   const handleBudgetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
