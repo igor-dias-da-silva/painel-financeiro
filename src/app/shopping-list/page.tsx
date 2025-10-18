@@ -20,10 +20,8 @@ import {
   ShoppingItem as DbShoppingItem
 } from '@/lib/shopping';
 import { showError, showSuccess } from '@/utils/toast';
-import { AuthGuard } from '@/components/AuthGuard';
-import { MainLayout } from '@/components/MainLayout';
 
-const ShoppingListPageContent = () => {
+const ShoppingListPage = () => {
   const { user, isLoading: authLoading } = useAuth();
   const queryClient = useQueryClient();
   
@@ -260,16 +258,6 @@ const ShoppingListPageContent = () => {
         </div>
       </div>
     </div>
-  );
-}
-
-const ShoppingListPage = () => {
-  return (
-    <AuthGuard>
-      <MainLayout>
-        <ShoppingListPageContent />
-      </MainLayout>
-    </AuthGuard>
   );
 };
 

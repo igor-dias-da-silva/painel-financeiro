@@ -14,14 +14,16 @@ import {
   Menu,
   ChevronDown,
   ChevronUp,
+  ShoppingCart,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'; // AvatarImage removido
-import { ThemeToggle } from './ThemeToggle'; // Importar ThemeToggle
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { ThemeToggle } from './ThemeToggle';
 
 const navItems = [
   { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
   { name: 'Quadros', icon: ClipboardList, path: '/boards' },
+  { name: 'Lista de Compras', icon: ShoppingCart, path: '/shopping-list' },
   { name: 'Configurações', icon: Settings, path: '/settings' },
   { name: 'Perfil', icon: User, path: '/profile' },
   { name: 'Ajuda', icon: HelpCircle, path: '/help' },
@@ -64,7 +66,6 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
           onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
         >
           <Avatar>
-            {/* AvatarImage removido */}
             <AvatarFallback>{user?.name?.charAt(0) || 'U'}</AvatarFallback>
           </Avatar>
           <span className="text-sm font-medium truncate flex-1">{user?.name || 'Usuário'}</span>
@@ -93,7 +94,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   );
 
   return (
-    <div className="flex h-screen bg-gray-100 dark:bg-background"> {/* Adicionado dark:bg-background */}
+    <div className="flex h-screen bg-gray-100 dark:bg-background">
       {/* Desktop Sidebar */}
       <aside
         className={`hidden md:flex flex-col transition-all duration-300 w-64`}
@@ -126,7 +127,6 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
             >
               <Avatar>
-                {/* AvatarImage removido */}
                 <AvatarFallback>{user?.name?.charAt(0) || 'U'}</AvatarFallback>
               </Avatar>
               <span className="text-sm font-medium truncate flex-1">{user?.name || 'Usuário'}</span>
@@ -155,7 +155,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
       </aside>
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="bg-white shadow-sm p-4 flex justify-between items-center dark:bg-card"> {/* Alterado dark:bg-gray-800 para dark:bg-card */}
+        <header className="bg-white shadow-sm p-4 flex justify-between items-center dark:bg-card">
           <div className="md:hidden">
             <Sheet>
               <SheetTrigger asChild>
@@ -173,7 +173,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
           </h2>
           <ThemeToggle />
         </header>
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6 dark:bg-background"> {/* Alterado dark:bg-gray-900 para dark:bg-background */}
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6 dark:bg-background">
           {children}
         </main>
       </div>
