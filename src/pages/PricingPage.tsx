@@ -12,8 +12,6 @@ import { showError, showSuccess } from '@/utils/toast';
 import { AuthGuard } from '@/components/AuthGuard';
 import { supabase } from '@/integrations/supabase/client';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { MercadoPagoPayment } from '@/components/MercadoPagoPayment';
 
 const MERCADO_PAGO_FUNCTION_URL = 'https://ruubwpgemhyzsrbqspnj.supabase.co/functions/v1/create-payment-preference';
 
@@ -21,8 +19,6 @@ const PricingPage = () => {
   const { user, isLoading: authLoading } = useAuth();
   const queryClient = useQueryClient();
   const [isPaymentLoading, setIsPaymentLoading] = useState(false);
-  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-  const [preferenceId, setPreferenceId] = useState<string | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -34,6 +30,7 @@ const PricingPage = () => {
       switch (paymentStatus) {
         case 'success':
           showSuccess('Pagamento aprovado! Seu plano Premium está ativo.');
+          queryClient.invalidateQueries({ queryKey: ['profile', user?.id] });
           break;
         case 'pending':
           showError('Pagamento pendente. Seu plano será ativado assim que o pagamento for confirmado.');
@@ -45,9 +42,10 @@ const PricingPage = () => {
           showError('Ocorreu um erro inesperado durante o processamento do pagamento.');
           break;
       }
+      // Limpa os parâmetros da URL após exibir a mensagem
       navigate(location.pathname, { replace: true });
     }
-  }, [location.search, navigate]);
+  }, [location.search, navigate, queryClient, user?.id]);
 
   const { data: profile, isLoading: profileLoading } = useQuery({
     queryKey: ['profile', user?.id],
@@ -86,7 +84,11 @@ const PricingPage = () => {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${accessToken}`,
           },
-          body: JSON.stringify({ userId: user.id, planId: 'premium' }),
+          body: JSON.stringify({ 
+            userId: user.id, 
+            planId: 'premium',
+            origin: window.location.origin // Envia a URL base do app
+          }),
         });
 
         const data = await response.json();
@@ -95,17 +97,16 @@ const PricingPage = () => {
           throw new Error(data.error || `Falha ao criar preferência de pagamento. Status: ${response.status}`);
         }
 
-        if (data.preferenceId) {
-          setPreferenceId(data.preferenceId);
-          setIsPaymentModalOpen(true);
+        if (data.init_point) {
+          // Redireciona o usuário para a página de checkout do Mercado Pago
+          window.location.href = data.init_point;
         } else {
-          throw new Error('ID da preferência não recebido do servidor.');
+          throw new Error('URL de checkout não recebida do servidor.');
         }
 
       } catch (error: any) {
         console.error('Erro na integração com Mercado Pago:', error);
         showError(`Erro ao iniciar pagamento: ${error.message}`);
-      } finally {
         setIsPaymentLoading(false);
       }
     } else {
@@ -181,7 +182,7 @@ const PricingPage = () => {
   const currentPlan = profile?.subscription_plan || 'free';
   const isPremium = currentPlan === 'premium';
 
-  if (isLoading) {
+  if (isLoading && !isPaymentLoading) {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -296,7 +297,7 @@ const PricingPage = () => {
                       disabled={isLoading || isCurrentPlan || isPaymentLoading}
                     >
                       {isPaymentLoading && plan.id === 'premium' ? (
-                        <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Preparando...</>
+                        <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Redirecionando...</>
                       ) : (
                         plan.cta
                       )}
@@ -308,23 +309,6 @@ const PricingPage = () => {
           </div>
         </div>
       </div>
-      <Dialog open={isPaymentModalOpen} onOpenChange={setIsPaymentModalOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Efetuar Pagamento</DialogTitle>
-            <DialogDescription>
-              Complete os dados abaixo para finalizar a assinatura do plano Premium.
-            </DialogDescription>
-          </DialogHeader>
-          {preferenceId ? (
-            <MercadoPagoPayment preferenceId={preferenceId} />
-          ) : (
-            <div className="flex justify-center items-center h-32">
-              <Loader2 className="h-8 w-8 animate-spin" />
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </AuthGuard>
   );
 };
