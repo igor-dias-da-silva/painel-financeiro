@@ -12,6 +12,7 @@ import Profile from "./pages/Profile"; // Import Profile page
 import Help from "./pages/Help"; // Import Help page
 import NotFound from "./pages/NotFound";
 import ShoppingListPage from "./app/shopping-list/page";
+import BillsPage from "./pages/BillsPage"; // Importar a nova página
 
 function App() {
   return (
@@ -52,6 +53,13 @@ function App() {
           <AuthGuard>
             <Layout>
               <ShoppingListPage />
+            </Layout>
+          </AuthGuard>
+        } />
+        <Route path="/bills" element={ // Adicionar nova rota
+          <AuthGuard>
+            <Layout>
+              <BillsPage />
             </Layout>
           </AuthGuard>
         } />
