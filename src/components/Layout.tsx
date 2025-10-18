@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import {
   LayoutDashboard,
-  ClipboardList,
   Settings,
   User,
   HelpCircle,
@@ -15,7 +14,7 @@ import {
   ChevronDown,
   ChevronUp,
   ShoppingCart,
-  Receipt, // Importar novo ícone
+  Receipt,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -23,16 +22,15 @@ import { ThemeToggle } from './ThemeToggle';
 
 const navItems = [
   { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
-  { name: 'Quadros', icon: ClipboardList, path: '/boards' },
   { name: 'Lista de Compras', icon: ShoppingCart, path: '/shopping-list' },
-  { name: 'Contas a Pagar', icon: Receipt, path: '/bills' }, // Adicionar novo item
+  { name: 'Contas a Pagar', icon: Receipt, path: '/bills' },
   { name: 'Configurações', icon: Settings, path: '/settings' },
   { name: 'Perfil', icon: User, path: '/profile' },
   { name: 'Ajuda', icon: HelpCircle, path: '/help' },
 ];
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Keep true for initial expanded state
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -97,7 +95,6 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
   return (
     <div className="flex h-screen bg-gray-100 dark:bg-background">
-      {/* Desktop Sidebar */}
       <aside
         className={`hidden md:flex flex-col transition-all duration-300 w-64`}
       >

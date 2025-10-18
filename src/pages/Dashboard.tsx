@@ -1,46 +1,49 @@
 "use client";
 
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, Loader2, LayoutDashboard, ListTodo } from 'lucide-react';
-import { Board, getTotalCards } from '@/lib/database';
+import { Loader2, Receipt, ShoppingCart, Plus } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
-
-const fetchBoards = async (userId: string): Promise<Board[]> => {
-  const { data, error } = await supabase
-    .from('boards')
-    .select('*')
-    .eq('user_id', userId)
-    .order('updated_at', { ascending: false }); // Order by last updated
-  
-  if (error) throw new Error(error.message);
-  return data || [];
-};
+import { getBills } from '@/lib/bills';
+import { getOrCreateBudget, getShoppingItems } from '@/lib/shopping';
+import { format } from 'date-fns';
 
 const Dashboard = () => {
   const { user, isLoading: authLoading } = useAuth();
-  const navigate = useNavigate();
-
   const userId = user?.id;
 
-  const { data: boards, isLoading: boardsLoading, isError: boardsError } = useQuery<Board[]>({
-    queryKey: ['boards', userId],
-    queryFn: () => fetchBoards(userId!),
-    enabled: !!userId, // Only run query if userId is available
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth() + 1;
+  const currentYear = currentDate.getFullYear();
+
+  const { data: bills, isLoading: billsLoading } = useQuery({
+    queryKey: ['bills', userId],
+    queryFn: () => getBills(userId!),
+    enabled: !!userId,
   });
 
-  const { data: totalTasks, isLoading: tasksLoading, isError: tasksError } = useQuery<number>({
-    queryKey: ['totalTasks', userId],
-    queryFn: () => getTotalCards(userId!),
-    enabled: !!userId, // Only run query if userId is available
+  const { data: shoppingData, isLoading: shoppingLoading } = useQuery({
+    queryKey: ['monthlyShoppingSummary', userId, currentMonth, currentYear],
+    queryFn: async () => {
+      const budget = await getOrCreateBudget(userId!, currentMonth, currentYear);
+      const items = await getShoppingItems(budget.id);
+      const totalExpenses = items.reduce((sum, item) => sum + Number(item.price), 0);
+      return { budget, totalExpenses };
+    },
+    enabled: !!userId,
   });
 
-  const isLoading = authLoading || boardsLoading || tasksLoading;
-  const isError = boardsError || tasksError;
+  const isLoading = authLoading || billsLoading || shoppingLoading;
+
+  const pendingBills = bills?.filter(bill => !bill.is_paid) || [];
+  const pendingBillsTotal = pendingBills.reduce((sum, bill) => sum + Number(bill.amount), 0);
+
+  const formatCurrency = (value: number) => {
+    return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  };
 
   if (isLoading) {
     return (
@@ -50,32 +53,25 @@ const Dashboard = () => {
     );
   }
 
-  if (isError) {
-    return (
-      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-        <strong className="font-bold">Erro:</strong>
-        <span className="block sm:inline"> Não foi possível carregar os dados do dashboard.</span>
-      </div>
-    );
-  }
-
   return (
     <div className="p-4">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-800 dark:text-foreground">Dashboard</h1>
-          <p className="text-gray-600 mt-1 dark:text-muted-foreground">Visão geral das suas atividades e quadros</p>
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-foreground">Dashboard Financeiro</h1>
+          <p className="text-gray-600 mt-1 dark:text-muted-foreground">Sua visão geral de contas e compras.</p>
         </div>
         <div className="flex gap-2">
-          <Link to="/boards">
-            <Button variant="outline">
-              Ver Todos os Quadros
+          <Link to="/bills">
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Adicionar Conta
             </Button>
           </Link>
-          <Button onClick={() => navigate('/boards')}> {/* Assuming /boards page has a way to create new board */}
-            <Plus className="h-4 w-4 mr-2" />
-            Criar Novo Quadro
-          </Button>
+          <Link to="/shopping-list">
+            <Button variant="outline">
+              Ver Lista de Compras
+            </Button>
+          </Link>
         </div>
       </div>
 
@@ -83,51 +79,48 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <Card className="dark:bg-card dark:border-border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium dark:text-foreground">Total de Quadros</CardTitle>
-            <LayoutDashboard className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium dark:text-foreground">Contas a Pagar</CardTitle>
+            <Receipt className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold dark:text-foreground">{boards?.length || 0}</div>
-            <p className="text-xs text-muted-foreground">Quadros criados por você</p>
+            <div className="text-2xl font-bold text-red-500">{formatCurrency(pendingBillsTotal)}</div>
+            <p className="text-xs text-muted-foreground">{pendingBills.length} conta(s) pendente(s)</p>
           </CardContent>
         </Card>
         <Card className="dark:bg-card dark:border-border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium dark:text-foreground">Total de Tarefas</CardTitle>
-            <ListTodo className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium dark:text-foreground">Lista de Compras do Mês</CardTitle>
+            <ShoppingCart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold dark:text-foreground">{totalTasks || 0}</div>
-            <p className="text-xs text-muted-foreground">Tarefas em todos os seus quadros</p>
+            <div className="text-2xl font-bold text-orange-500">{formatCurrency(shoppingData?.totalExpenses || 0)}</div>
+            <p className="text-xs text-muted-foreground">Orçamento de {formatCurrency(shoppingData?.budget.amount || 0)}</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Recent Boards */}
-      <Card className="mb-8 dark:bg-card dark:border-border">
+      {/* Upcoming Bills */}
+      <Card className="dark:bg-card dark:border-border">
         <CardHeader>
-          <CardTitle className="dark:text-foreground">Quadros Recentes</CardTitle>
+          <CardTitle className="dark:text-foreground">Próximas Contas a Vencer</CardTitle>
         </CardHeader>
         <CardContent>
-          {boards && boards.length === 0 ? (
+          {pendingBills.length === 0 ? (
             <div className="text-center py-8 text-gray-500 dark:text-muted-foreground">
-              Nenhum quadro criado ainda.
-              <Button variant="link" onClick={() => navigate('/boards')} className="block mt-2">
-                Crie seu primeiro quadro!
-              </Button>
+              Nenhuma conta pendente. Tudo em dia!
             </div>
           ) : (
             <div className="space-y-4">
-              {boards?.slice(0, 3).map((board) => (
-                <div key={board.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg dark:bg-secondary dark:border-border">
+              {pendingBills.slice(0, 5).map((bill) => (
+                <div key={bill.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg dark:bg-secondary">
                   <div>
-                    <Link to={`/boards/${board.id}`} className="font-medium text-blue-600 hover:underline">
-                      {board.title}
-                    </Link>
-                    <p className="text-sm text-gray-600 line-clamp-1 dark:text-muted-foreground">{board.description || 'Sem descrição'}</p>
+                    <p className="font-medium text-gray-800 dark:text-foreground">{bill.name}</p>
+                    <p className="text-sm text-gray-600 dark:text-muted-foreground">
+                      Vence em: {format(new Date(bill.due_date), 'dd/MM/yyyy')}
+                    </p>
                   </div>
-                  <span className="text-xs text-gray-500 dark:text-muted-foreground">
-                    Atualizado em {new Date(board.updated_at).toLocaleDateString('pt-BR')}
+                  <span className="font-semibold text-lg text-gray-800 dark:text-foreground">
+                    {formatCurrency(bill.amount)}
                   </span>
                 </div>
               ))}
@@ -135,17 +128,6 @@ const Dashboard = () => {
           )}
         </CardContent>
       </Card>
-
-      {/* Call to Action for more boards */}
-      {boards && boards.length > 3 && (
-        <div className="text-center mt-8">
-          <Link to="/boards">
-            <Button variant="outline">
-              Ver Todos os {boards.length} Quadros
-            </Button>
-          </Link>
-        </div>
-      )}
     </div>
   );
 };

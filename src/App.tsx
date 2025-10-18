@@ -1,18 +1,16 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthGuard } from "./components/AuthGuard";
 import { Layout } from "./components/Layout";
 import Home from "./pages/Home";
-import Boards from "./pages/Boards"; // Import the updated Boards page
-import BoardView from "./pages/BoardView"; // Import the new BoardView page
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
-import Settings from "./pages/Settings"; // Import Settings page
-import Profile from "./pages/Profile"; // Import Profile page
-import Help from "./pages/Help"; // Import Help page
+import Settings from "./pages/Settings";
+import Profile from "./pages/Profile";
+import Help from "./pages/Help";
 import NotFound from "./pages/NotFound";
 import ShoppingListPage from "./app/shopping-list/page";
-import BillsPage from "./pages/BillsPage"; // Importar a nova página
+import BillsPage from "./pages/BillsPage";
 
 function App() {
   return (
@@ -28,27 +26,6 @@ function App() {
             </Layout>
           </AuthGuard>
         } />
-        <Route path="/boards" element={
-          <AuthGuard>
-            <Layout>
-              <Boards /> {/* Use the updated Boards list page */}
-            </Layout>
-          </AuthGuard>
-        } />
-        <Route path="/boards/:boardId" element={
-          <AuthGuard>
-            <Layout>
-              <BoardView /> {/* New route for individual board view */}
-            </Layout>
-          </AuthGuard>
-        } />
-        <Route path="/kanban" element={
-          <AuthGuard>
-            <Layout>
-              <BoardView />
-            </Layout>
-          </AuthGuard>
-        } />
         <Route path="/shopping-list" element={
           <AuthGuard>
             <Layout>
@@ -56,7 +33,7 @@ function App() {
             </Layout>
           </AuthGuard>
         } />
-        <Route path="/bills" element={ // Adicionar nova rota
+        <Route path="/bills" element={
           <AuthGuard>
             <Layout>
               <BillsPage />
@@ -66,21 +43,21 @@ function App() {
         <Route path="/settings" element={
           <AuthGuard>
             <Layout>
-              <Settings /> {/* Render the actual Settings page */}
+              <Settings />
             </Layout>
           </AuthGuard>
         } />
         <Route path="/profile" element={
           <AuthGuard>
             <Layout>
-              <Profile /> {/* Render the actual Profile page */}
+              <Profile />
             </Layout>
           </AuthGuard>
         } />
         <Route path="/help" element={
           <AuthGuard>
             <Layout>
-              <Help /> {/* Render the actual Help page */}
+              <Help />
             </Layout>
           </AuthGuard>
         } />

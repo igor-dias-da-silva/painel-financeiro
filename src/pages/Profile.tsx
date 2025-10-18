@@ -6,23 +6,20 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { User, Calendar, Clock, Award, Loader2, Edit } from 'lucide-react';
+import { Loader2, Edit, Calendar } from 'lucide-react';
 import { AuthGuard } from '@/components/AuthGuard';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getProfile, updateProfile, getTotalCards, getBoards, Profile as SupabaseProfile, Board, Card as SupabaseCard } from '@/lib/database';
+import { getProfile, updateProfile, Profile as SupabaseProfile } from '@/lib/database';
 import { showError, showSuccess } from '@/utils/toast';
-import { supabase } from '@/integrations/supabase/client';
 import { ChangePasswordDialog } from '@/components/ChangePasswordDialog';
 import { EditBioDialog } from '@/components/EditBioDialog';
-import { EditNameDialog } from '@/components/EditNameDialog'; // Importar o novo componente
+import { EditNameDialog } from '@/components/EditNameDialog';
 
 const Profile = () => {
   const { user, isLoading: authLoading, logout } = useAuth();
   const queryClient = useQueryClient();
-
   const userId = user?.id;
 
   const { data: profile, isLoading: profileLoading, isError: profileError } = useQuery<SupabaseProfile | null>({
@@ -31,37 +28,12 @@ const Profile = () => {
     enabled: !!userId,
   });
 
-  const { data: boards, isLoading: boardsLoading } = useQuery<Board[]>({
-    queryKey: ['boards', userId],
-    queryFn: () => getBoards(userId!),
-    enabled: !!userId,
-  });
-
-  const { data: totalTasksCount, isLoading: tasksCountLoading } = useQuery<number>({
-    queryKey: ['totalTasks', userId],
-    queryFn: () => getTotalCards(userId!),
-    enabled: !!userId,
-  });
-
-  const { data: allCards, isLoading: cardsLoading } = useQuery<SupabaseCard[]>({
-    queryKey: ['allCards', userId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('cards')
-        .select('*')
-        .eq('user_id', userId!);
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!userId,
-  });
-
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [bio, setBio] = useState('');
   const [showChangePasswordDialog, setShowChangePasswordDialog] = useState(false);
   const [showEditBioDialog, setShowEditBioDialog] = useState(false);
-  const [showEditNameDialog, setShowEditNameDialog] = useState(false); // Estado para controlar o diálogo de nome
+  const [showEditNameDialog, setShowEditNameDialog] = useState(false);
 
   useEffect(() => {
     if (profile) {
@@ -113,50 +85,7 @@ const Profile = () => {
     await logout();
   };
 
-  const calculateStats = () => {
-    const totalTasks = totalTasksCount || 0;
-    const completedTasks = allCards?.filter(card => card.column_id === 'done').length || 0;
-    const totalBoards = boards?.length || 0;
-    
-    const tasksByPriority = {
-      urgent: 0,
-      high: 0,
-      medium: 0,
-      low: 0
-    };
-
-    allCards?.forEach(card => {
-      if (card.priority) {
-        tasksByPriority[card.priority]++;
-      }
-    });
-
-    return {
-      totalTasks,
-      completedTasks,
-      totalBoards,
-      tasksByPriority,
-      completionRate: totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0
-    };
-  };
-
-  const stats = calculateStats();
-
-  const priorityColors = {
-    urgent: 'bg-red-500',
-    high: 'bg-orange-500',
-    medium: 'bg-yellow-500',
-    low: 'bg-blue-500'
-  };
-
-  const priorityLabels = {
-    urgent: 'Urgente',
-    high: 'Alta',
-    medium: 'Média',
-    low: 'Baixa'
-  };
-
-  const isLoading = authLoading || profileLoading || boardsLoading || tasksCountLoading || cardsLoading;
+  const isLoading = authLoading || profileLoading;
 
   if (isLoading) {
     return (
@@ -183,7 +112,7 @@ const Profile = () => {
   }
 
   const displayName = `${firstName} ${lastName}`.trim() || user?.name || 'Usuário';
-  const joinDate = "N/A"; 
+  const joinDate = "N/A";
 
   return (
     <AuthGuard>
@@ -191,11 +120,10 @@ const Profile = () => {
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-800 dark:text-foreground mb-2">Perfil</h1>
-            <p className="text-gray-600 dark:text-muted-foreground">Gerencie suas informações pessoais e estatísticas</p>
+            <p className="text-gray-600 dark:text-muted-foreground">Gerencie suas informações pessoais e de conta</p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Informações Pessoais */}
             <div className="lg:col-span-1">
               <Card className="dark:bg-card dark:border-border">
                 <CardHeader className="text-center">
@@ -213,167 +141,60 @@ const Profile = () => {
                     <Calendar className="h-4 w-4" />
                     <span>Membro desde {joinDate}</span>
                   </div>
-                  
-                  <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-muted-foreground">
-                    <Award className="h-4 w-4" />
-                    <span>{stats.totalBoards} quadros criados</span>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-muted-foreground">
-                    <Clock className="h-4 w-4" />
-                    <span>{stats.totalTasks} tarefas criadas</span>
-                  </div>
-                  
-                  <div className="space-y-4 pt-4 border-t dark:border-border">
-                    <div>
-                      <Label htmlFor="firstName" className="dark:text-foreground">Primeiro Nome</Label>
-                      <div className="relative mt-2">
-                        <Input
-                          id="firstName"
-                          value={firstName}
-                          readOnly
-                          className="dark:bg-input dark:text-foreground dark:border-border"
-                        />
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="absolute bottom-0 right-0 h-full rounded-l-none dark:bg-secondary dark:text-secondary-foreground dark:border-border dark:hover:bg-accent"
-                          onClick={() => setShowEditNameDialog(true)}
-                          disabled={updateProfileMutation.isPending}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                    <div>
-                      <Label htmlFor="lastName" className="dark:text-foreground">Sobrenome</Label>
-                      <div className="relative mt-2">
-                        <Input
-                          id="lastName"
-                          value={lastName}
-                          readOnly
-                          className="dark:bg-input dark:text-foreground dark:border-border"
-                        />
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="absolute bottom-0 right-0 h-full rounded-l-none dark:bg-secondary dark:text-secondary-foreground dark:border-border dark:hover:bg-accent"
-                          onClick={() => setShowEditNameDialog(true)}
-                          disabled={updateProfileMutation.isPending}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                    <div>
-                      <Label htmlFor="bio" className="dark:text-foreground">Bio</Label>
-                      <div className="relative mt-2">
-                        <Textarea
-                          id="bio"
-                          value={bio || 'Nenhuma biografia definida.'}
-                          readOnly
-                          className="dark:bg-input dark:text-foreground dark:border-border min-h-[80px]"
-                          rows={3}
-                        />
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="absolute bottom-2 right-2 dark:bg-secondary dark:text-secondary-foreground dark:border-border dark:hover:bg-accent"
-                          onClick={() => setShowEditBioDialog(true)}
-                          disabled={updateProfileMutation.isPending}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Estatísticas e Detalhes */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Estatísticas Gerais */}
               <Card className="dark:bg-card dark:border-border">
                 <CardHeader>
-                  <CardTitle className="dark:text-foreground">Estatísticas de Atividade</CardTitle>
+                  <CardTitle className="dark:text-foreground">Informações Pessoais</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-blue-600">{stats.totalBoards}</div>
-                      <div className="text-sm text-gray-600 dark:text-muted-foreground">Quadros</div>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label htmlFor="fullName" className="dark:text-foreground">Nome e Sobrenome</Label>
+                    <div className="relative mt-2">
+                      <Input
+                        id="fullName"
+                        value={displayName}
+                        readOnly
+                        className="dark:bg-input dark:text-foreground dark:border-border"
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="absolute bottom-0 right-0 h-full rounded-l-none dark:bg-secondary dark:text-secondary-foreground dark:border-border dark:hover:bg-accent"
+                        onClick={() => setShowEditNameDialog(true)}
+                        disabled={updateProfileMutation.isPending}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
                     </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-green-600">{stats.totalTasks}</div>
-                      <div className="text-sm text-gray-600 dark:text-muted-foreground">Tarefas</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-purple-600">{stats.completedTasks}</div>
-                      <div className="text-sm text-gray-600 dark:text-muted-foreground">Concluídas</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-orange-600">{stats.completionRate}%</div>
-                      <div className="text-sm text-gray-600 dark:text-muted-foreground">Taxa</div>
+                  </div>
+                  <div>
+                    <Label htmlFor="bio" className="dark:text-foreground">Bio</Label>
+                    <div className="relative mt-2">
+                      <Textarea
+                        id="bio"
+                        value={bio || 'Nenhuma biografia definida.'}
+                        readOnly
+                        className="dark:bg-input dark:text-foreground dark:border-border min-h-[80px]"
+                        rows={3}
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="absolute bottom-2 right-2 dark:bg-secondary dark:text-secondary-foreground dark:border-border dark:hover:bg-accent"
+                        onClick={() => setShowEditBioDialog(true)}
+                        disabled={updateProfileMutation.isPending}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Prioridades Mais Usadas */}
-              <Card className="dark:bg-card dark:border-border">
-                <CardHeader>
-                  <CardTitle className="dark:text-foreground">Prioridades Mais Usadas</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {Object.entries(stats.tasksByPriority).map(([priority, count]) => (
-                      <div key={priority} className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          <div className={`w-3 h-3 rounded-full ${priorityColors[priority as keyof typeof priorityColors]}`}></div>
-                          <span className="text-sm font-medium dark:text-foreground">{priorityLabels[priority as keyof typeof priorityLabels]}</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <span className="text-lg font-semibold dark:text-foreground">{count}</span>
-                          <span className="text-sm text-gray-500 dark:text-muted-foreground">tarefas</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Atividade Recente */}
-              <Card className="dark:bg-card dark:border-border">
-                <CardHeader>
-                  <CardTitle className="dark:text-foreground">Atividade Recente</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {boards?.slice(0, 3).map(board => (
-                      <div key={board.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg dark:bg-secondary dark:border-border">
-                        <div>
-                          <div className="font-medium dark:text-foreground">{board.title}</div>
-                          <div className="text-sm text-gray-600 dark:text-muted-foreground">
-                            ... tarefas • ... colunas
-                          </div>
-                        </div>
-                        <Badge variant="outline" className="dark:bg-accent dark:text-accent-foreground dark:border-border">
-                          {new Date(board.updated_at).toLocaleDateString('pt-BR')}
-                        </Badge>
-                      </div>
-                    ))}
-                    
-                    {(boards?.length === 0 || !boards) && (
-                      <div className="text-center py-8 text-gray-500 dark:text-muted-foreground">
-                        Nenhuma atividade recente
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Configurações de Conta */}
               <Card className="dark:bg-card dark:border-border">
                 <CardHeader>
                   <CardTitle className="dark:text-foreground">Configurações de Conta</CardTitle>
