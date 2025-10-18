@@ -37,6 +37,11 @@ serve(async (req) => {
       payer: {
         email: `user-${userId}@finandash.com`,
       },
+      // Adicionando configuração explícita de métodos de pagamento
+      payment_methods: {
+        excluded_payment_types: [], // Garante que nenhum tipo de pagamento seja excluído
+        installments: 1, // Você pode ajustar o número de parcelas se desejar
+      },
       back_urls: {
         success: `https://ruubwpgemhyzsrbqspnj.supabase.co/functions/v1/payment-success?user_id=${userId}`,
         failure: `https://ruubwpgemhyzsrbqspnj.supabase.co/functions/v1/payment-failure?user_id=${userId}`,
