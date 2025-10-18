@@ -4,17 +4,20 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Check, X, Crown, Zap, Shield, Star } from 'lucide-react';
+import { Check, X, Crown, Zap, Star, Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getProfile, updateProfile } from '@/lib/database';
 import { showError, showSuccess } from '@/utils/toast';
 import { AuthGuard } from '@/components/AuthGuard';
 
+// URL da Edge Function do Mercado Pago
+const MERCADO_PAGO_FUNCTION_URL = 'https://ruubwpgemhyzsrbqspnj.supabase.co/functions/v1/create-payment-preference';
+
 const PricingPage = () => {
   const { user, isLoading: authLoading } = useAuth();
   const queryClient = useQueryClient();
-  const [selectedPlan, setSelectedPlan] = useState<'free' | 'premium'>('free');
+  const [isPaymentLoading, setIsPaymentLoading] = useState(false);
 
   const { data: profile, isLoading: profileLoading } = useQuery({
     queryKey: ['profile', user?.id],
@@ -31,21 +34,41 @@ const PricingPage = () => {
     onError: () => showError('Erro ao atualizar plano.'),
   });
 
-  const handleSubscribe = (plan: 'free' | 'premium') => {
+  const handleSubscribe = async (plan: 'free' | 'premium') => {
     if (!user) {
       showError('Você precisa estar logado para assinar um plano.');
       return;
     }
     
-    setSelectedPlan(plan);
-    
     if (plan === 'premium') {
-      updateProfileMutation.mutate({ 
-        subscription_plan: 'premium',
-        subscription_status: 'active',
-        subscription_ends_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-      });
+      setIsPaymentLoading(true);
+      try {
+        const response = await fetch(MERCADO_PAGO_FUNCTION_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': \`Bearer \${(await supabase.auth.getSession()).data.session?.access_token}\`,
+          },
+          body: JSON.stringify({ userId: user.id, planId: 'premium' }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || data.error) {
+          throw new Error(data.error || 'Falha ao criar preferência de pagamento.');
+        }
+
+        // Redirecionar para o Mercado Pago
+        window.location.href = data.init_point;
+
+      } catch (error) {
+        console.error('Erro na integração com Mercado Pago:', error);
+        showError('Erro ao iniciar o pagamento. Tente novamente.');
+      } finally {
+        setIsPaymentLoading(false);
+      }
     } else {
+      // Lógica para downgrade para Free
       updateProfileMutation.mutate({ 
         subscription_plan: 'free',
         subscription_status: 'active',
@@ -64,7 +87,7 @@ const PricingPage = () => {
     });
   };
 
-  const isLoading = authLoading || profileLoading || updateProfileMutation.isPending;
+  const isLoading = authLoading || profileLoading || updateProfileMutation.isPending || isPaymentLoading;
 
   const plans = [
     {
@@ -118,7 +141,7 @@ const PricingPage = () => {
   const currentPlan = profile?.subscription_plan || 'free';
   const isPremium = currentPlan === 'premium';
 
-  if (isLoading) {
+  if (isLoading && !isPaymentLoading) {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -230,9 +253,13 @@ const PricingPage = () => {
                       className="w-full" 
                       variant={plan.ctaVariant}
                       onClick={() => handleSubscribe(plan.id as 'free' | 'premium')}
-                      disabled={updateProfileMutation.isPending}
+                      disabled={isLoading || isCurrentPlan}
                     >
-                      {updateProfileMutation.isPending && isCurrentPlan ? 'Atualizando...' : plan.cta}
+                      {isPaymentLoading && plan.id === 'premium' ? (
+                        <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Redirecionando...</>
+                      ) : (
+                        plan.cta
+                      )}
                     </Button>
                   </CardContent>
                 </Card>
@@ -240,6 +267,7 @@ const PricingPage = () => {
             })}
           </div>
 
+          {/* Perguntas Frequentes */}
           <div className="mt-16">
             <h2 className="text-2xl font-bold text-center mb-8 dark:text-foreground">Perguntas Frequentes</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
