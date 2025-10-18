@@ -8,7 +8,6 @@ const corsHeaders = {
 };
 
 // O token de acesso deve ser configurado como um segredo no Supabase
-// Nome do segredo: MERCADO_PAGO_ACCESS_TOKEN
 const ACCESS_TOKEN = Deno.env.get('MERCADO_PAGO_ACCESS_TOKEN');
 
 if (!ACCESS_TOKEN) {
@@ -24,15 +23,12 @@ serve(async (req) => {
   }
 
   try {
-    // 1. Autenticação (Verificação básica de que a requisição veio de um usuário logado)
+    // 1. Autenticação
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       return new Response('Unauthorized: Missing Authorization header', { status: 401, headers: corsHeaders });
     }
     
-    // Nota: A verificação completa do JWT deve ser feita aqui se necessário,
-    // mas para simplificar, confiamos no header de autorização para prosseguir.
-
     const { userId, planId } = await req.json();
 
     if (!userId || planId !== 'premium') {
@@ -52,18 +48,16 @@ serve(async (req) => {
         },
       ],
       payer: {
-        // O Mercado Pago precisa de um email para o pagador
-        // Usamos um template literal Deno/JS normal aqui
         email: `user-${userId}@finandash.com`, 
       },
-      // URL para onde o usuário será redirecionado após o pagamento
+      // URLs de retorno (usando o ID do projeto ruubwpgemhyzsrbqspnj)
       back_urls: {
         success: `https://ruubwpgemhyzsrbqspnj.supabase.co/functions/v1/payment-success?user_id=${userId}`,
         failure: `https://ruubwpgemhyzsrbqspnj.supabase.co/functions/v1/payment-failure?user_id=${userId}`,
         pending: `https://ruubwpgemhyzsrbqspnj.supabase.co/functions/v1/payment-pending?user_id=${userId}`,
       },
       auto_return: "approved",
-      external_reference: userId, // Usamos o ID do usuário como referência externa
+      external_reference: userId,
     };
 
     const result = await preference.create({ body });

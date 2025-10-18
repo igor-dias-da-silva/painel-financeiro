@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,7 +10,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getProfile, updateProfile } from '@/lib/database';
 import { showError, showSuccess } from '@/utils/toast';
 import { AuthGuard } from '@/components/AuthGuard';
-import { supabase } from '@/integrations/supabase/client'; // Importação adicionada
+import { supabase } from '@/integrations/supabase/client';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 // URL da Edge Function do Mercado Pago
 const MERCADO_PAGO_FUNCTION_URL = 'https://ruubwpgemhyzsrbqspnj.supabase.co/functions/v1/create-payment-preference';
@@ -19,6 +20,34 @@ const PricingPage = () => {
   const { user, isLoading: authLoading } = useAuth();
   const queryClient = useQueryClient();
   const [isPaymentLoading, setIsPaymentLoading] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Lógica para lidar com o retorno do pagamento
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const paymentStatus = params.get('payment');
+
+    if (paymentStatus) {
+      switch (paymentStatus) {
+        case 'success':
+          showSuccess('Pagamento aprovado! Seu plano Premium está ativo.');
+          break;
+        case 'pending':
+          showError('Pagamento pendente. Seu plano será ativado assim que o pagamento for confirmado.');
+          break;
+        case 'failure':
+          showError('Pagamento falhou. Por favor, tente novamente.');
+          break;
+        case 'error':
+          showError('Ocorreu um erro inesperado durante o processamento do pagamento.');
+          break;
+      }
+      // Limpa o parâmetro da URL para evitar que o toast apareça novamente
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location.search, navigate]);
+
 
   const { data: profile, isLoading: profileLoading } = useQuery({
     queryKey: ['profile', user?.id],
@@ -55,7 +84,7 @@ const PricingPage = () => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`, // Uso de template literal corrigido
+            'Authorization': `Bearer ${accessToken}`,
           },
           body: JSON.stringify({ userId: user.id, planId: 'premium' }),
         });
