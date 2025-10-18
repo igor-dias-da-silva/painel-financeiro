@@ -16,8 +16,6 @@ import {
   Search,
   Plus,
   CheckCircle,
-  AlertCircle,
-  Info
 } from 'lucide-react';
 import { AuthGuard } from '@/components/AuthGuard';
 
@@ -81,11 +79,11 @@ const Help = () => {
 
   return (
     <AuthGuard>
-      <div className="min-h-screen bg-gray-50 p-4">
+      <div className="min-h-screen bg-gray-50 dark:bg-background p-4">
         <div className="max-w-6xl mx-auto">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">Central de Ajuda</h1>
-            <p className="text-gray-600">Encontre respostas para suas dúvidas e aprenda a usar o aplicativo</p>
+            <h1 className="text-3xl font-bold text-gray-800 dark:text-foreground mb-2">Central de Ajuda</h1>
+            <p className="text-gray-600 dark:text-muted-foreground">Encontre respostas para suas dúvidas e aprenda a usar o aplicativo</p>
           </div>
 
           {/* Barra de Pesquisa */}
@@ -96,14 +94,14 @@ const Help = () => {
                 placeholder="Buscar ajuda..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 dark:bg-input dark:text-foreground dark:border-border"
               />
             </div>
           </div>
 
           {/* Abas de Navegação */}
           <div className="mb-8">
-            <div className="flex space-x-1 bg-gray-200 p-1 rounded-lg max-w-md mx-auto">
+            <div className="flex space-x-1 bg-gray-200 dark:bg-secondary p-1 rounded-lg max-w-md mx-auto">
               <Button
                 variant={activeTab === 'guide' ? 'default' : 'ghost'}
                 onClick={() => setActiveTab('guide')}
@@ -135,8 +133,8 @@ const Help = () => {
           {activeTab === 'guide' && (
             <div className="space-y-6">
               <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">Guia do Usuário</h2>
-                <p className="text-gray-600 max-w-2xl mx-auto">
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-foreground mb-4">Guia do Usuário</h2>
+                <p className="text-gray-600 dark:text-muted-foreground max-w-2xl mx-auto">
                   Aprenda passo a passo como usar todas as funcionalidades do aplicativo Kanban
                 </p>
               </div>
@@ -145,23 +143,23 @@ const Help = () => {
                 {guides.map((guide, index) => {
                   const Icon = guide.icon;
                   return (
-                    <Card key={index} className="hover:shadow-md transition-shadow">
+                    <Card key={index} className="hover:shadow-md transition-shadow dark:bg-card dark:border-border">
                       <CardHeader>
                         <div className="flex items-center space-x-3">
-                          <div className="p-2 bg-blue-100 rounded-lg">
-                            <Icon className="h-6 w-6 text-blue-600" />
+                          <div className="p-2 bg-blue-100 dark:bg-primary/10 rounded-lg">
+                            <Icon className="h-6 w-6 text-blue-600 dark:text-primary" />
                           </div>
                           <div>
-                            <CardTitle className="text-lg">{guide.title}</CardTitle>
-                            <div className="flex items-center space-x-1 text-sm text-gray-500">
+                            <CardTitle className="text-lg dark:text-card-foreground">{guide.title}</CardTitle>
+                            <div className="flex items-center space-x-1 text-sm text-gray-500 dark:text-muted-foreground">
                               <span>{guide.duration}</span>
                             </div>
                           </div>
                         </div>
                       </CardHeader>
                       <CardContent>
-                        <p className="text-gray-600 mb-4">{guide.description}</p>
-                        <Button variant="outline" className="w-full">
+                        <p className="text-gray-600 dark:text-muted-foreground mb-4">{guide.description}</p>
+                        <Button variant="outline" className="w-full dark:bg-secondary dark:text-secondary-foreground dark:border-border dark:hover:bg-accent">
                           Ler Guia
                         </Button>
                       </CardContent>
@@ -170,41 +168,41 @@ const Help = () => {
                 })}
               </div>
 
-              <Card>
+              <Card className="dark:bg-card dark:border-border">
                 <CardHeader>
-                  <CardTitle>Recursos Disponíveis</CardTitle>
+                  <CardTitle className="dark:text-card-foreground">Recursos Disponíveis</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-3">
                       <div className="flex items-center space-x-3">
-                        <Video className="h-5 w-5 text-blue-600" />
+                        <Video className="h-5 w-5 text-blue-600 dark:text-primary" />
                         <div>
-                          <div className="font-medium">Vídeo Tutoriais</div>
-                          <div className="text-sm text-gray-600">Assista a vídeos explicativos</div>
+                          <div className="font-medium dark:text-foreground">Vídeo Tutoriais</div>
+                          <div className="text-sm text-gray-600 dark:text-muted-foreground">Assista a vídeos explicativos</div>
                         </div>
                       </div>
                       <div className="flex items-center space-x-3">
-                        <BookOpen className="h-5 w-5 text-green-600" />
+                        <BookOpen className="h-5 w-5 text-green-600 dark:text-green-400" />
                         <div>
-                          <div className="font-medium">Documentação Completa</div>
-                          <div className="text-sm text-gray-600">Acesse a documentação detalhada</div>
+                          <div className="font-medium dark:text-foreground">Documentação Completa</div>
+                          <div className="text-sm text-gray-600 dark:text-muted-foreground">Acesse a documentação detalhada</div>
                         </div>
                       </div>
                     </div>
                     <div className="space-y-3">
                       <div className="flex items-center space-x-3">
-                        <MessageCircle className="h-5 w-5 text-purple-600" />
+                        <MessageCircle className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                         <div>
-                          <div className="font-medium">Comunidade</div>
-                          <div className="text-sm text-gray-600">Participe da nossa comunidade</div>
+                          <div className="font-medium dark:text-foreground">Comunidade</div>
+                          <div className="text-sm text-gray-600 dark:text-muted-foreground">Participe da nossa comunidade</div>
                         </div>
                       </div>
                       <div className="flex items-center space-x-3">
-                        <Mail className="h-5 w-5 text-orange-600" />
+                        <Mail className="h-5 w-5 text-orange-600 dark:text-orange-400" />
                         <div>
-                          <div className="font-medium">Suporte por Email</div>
-                          <div className="text-sm text-gray-600">Entre em contato com nossa equipe</div>
+                          <div className="font-medium dark:text-foreground">Suporte por Email</div>
+                          <div className="text-sm text-gray-600 dark:text-muted-foreground">Entre em contato com nossa equipe</div>
                         </div>
                       </div>
                     </div>
@@ -217,36 +215,36 @@ const Help = () => {
           {activeTab === 'faq' && (
             <div className="space-y-6">
               <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">Perguntas Frequentes</h2>
-                <p className="text-gray-600 max-w-2xl mx-auto">
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-foreground mb-4">Perguntas Frequentes</h2>
+                <p className="text-gray-600 dark:text-muted-foreground max-w-2xl mx-auto">
                   Encontre respostas para as perguntas mais comuns sobre o aplicativo
                 </p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredFaqs.map((faq, index) => (
-                  <Card key={index} className="hover:shadow-md transition-shadow">
+                  <Card key={index} className="hover:shadow-md transition-shadow dark:bg-card dark:border-border">
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between">
-                        <CardTitle className="text-base flex-1">{faq.question}</CardTitle>
-                        <Badge variant="outline" className="ml-2">
+                        <CardTitle className="text-base flex-1 dark:text-card-foreground">{faq.question}</CardTitle>
+                        <Badge variant="outline" className="ml-2 dark:border-border dark:text-muted-foreground">
                           {faq.category}
                         </Badge>
                       </div>
                     </CardHeader>
                     <CardContent className="pt-0">
-                      <p className="text-sm text-gray-600">{faq.answer}</p>
+                      <p className="text-sm text-gray-600 dark:text-muted-foreground">{faq.answer}</p>
                     </CardContent>
                   </Card>
                 ))}
               </div>
 
               {filteredFaqs.length === 0 && (
-                <Card>
+                <Card className="dark:bg-card dark:border-border">
                   <CardContent className="text-center py-12">
                     <HelpCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhuma pergunta encontrada</h3>
-                    <p className="text-gray-500">Tente usar termos diferentes na sua busca</p>
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-foreground mb-2">Nenhuma pergunta encontrada</h3>
+                    <p className="text-gray-500 dark:text-muted-foreground">Tente usar termos diferentes na sua busca</p>
                   </CardContent>
                 </Card>
               )}
@@ -256,39 +254,40 @@ const Help = () => {
           {activeTab === 'contact' && (
             <div className="space-y-6">
               <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">Entre em Contato</h2>
-                <p className="text-gray-600 max-w-2xl mx-auto">
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-foreground mb-4">Entre em Contato</h2>
+                <p className="text-gray-600 dark:text-muted-foreground max-w-2xl mx-auto">
                   Tem alguma dúvida ou sugestão? Estamos aqui para ajudar!
                 </p>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card>
+                <Card className="dark:bg-card dark:border-border">
                   <CardHeader>
-                    <CardTitle>Envie uma Mensagem</CardTitle>
+                    <CardTitle className="dark:text-card-foreground">Envie uma Mensagem</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div>
-                      <Label htmlFor="name">Nome</Label>
-                      <Input id="name" placeholder="Seu nome" />
+                      <Label htmlFor="name" className="dark:text-foreground">Nome</Label>
+                      <Input id="name" placeholder="Seu nome" className="dark:bg-input dark:text-foreground dark:border-border" />
                     </div>
                     
                     <div>
-                      <Label htmlFor="email">Email</Label>
-                      <Input id="email" type="email" placeholder="seu@email.com" />
+                      <Label htmlFor="email" className="dark:text-foreground">Email</Label>
+                      <Input id="email" type="email" placeholder="seu@email.com" className="dark:bg-input dark:text-foreground dark:border-border" />
                     </div>
                     
                     <div>
-                      <Label htmlFor="subject">Assunto</Label>
-                      <Input id="subject" placeholder="Assunto da mensagem" />
+                      <Label htmlFor="subject" className="dark:text-foreground">Assunto</Label>
+                      <Input id="subject" placeholder="Assunto da mensagem" className="dark:bg-input dark:text-foreground dark:border-border" />
                     </div>
                     
                     <div>
-                      <Label htmlFor="message">Mensagem</Label>
+                      <Label htmlFor="message" className="dark:text-foreground">Mensagem</Label>
                       <Textarea 
                         id="message" 
                         placeholder="Descreva sua dúvida ou sugestão..." 
                         rows={5}
+                        className="dark:bg-input dark:text-foreground dark:border-border"
                       />
                     </div>
                     
@@ -296,52 +295,52 @@ const Help = () => {
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="dark:bg-card dark:border-border">
                   <CardHeader>
-                    <CardTitle>Outras Formas de Contato</CardTitle>
+                    <CardTitle className="dark:text-card-foreground">Outras Formas de Contato</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-6">
                     <div className="space-y-4">
                       <div className="flex items-center space-x-3">
-                        <Mail className="h-5 w-5 text-blue-600" />
+                        <Mail className="h-5 w-5 text-blue-600 dark:text-primary" />
                         <div>
-                          <div className="font-medium">Email</div>
-                          <div className="text-sm text-gray-600">suporte@kanbanapp.com</div>
+                          <div className="font-medium dark:text-foreground">Email</div>
+                          <div className="text-sm text-gray-600 dark:text-muted-foreground">suporte@kanbanapp.com</div>
                         </div>
                       </div>
                       
                       <div className="flex items-center space-x-3">
-                        <MessageCircle className="h-5 w-5 text-green-600" />
+                        <MessageCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
                         <div>
-                          <div className="font-medium">Chat Online</div>
-                          <div className="text-sm text-gray-600">Disponível de 9h às 18h</div>
+                          <div className="font-medium dark:text-foreground">Chat Online</div>
+                          <div className="text-sm text-gray-600 dark:text-muted-foreground">Disponível de 9h às 18h</div>
                         </div>
                       </div>
                     </div>
 
-                    <div className="border-t pt-6">
-                      <h4 className="font-medium mb-3">Horário de Atendimento</h4>
+                    <div className="border-t dark:border-border pt-6">
+                      <h4 className="font-medium mb-3 dark:text-foreground">Horário de Atendimento</h4>
                       <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
+                        <div className="flex justify-between dark:text-muted-foreground">
                           <span>Segunda a Sexta</span>
-                          <span className="font-medium">9:00 - 18:00</span>
+                          <span className="font-medium dark:text-foreground">9:00 - 18:00</span>
                         </div>
-                        <div className="flex justify-between">
+                        <div className="flex justify-between dark:text-muted-foreground">
                           <span>Sábado</span>
-                          <span className="font-medium">9:00 - 12:00</span>
+                          <span className="font-medium dark:text-foreground">9:00 - 12:00</span>
                         </div>
-                        <div className="flex justify-between">
+                        <div className="flex justify-between dark:text-muted-foreground">
                           <span>Domingo</span>
                           <span className="font-medium text-gray-500">Fechado</span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="border-t pt-6">
-                      <h4 className="font-medium mb-3">Status do Sistema</h4>
+                    <div className="border-t dark:border-border pt-6">
+                      <h4 className="font-medium mb-3 dark:text-foreground">Status do Sistema</h4>
                       <div className="flex items-center space-x-2">
                         <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <span className="text-sm text-green-600">Todos os sistemas operando normalmente</span>
+                        <span className="text-sm text-green-600 dark:text-green-400">Todos os sistemas operando normalmente</span>
                       </div>
                     </div>
                   </CardContent>
