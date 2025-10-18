@@ -33,11 +33,7 @@ export const MercadoPagoPayment: React.FC<MercadoPagoPaymentProps> = ({ preferen
         theme: document.documentElement.classList.contains('dark') ? 'dark' : 'default',
       },
     },
-    paymentMethods: {
-      creditCard: 'all' as const,
-      debitCard: 'all' as const,
-      pix: 'all' as const,
-    },
+    // Removido o objeto paymentMethods que estava causando o erro
   };
 
   const onSubmit = async (param: any) => {
@@ -53,7 +49,6 @@ export const MercadoPagoPayment: React.FC<MercadoPagoPaymentProps> = ({ preferen
     // Callback para quando o brick estiver pronto
   };
 
-  // Adicionando callback de renderização para diagnóstico
   const onRender = (containerId: string, paymentMethods: any) => {
     console.log('--- MÉTODOS DE PAGAMENTO DISPONÍVEIS ---');
     console.log('Container ID:', containerId);
@@ -70,7 +65,7 @@ export const MercadoPagoPayment: React.FC<MercadoPagoPaymentProps> = ({ preferen
           onSubmit={onSubmit}
           onError={onError}
           onReady={onReady}
-          onRender={onRender} // Adicionando o callback aqui
+          onRender={onRender}
         />
       ) : (
         <div className="flex justify-center items-center h-48">

@@ -51,7 +51,7 @@ const PricingPage = () => {
 
   const { data: profile, isLoading: profileLoading } = useQuery({
     queryKey: ['profile', user?.id],
-    fn: () => getProfile(user!.id),
+    queryFn: () => getProfile(user!.id), // Corrigido de 'fn' para 'queryFn'
     enabled: !!user,
   });
 
