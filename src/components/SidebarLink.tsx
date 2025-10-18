@@ -1,6 +1,6 @@
 "use client";
 
-import Link from 'next/link';
+import { Link } from 'react-router-dom';
 import { clsx } from 'clsx';
 
 interface SidebarLinkProps {
@@ -13,7 +13,7 @@ interface SidebarLinkProps {
 export const SidebarLink = ({ href, icon, children, active }: SidebarLinkProps) => {
   return (
     <Link
-      href={href}
+      to={href}
       className={clsx(
         'flex items-center p-2 rounded-md text-sm font-medium transition-colors',
         active

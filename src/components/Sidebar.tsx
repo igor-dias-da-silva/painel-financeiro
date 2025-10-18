@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname } from 'next/navigation';
+import { useLocation } from 'react-router-dom';
 import { Home, KanbanSquare, Settings, ShoppingCart } from 'lucide-react';
 import { SidebarLink } from './SidebarLink';
 import { Separator } from './ui/separator';
@@ -12,7 +12,8 @@ const links = [
 ];
 
 export const Sidebar = () => {
-  const pathname = usePathname();
+  const location = useLocation();
+  const pathname = location.pathname;
 
   return (
     <aside className="fixed top-0 left-0 z-40 w-64 h-screen p-4 border-r bg-card text-card-foreground">
