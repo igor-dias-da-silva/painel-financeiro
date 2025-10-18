@@ -13,7 +13,6 @@ import { AuthGuard } from '@/components/AuthGuard';
 import { supabase } from '@/integrations/supabase/client';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-// URL da Edge Function do Mercado Pago
 const MERCADO_PAGO_FUNCTION_URL = 'https://ruubwpgemhyzsrbqspnj.supabase.co/functions/v1/create-payment-preference';
 
 const PricingPage = () => {
@@ -23,7 +22,6 @@ const PricingPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Lógica para lidar com o retorno do pagamento
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const paymentStatus = params.get('payment');
@@ -43,11 +41,9 @@ const PricingPage = () => {
           showError('Ocorreu um erro inesperado durante o processamento do pagamento.');
           break;
       }
-      // Limpa o parâmetro da URL para evitar que o toast apareça novamente
       navigate(location.pathname, { replace: true });
     }
   }, [location.search, navigate]);
-
 
   const { data: profile, isLoading: profileLoading } = useQuery({
     queryKey: ['profile', user?.id],
@@ -90,22 +86,26 @@ const PricingPage = () => {
         });
 
         const data = await response.json();
+        
+        console.log('Response from Edge Function:', { status: response.status, body: data });
 
         if (!response.ok || data.error) {
-          throw new Error(data.error || 'Falha ao criar preferência de pagamento.');
+          throw new Error(data.error || `Falha ao criar preferência de pagamento. Status: ${response.status}`);
         }
 
-        // Redirecionar para o Mercado Pago
-        window.location.href = data.init_point;
+        if (data.init_point) {
+          window.location.href = data.init_point;
+        } else {
+          throw new Error('URL de pagamento não recebida do servidor.');
+        }
 
-      } catch (error) {
+      } catch (error: any) {
         console.error('Erro na integração com Mercado Pago:', error);
-        showError('Erro ao iniciar o pagamento. Tente novamente.');
+        showError(`Erro ao iniciar pagamento: ${error.message}`);
       } finally {
         setIsPaymentLoading(false);
       }
     } else {
-      // Lógica para downgrade para Free
       updateProfileMutation.mutate({ 
         subscription_plan: 'free',
         subscription_status: 'active',
@@ -304,7 +304,6 @@ const PricingPage = () => {
             })}
           </div>
 
-          {/* Perguntas Frequentes */}
           <div className="mt-16">
             <h2 className="text-2xl font-bold text-center mb-8 dark:text-foreground">Perguntas Frequentes</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
