@@ -23,7 +23,7 @@ export const MercadoPagoPayment: React.FC<MercadoPagoPaymentProps> = ({ preferen
   }, []);
 
   const initialization = {
-    amount: 19.90,
+    // O 'amount' foi removido daqui, pois já está definido na preferência de pagamento.
     preferenceId: preferenceId,
   };
 
@@ -33,7 +33,6 @@ export const MercadoPagoPayment: React.FC<MercadoPagoPaymentProps> = ({ preferen
         theme: document.documentElement.classList.contains('dark') ? 'dark' : 'default',
       },
     },
-    // Removido o objeto paymentMethods que estava causando o erro
   };
 
   const onSubmit = async (param: any) => {

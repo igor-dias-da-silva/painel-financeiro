@@ -12,7 +12,7 @@ import { showError, showSuccess } from '@/utils/toast';
 import { AuthGuard } from '@/components/AuthGuard';
 import { supabase } from '@/integrations/supabase/client';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { MercadoPagoPayment } from '@/components/MercadoPagoPayment';
 
 const MERCADO_PAGO_FUNCTION_URL = 'https://ruubwpgemhyzsrbqspnj.supabase.co/functions/v1/create-payment-preference';
@@ -51,7 +51,7 @@ const PricingPage = () => {
 
   const { data: profile, isLoading: profileLoading } = useQuery({
     queryKey: ['profile', user?.id],
-    queryFn: () => getProfile(user!.id), // Corrigido de 'fn' para 'queryFn'
+    queryFn: () => getProfile(user!.id),
     enabled: !!user,
   });
 
@@ -312,6 +312,9 @@ const PricingPage = () => {
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Efetuar Pagamento</DialogTitle>
+            <DialogDescription>
+              Complete os dados abaixo para finalizar a assinatura do plano Premium.
+            </DialogDescription>
           </DialogHeader>
           {preferenceId ? (
             <MercadoPagoPayment preferenceId={preferenceId} />
