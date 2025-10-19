@@ -1,206 +1,148 @@
 "use client";
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { DollarSign, Plus, Loader2, Tag, Edit, Trash2, ArrowUp, ArrowDown } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
 import { AuthGuard } from '@/components/AuthGuard';
-import { useAuth } from '@/hooks/useAuth';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getTransactions, deleteTransaction, Transaction, Category, getCategories } from '@/lib/transactions';
-import TransactionForm from '@/components/TransactionForm';
+import { TransactionForm } from '@/components/TransactionForm'; // CORRIGIDO: Importação nomeada
 import CategoryManager from '@/components/CategoryManager';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { showError, showSuccess } from '@/utils/toast';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Edit, Trash2, PlusCircle } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
+import { mockCategories, mockAccounts, mockTransactions } from '@/data/mockData';
 
 const Transactions = () => {
-  const { user } = useAuth();
-  const queryClient = useQueryClient();
-  const [isAdding, setIsAdding] = useState(false);
+  const [transactions, setTransactions] = useState<Transaction[]>(mockTransactions);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | undefined>(undefined);
+  const { toast } = useToast();
 
-  const { data: transactions = [], isLoading: isLoadingTransactions } = useQuery<Transaction[]>({
-    queryKey: ['transactions', user?.id],
-    queryFn: () => getTransactions(user!.id),
-    enabled: !!user?.id,
-  });
+  const categoriesMap = useMemo(() => {
+    return mockCategories.reduce((acc, cat) => {
+      acc[cat.id] = cat;
+      return acc;
+    }, {} as Record<string, Category>);
+  }, []);
 
-  const { data: categories = [], isLoading: isLoadingCategories } = useQuery<Category[]>({
-    queryKey: ['categories', user?.id],
-    queryFn: () => getCategories(user!.id),
-    enabled: !!user?.id,
-  });
+  const accountsMap = useMemo(() => {
+    return mockAccounts.reduce((acc, accItem) => {
+      acc[accItem.id] = accItem;
+      return acc;
+    }, {} as Record<string, any>); // Usando 'any' temporariamente, idealmente Account
+  }, []);
 
-  const deleteMutation = useMutation({
-    mutationFn: deleteTransaction,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['transactions'] });
-      showSuccess('Transação excluída com sucesso!');
-    },
-    onError: (error) => {
-      showError(`Erro ao excluir transação: ${error.message}`);
-    },
-  });
-
-  const handleDelete = (id: string) => {
-    if (window.confirm('Tem certeza que deseja excluir esta transação?')) {
-      deleteMutation.mutate(id);
+  const handleSaveTransaction = (data: any) => {
+    if (editingTransaction) {
+      // Lógica de edição
+      setTransactions(
+        transactions.map((t) => (t.id === editingTransaction.id ? { ...t, ...data } : t))
+      );
+    } else {
+      // Lógica de adição
+      const newTransaction: Transaction = {
+        ...data,
+        id: Date.now().toString(),
+      };
+      setTransactions([...transactions, newTransaction]);
     }
+    setIsFormOpen(false);
+    setEditingTransaction(undefined);
   };
 
-  const getCategoryName = (categoryId: string | null) => {
-    if (!categoryId) return 'Sem Categoria';
-    const category = categories.find(cat => cat.id === categoryId);
-    return category ? category.name : 'Desconhecida';
+  const handleDeleteTransaction = (id: string) => {
+    setTransactions(transactions.filter((t) => t.id !== id));
+    toast({
+      title: 'Transação Excluída',
+      description: 'A transação foi removida com sucesso.',
+      variant: 'destructive',
+    });
   };
 
-  const getCategoryColor = (categoryId: string | null) => {
-    if (!categoryId) return '#6B7280';
-    const category = categories.find(cat => cat.id === categoryId);
-    return category ? category.color || '#6B7280' : '#6B7280';
+  const handleEdit = (transaction: Transaction) => {
+    setEditingTransaction(transaction);
+    setIsFormOpen(true);
   };
-
-  const totalIncome = transactions
-    .filter(t => t.type === 'income')
-    .reduce((sum, t) => sum + t.amount, 0);
-
-  const totalExpense = transactions
-    .filter(t => t.type === 'expense')
-    .reduce((sum, t) => sum + t.amount, 0);
-
-  const balance = totalIncome - totalExpense;
 
   return (
     <AuthGuard>
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold">Transações</h1>
-          <div className="flex space-x-2">
-            <CategoryManager />
-            <Button onClick={() => setIsAdding(!isAdding)} className="flex items-center">
-              <Plus className="h-4 w-4 mr-2" />
-              {isAdding ? 'Fechar Formulário' : 'Nova Transação'}
+      <div className="p-4 md:p-6 space-y-6">
+        <h1 className="text-3xl font-bold">Transações</h1>
+
+        {/* Seção de Adicionar Transação */}
+        <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+          <DialogTrigger asChild>
+            <Button onClick={() => setEditingTransaction(undefined)}>
+              <PlusCircle className="h-4 w-4 mr-2" />
+              Adicionar Transação
             </Button>
-          </div>
-        </div>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>{editingTransaction ? 'Editar Transação' : 'Nova Transação'}</DialogTitle>
+            </DialogHeader>
+            <TransactionForm
+              initialData={editingTransaction}
+              onSubmit={handleSaveTransaction}
+            />
+          </DialogContent>
+        </Dialog>
 
-        {/* Formulário de Adição */}
-        {isAdding && (
-          <div className="mb-6">
-            <TransactionForm onSuccess={() => setIsAdding(false)} />
-          </div>
-        )}
-
-        {/* Resumo Financeiro */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="dark:bg-card dark:border-border">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Receitas Totais</CardTitle>
-              <ArrowUp className="h-4 w-4 text-green-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                {totalIncome.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="dark:bg-card dark:border-border">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Despesas Totais</CardTitle>
-              <ArrowDown className="h-4 w-4 text-red-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600 dark:text-red-400">
-                {totalExpense.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="dark:bg-card dark:border-border">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Saldo</CardTitle>
-              <DollarSign className="h-4 w-4 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <div className={`text-2xl font-bold ${balance >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                {balance.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Lista de Transações */}
-        <Card className="dark:bg-card dark:border-border">
+        {/* Tabela de Transações */}
+        <Card>
           <CardHeader>
-            <CardTitle className="text-xl">Histórico de Transações</CardTitle>
+            <CardTitle>Histórico de Transações</CardTitle>
           </CardHeader>
           <CardContent>
-            {isLoadingTransactions || isLoadingCategories ? (
-              <div className="flex justify-center items-center h-40">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
-            ) : transactions.length === 0 ? (
-              <div className="text-center py-10 text-muted-foreground">
-                Nenhuma transação registrada ainda. Comece adicionando uma!
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[100px]">Data</TableHead>
-                      <TableHead>Descrição</TableHead>
-                      <TableHead>Categoria</TableHead>
-                      <TableHead className="text-right">Valor</TableHead>
-                      <TableHead className="text-right w-[100px]">Ações</TableHead>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Data</TableHead>
+                    <TableHead>Descrição</TableHead>
+                    <TableHead>Tipo</TableHead>
+                    <TableHead>Categoria</TableHead>
+                    <TableHead>Conta</TableHead>
+                    <TableHead className="text-right">Valor</TableHead>
+                    <TableHead className="text-center">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {transactions.map((t) => (
+                    <TableRow key={t.id} className={t.type === 'income' ? 'bg-green-50/50 dark:bg-green-900/10' : 'bg-red-50/50 dark:bg-red-900/10'}>
+                      <TableCell>{t.date}</TableCell>
+                      <TableCell className="font-medium">{t.description}</TableCell>
+                      <TableCell>
+                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                          t.type === 'income' ? 'bg-green-200 text-green-800 dark:bg-green-800 dark:text-green-200' : 'bg-red-200 text-red-800 dark:bg-red-800 dark:text-red-200'
+                        }`}>
+                          {t.type === 'income' ? 'Receita' : 'Despesa'}
+                        </span>
+                      </TableCell>
+                      <TableCell>{categoriesMap[t.categoryId]?.name || 'N/A'}</TableCell>
+                      <TableCell>{accountsMap[t.accountId]?.name || 'N/A'}</TableCell>
+                      <TableCell className={`text-right font-semibold ${t.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                        {t.type === 'expense' ? '-' : ''}R$ {t.amount.toFixed(2)}
+                      </TableCell>
+                      <TableCell className="text-center space-x-2">
+                        <Button variant="ghost" size="icon" onClick={() => handleEdit(t)}>
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => handleDeleteTransaction(t.id)}>
+                          <Trash2 className="h-4 w-4 text-red-500" />
+                        </Button>
+                      </TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {transactions.map((transaction) => (
-                      <TableRow key={transaction.id}>
-                        <TableCell className="font-medium">
-                          {format(new Date(transaction.transaction_date), 'dd/MM/yyyy', { locale: ptBR })}
-                        </TableCell>
-                        <TableCell>{transaction.description || '-'}</TableCell>
-                        <TableCell>
-                          <Badge 
-                            style={{ backgroundColor: getCategoryColor(transaction.category_id), color: '#fff' }}
-                            className="hover:opacity-80"
-                          >
-                            {getCategoryName(transaction.category_id)}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className={`text-right font-semibold ${transaction.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                          {transaction.type === 'income' ? '+' : '-'}
-                          {transaction.amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end space-x-1">
-                            {/* TODO: Implementar edição */}
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              className="h-8 w-8 text-red-500 hover:bg-red-100 dark:hover:bg-red-900"
-                              onClick={() => handleDelete(transaction.id)}
-                              disabled={deleteMutation.isPending}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </CardContent>
         </Card>
+
+        {/* Seção de Gerenciamento de Categorias */}
+        <CategoryManager />
       </div>
     </AuthGuard>
   );
