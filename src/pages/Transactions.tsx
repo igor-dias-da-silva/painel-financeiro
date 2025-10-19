@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from 'react';
-import { AuthGuard } from '@/components/AuthGuard';
-import { TransactionForm } from '@/components/TransactionForm';
+import TransactionForm from '@/components/TransactionForm'; // Importação padrão
 import CategoryManager from '@/components/CategoryManager';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,8 +10,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Edit, Trash2, PlusCircle } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { mockCategories, mockAccounts, mockTransactions } from '@/data/mockData';
-import { Transaction, Category, Account } from '@/data/types'; // Importando tipos corretos
-import { getTransactions } from '@/lib/transactions'; // Importando getTransactions para resolver dependência
+import { Transaction, Category, Account } from '@/data/types';
+import { getTransactions } from '@/lib/transactions';
 
 // Definindo o tipo de dados que o TransactionForm retorna
 interface TransactionFormValues {

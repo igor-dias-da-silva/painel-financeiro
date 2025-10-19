@@ -45,7 +45,7 @@ interface TransactionFormProps {
   onSubmit: (data: TransactionFormValues) => void;
 }
 
-export const TransactionForm: React.FC<TransactionFormProps> = ({ initialData, onSubmit }) => {
+const TransactionForm: React.FC<TransactionFormProps> = ({ initialData, onSubmit }) => {
   const { toast } = useToast();
   
   const defaultValues: Partial<TransactionFormValues> = initialData
@@ -236,3 +236,5 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({ initialData, o
     </Card>
   );
 };
+
+export default TransactionForm;
