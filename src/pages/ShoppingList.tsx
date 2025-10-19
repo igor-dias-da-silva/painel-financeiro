@@ -14,6 +14,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getOrCreateBudget, getShoppingItems, addShoppingItem, updateShoppingItem, deleteShoppingItem, ShoppingItem } from '@/lib/shopping';
 import { showError, showSuccess } from '@/utils/toast';
 import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import { exportToPdf } from '@/utils/export';
 import { useProfile } from '@/hooks/useProfile';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -204,7 +205,7 @@ const ShoppingListPage = () => {
             <div className="lg:col-span-2">
               <Card id={SHOPPING_LIST_ID}> {/* Adicionado ID para exportação */}
                 <CardHeader>
-                  <CardTitle>Itens para {format(currentDate, 'MMMM/yyyy')}</CardTitle>
+                  <CardTitle>Itens para {format(currentDate, 'MMMM/yyyy', { locale: ptBR })}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="overflow-x-auto">

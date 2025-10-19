@@ -15,6 +15,7 @@ import { useFinancialSummary } from '@/hooks/useFinancialSummary'; // Importando
 import { showError, showSuccess } from '@/utils/toast';
 import { AuthGuard } from '@/components/AuthGuard';
 import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import { PremiumFeatureGuard } from '@/components/PremiumFeatureGuard';
 
 const BudgetPage = () => {
@@ -113,7 +114,7 @@ const BudgetPage = () => {
             <h1 className="text-3xl font-bold">Orçamento Mensal</h1>
           </div>
           <p className="text-muted-foreground mb-6">
-            Defina limites de gastos para cada categoria neste mês ({format(currentDate, 'MMMM/yyyy')}).
+            Defina limites de gastos para cada categoria neste mês ({format(currentDate, 'MMMM/yyyy', { locale: ptBR })}).
           </p>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
