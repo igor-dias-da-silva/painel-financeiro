@@ -25,22 +25,11 @@ import { useAuth } from '@/hooks/useAuth';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ThemeToggle } from './ThemeToggle';
 import { useProfile } from '@/hooks/useProfile';
-
-const navItems = [
-  { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
-  { name: 'Transações', icon: DollarSign, path: '/transactions' },
-  { name: 'Contas', icon: Wallet, path: '/accounts' }, // NOVO ITEM
-  { name: 'Contas a Pagar', icon: Receipt, path: '/bills' },
-  { name: 'Lista de Compras', icon: ShoppingCart, path: '/shopping-list' },
-  { name: 'Orçamento', icon: TrendingUp, path: '/budget' },
-  { name: 'Planos', icon: Crown, path: '/pricing' },
-  { name: 'Configurações', icon: Settings, path: '/settings' },
-  { name: 'Perfil', icon: User, path: '/profile' },
-  { name: 'Ajuda', icon: HelpCircle, path: '/help' },
-];
+import { useTranslation } from 'react-i18next';
 
 // Removendo a prop 'children' da assinatura do componente
 export const Layout: React.FC = () => {
+  const { t } = useTranslation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const { user, logout } = useAuth();
@@ -48,12 +37,25 @@ export const Layout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const navItems = [
+    { name: t('sidebar.dashboard'), icon: LayoutDashboard, path: '/dashboard' },
+    { name: t('sidebar.transactions'), icon: DollarSign, path: '/transactions' },
+    { name: t('sidebar.accounts'), icon: Wallet, path: '/accounts' }, // NOVO ITEM
+    { name: t('sidebar.bills'), icon: Receipt, path: '/bills' },
+    { name: t('sidebar.shoppingList'), icon: ShoppingCart, path: '/shopping-list' },
+    { name: t('sidebar.budget'), icon: TrendingUp, path: '/budget' },
+    { name: t('sidebar.plans'), icon: Crown, path: '/pricing' },
+    { name: t('sidebar.settings'), icon: Settings, path: '/settings' },
+    { name: t('sidebar.profile'), icon: User, path: '/profile' },
+    { name: t('sidebar.help'), icon: HelpCircle, path: '/help' },
+  ];
+
   const handleLogout = async () => {
     await logout();
     navigate('/login');
   };
 
-  const adminNavItem = { name: 'Admin', icon: Shield, path: '/admin' };
+  const adminNavItem = { name: t('sidebar.admin'), icon: Shield, path: '/admin' };
   const fullNavItems = isAdmin ? [...navItems, adminNavItem] : navItems;
 
   const SidebarContent = () => (
@@ -84,7 +86,7 @@ export const Layout: React.FC = () => {
             <AvatarFallback>{user?.name?.charAt(0) || 'U'}</AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <span className="text-sm font-medium truncate">{user?.name || 'Usuário'}</span>
+            <span className="text-sm font-medium truncate">{user?.name || t('profileMenu.userPlaceholder')}</span>
           </div>
           {isProfileMenuOpen ? <ChevronUp className="h-4 w-4 flex-shrink-0" /> : <ChevronDown className="h-4 w-4 flex-shrink-0" />}
         </div>
@@ -95,7 +97,7 @@ export const Layout: React.FC = () => {
               className="block px-4 py-2 text-sm hover:bg-sidebar-primary"
               onClick={() => setIsProfileMenuOpen(false)}
             >
-              Perfil
+              {t('profileMenu.profile')}
             </Link>
             <button
               onClick={() => {
@@ -105,7 +107,7 @@ export const Layout: React.FC = () => {
               className="w-full text-left flex items-center px-4 py-2 text-sm text-destructive-foreground hover:bg-destructive"
             >
               <LogOut className="h-4 w-4 mr-2" />
-              Sair
+              {t('profileMenu.logout')}
             </button>
           </div>
         )}
@@ -152,7 +154,7 @@ export const Layout: React.FC = () => {
                 <AvatarFallback>{user?.name?.charAt(0) || 'U'}</AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <span className="text-sm font-medium truncate">{user?.name || 'Usuário'}</span>
+                <span className="text-sm font-medium truncate">{user?.name || t('profileMenu.userPlaceholder')}</span>
               </div>
               {isProfileMenuOpen ? <ChevronUp className="h-4 w-4 flex-shrink-0" /> : <ChevronDown className="h-4 w-4 flex-shrink-0" />}
             </div>
@@ -163,7 +165,7 @@ export const Layout: React.FC = () => {
                   className="block px-4 py-2 text-sm hover:bg-sidebar-primary"
                   onClick={() => setIsProfileMenuOpen(false)}
                 >
-                  Perfil
+                  {t('profileMenu.profile')}
                 </Link>
                 <button
                   onClick={() => {
@@ -173,7 +175,7 @@ export const Layout: React.FC = () => {
                   className="w-full text-left flex items-center px-4 py-2 text-sm text-destructive-foreground hover:bg-destructive"
                 >
                   <LogOut className="h-4 w-4 mr-2" />
-                  Sair
+                  {t('profileMenu.logout')}
                 </button>
               </div>
             )}
@@ -199,7 +201,7 @@ export const Layout: React.FC = () => {
               </Sheet>
             </div>
             <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
-              {fullNavItems.find(item => item.path === location.pathname)?.name || 'Página'}
+              {fullNavItems.find(item => item.path === location.pathname)?.name || t('header.pageTitlePlaceholder')}
             </h2>
           </div>
           <div className="flex items-center space-x-2">

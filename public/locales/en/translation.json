@@ -17,5 +17,26 @@
   "languages": {
     "pt": "Portuguese",
     "en": "English"
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "transactions": "Transactions",
+    "accounts": "Accounts",
+    "bills": "Bills to Pay",
+    "shoppingList": "Shopping List",
+    "budget": "Budget",
+    "plans": "Plans",
+    "settings": "Settings",
+    "profile": "Profile",
+    "help": "Help",
+    "admin": "Admin"
+  },
+  "header": {
+    "pageTitlePlaceholder": "Page"
+  },
+  "profileMenu": {
+    "profile": "Profile",
+    "logout": "Log Out",
+    "userPlaceholder": "User"
   }
 }
