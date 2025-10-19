@@ -13,7 +13,15 @@ import { AuthGuard } from '@/components/AuthGuard';
 import { showError, showSuccess } from '@/utils/toast';
 import AccountForm from '@/components/AccountForm';
 import { Account, AccountInsert } from '@/data/types';
-import { EditAccountDialog } from '@/components/EditAccountDialog'; // Importando o novo componente
+import { EditAccountDialog } from '@/components/EditAccountDialog';
+import { useProfile } from '@/hooks/useProfile';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Link } from 'react-router-dom';
 
 // Definindo o tipo de dados que o AccountForm retorna
 interface AccountFormValues {
@@ -24,6 +32,7 @@ interface AccountFormValues {
 
 const AccountsPage = () => {
   const { user } = useAuth();
+  const { profile, isLoading: isLoadingProfile } = useProfile();
   const userId = user?.id;
   const queryClient = useQueryClient();
 
@@ -58,6 +67,13 @@ const AccountsPage = () => {
       return;
     }
 
+    // Lógica de Limitação de Contas
+    if (profile?.subscription_plan === 'free' && accounts.length >= 1) {
+      showError('Seu plano gratuito permite apenas 1 conta. Faça upgrade para Premium para adicionar mais.');
+      setIsFormOpen(false);
+      return;
+    }
+
     const payload: AccountInsert = {
       name: data.name,
       balance: data.balance,
@@ -84,7 +100,42 @@ const AccountsPage = () => {
     }
   };
 
-  const isLoading = isLoadingAccounts || insertMutation.isPending;
+  const isLoading = isLoadingAccounts || isLoadingProfile || insertMutation.isPending;
+  const isAddAccountDisabled = profile?.subscription_plan === 'free' && accounts.length >= 1;
+
+  const AddAccountButton = () => (
+    <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="inline-block">
+              <DialogTrigger asChild>
+                <Button onClick={() => setIsFormOpen(true)} disabled={isAddAccountDisabled}>
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Adicionar Conta
+                </Button>
+              </DialogTrigger>
+            </div>
+          </TooltipTrigger>
+          {isAddAccountDisabled && (
+            <TooltipContent>
+              <p>Seu plano gratuito permite apenas 1 conta.</p>
+              <Link to="/pricing" className="text-primary underline">Faça upgrade para Premium.</Link>
+            </TooltipContent>
+          )}
+        </Tooltip>
+      </TooltipProvider>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Nova Conta Financeira</DialogTitle>
+        </DialogHeader>
+        <AccountForm 
+          onSubmit={handleSaveAccount} 
+          isSubmitting={insertMutation.isPending} 
+        />
+      </DialogContent>
+    </Dialog>
+  );
 
   return (
     <AuthGuard>
@@ -94,24 +145,7 @@ const AccountsPage = () => {
             <Wallet className="h-8 w-8 mr-3 text-primary" />
             <h1 className="text-3xl font-bold">Minhas Contas</h1>
           </div>
-          
-          <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={() => setIsFormOpen(true)}>
-                <PlusCircle className="h-4 w-4 mr-2" />
-                Adicionar Conta
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Nova Conta Financeira</DialogTitle>
-              </DialogHeader>
-              <AccountForm 
-                onSubmit={handleSaveAccount} 
-                isSubmitting={insertMutation.isPending} 
-              />
-            </DialogContent>
-          </Dialog>
+          <AddAccountButton />
         </div>
 
         {isLoading ? (

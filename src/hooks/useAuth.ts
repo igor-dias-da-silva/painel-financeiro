@@ -111,6 +111,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         data: {
           full_name: name,
         },
+        emailRedirectTo: `${window.location.origin}/login`,
       },
     });
 
