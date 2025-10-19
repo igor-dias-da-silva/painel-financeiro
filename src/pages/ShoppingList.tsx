@@ -49,7 +49,7 @@ const ShoppingListPage = () => {
   });
 
   const addMutation = useMutation({
-    mutationFn: (newItem: Omit<ShoppingItem, 'id' | 'created_at' | 'budget_id'> & { budget_id: string }) => addShoppingItem(newItem),
+    mutationFn: (newItem: Omit<ShoppingItem, 'id' | 'created_at'>) => addShoppingItem(newItem),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['shoppingItems', budget?.id] });
       showSuccess('Item adicionado à lista!');
@@ -74,8 +74,9 @@ const ShoppingListPage = () => {
   const handleAddItem = (e: React.FormEvent) => {
     e.preventDefault();
     const price = parseFloat(newItemPrice);
-    if (newItemName.trim() && !isNaN(price) && price >= 0 && budget) {
+    if (newItemName.trim() && !isNaN(price) && price >= 0 && budget && user) {
       addMutation.mutate({
+        user_id: user.id,
         budget_id: budget.id,
         name: newItemName.trim(),
         price,
