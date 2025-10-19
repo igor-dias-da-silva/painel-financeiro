@@ -2,7 +2,7 @@
 
 import React, { useMemo, useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { DollarSign, ArrowUp, ArrowDown, TrendingUp, Receipt } from 'lucide-react';
+import { DollarSign, ArrowUp, ArrowDown, TrendingUp, Receipt, Loader2 } from 'lucide-react';
 import { AuthGuard } from '@/components/AuthGuard';
 import { Transaction, Category } from '@/data/types';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
