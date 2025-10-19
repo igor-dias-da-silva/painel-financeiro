@@ -8,13 +8,13 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Trash2, ShoppingCart, Loader2, CheckCircle, FileText } from 'lucide-react';
+import { Plus, Trash2, ShoppingCart, Loader2, CheckCircle, FileText, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getOrCreateBudget, getShoppingItems, addShoppingItem, updateShoppingItem, deleteShoppingItem, ShoppingItem } from '@/lib/shopping';
 import { showError, showSuccess } from '@/utils/toast';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { format, addMonths, subMonths } from 'date-fns';
+import { ptBR, enUS } from 'date-fns/locale';
 import { exportToPdf } from '@/utils/export';
 import { useProfile } from '@/hooks/useProfile';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -24,7 +24,7 @@ import { useTranslation } from 'react-i18next';
 const SHOPPING_LIST_ID = 'shopping-list-export-content';
 
 const ShoppingListPage = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user, isLoading: authLoading } = useAuth();
   const { profile, isLoading: profileLoading } = useProfile();
   const queryClient = useQueryClient();
@@ -32,15 +32,16 @@ const ShoppingListPage = () => {
   const [newItemName, setNewItemName] = useState('');
   const [newItemPrice, setNewItemPrice] = useState('');
   const [isExporting, setIsExporting] = useState(false);
+  const [displayDate, setDisplayDate] = useState(new Date());
 
-  const currentDate = new Date();
-  const currentMonth = currentDate.getMonth() + 1;
-  const currentYear = currentDate.getFullYear();
+  const displayMonth = displayDate.getMonth() + 1;
+  const displayYear = displayDate.getFullYear();
+  const locale = i18n.language === 'en' ? enUS : ptBR;
 
   // 1. Fetch/Create Budget for the month
   const { data: budget, isLoading: budgetLoading } = useQuery({
-    queryKey: ['monthlyBudget', user?.id, currentMonth, currentYear],
-    queryFn: () => getOrCreateBudget(user!.id, currentMonth, currentYear),
+    queryKey: ['monthlyBudget', user?.id, displayMonth, displayYear],
+    queryFn: () => getOrCreateBudget(user!.id, displayMonth, displayYear),
     enabled: !!user,
   });
 
@@ -97,7 +98,7 @@ const ShoppingListPage = () => {
   const handleExport = async () => {
     setIsExporting(true);
     try {
-      const filename = `Lista_Compras_${format(currentDate, 'MM_yyyy')}.pdf`;
+      const filename = `Lista_Compras_${format(displayDate, 'MM_yyyy')}.pdf`;
       await exportToPdf(SHOPPING_LIST_ID, filename);
       showSuccess('Lista exportada para PDF!');
     } catch (e) {
@@ -105,6 +106,14 @@ const ShoppingListPage = () => {
     } finally {
       setIsExporting(false);
     }
+  };
+
+  const handlePrevMonth = () => {
+    setDisplayDate(current => subMonths(current, 1));
+  };
+
+  const handleNextMonth = () => {
+    setDisplayDate(current => addMonths(current, 1));
   };
 
   const formatCurrency = (value: number) => {
@@ -205,9 +214,19 @@ const ShoppingListPage = () => {
             </div>
 
             <div className="lg:col-span-2">
-              <Card id={SHOPPING_LIST_ID}> {/* Adicionado ID para exportação */}
+              <Card id={SHOPPING_LIST_ID}>
                 <CardHeader>
-                  <CardTitle>{t('shoppingList.itemsForMonth', { month: format(currentDate, 'MMMM/yyyy', { locale: ptBR }) })}</CardTitle>
+                  <div className="flex justify-between items-center">
+                    <CardTitle>{t('shoppingList.itemsForMonth', { month: format(displayDate, 'MMMM/yyyy', { locale }) })}</CardTitle>
+                    <div className="flex items-center gap-2">
+                      <Button variant="outline" size="icon" onClick={handlePrevMonth}>
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                      <Button variant="outline" size="icon" onClick={handleNextMonth}>
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="overflow-x-auto">
