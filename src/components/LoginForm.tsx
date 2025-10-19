@@ -31,14 +31,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
     setIsLoading(true);
 
     try {
-      const success = await login(email, password);
-      if (success) {
-        navigate('/dashboard');
-      } else {
-        setError('Email ou senha inválidos');
-      }
-    } catch (err) {
-      setError('Ocorreu um erro ao fazer login');
+      await login(email, password);
+      navigate('/dashboard');
+    } catch (err: any) {
+      setError(err.message || 'Ocorreu um erro ao fazer login');
     } finally {
       setIsLoading(false);
     }

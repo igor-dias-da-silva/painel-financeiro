@@ -36,23 +36,19 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
       return;
     }
 
-    if (password.length < 6) {
-      setError('A senha deve ter pelo menos 6 caracteres');
+    if (password.length < 8) {
+      setError('A senha deve ter pelo menos 8 caracteres');
       return;
     }
 
     setIsLoading(true);
 
     try {
-      const success = await register(name, email, password);
-      if (success) {
-        showSuccess('Conta criada! Verifique seu e-mail para confirmar e poder fazer login.');
-        onToggleMode(); // Muda para a tela de login
-      } else {
-        setError('Erro ao criar conta. O email pode já estar em uso.');
-      }
-    } catch (err) {
-      setError('Ocorreu um erro ao criar conta');
+      await register(name, email, password);
+      showSuccess('Conta criada! Verifique seu e-mail para confirmar e poder fazer login.');
+      onToggleMode(); // Muda para a tela de login
+    } catch (err: any) {
+      setError(err.message || 'Ocorreu um erro ao criar conta');
     } finally {
       setIsLoading(false);
     }
@@ -107,7 +103,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Mínimo 6 caracteres"
+                placeholder="Mínimo 8 caracteres"
                 className="pl-10 pr-10"
                 required
               />

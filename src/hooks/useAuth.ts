@@ -73,59 +73,62 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+  const login = async (email: string, password: string): Promise<void> => {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-      if (error) {
-        console.error('Login error:', error);
-        return false;
+    if (error) {
+      console.error('Login error:', error);
+      if (error instanceof AuthApiError) {
+        if (error.message.includes('Email not confirmed')) {
+          throw new Error('Email não confirmado. Verifique sua caixa de entrada.');
+        }
+        if (error.message.includes('Invalid login credentials')) {
+          throw new Error('Email ou senha inválidos.');
+        }
       }
+      throw new Error('Ocorreu um erro ao fazer login.');
+    }
 
-      if (data.user) {
-        const userData: User = {
-          id: data.user.id,
-          name: data.user.user_metadata?.full_name || data.user.email?.split('@')[0] || 'Usuário',
-          email: data.user.email!,
-          createdAt: data.user.created_at,
-        };
-        setUser(userData);
-        return true;
-      }
-
-      return false;
-    } catch (error) {
-        console.error('Login error:', error);
-        return false;
+    if (data.user) {
+      const userData: User = {
+        id: data.user.id,
+        name: data.user.user_metadata?.full_name || data.user.email?.split('@')[0] || 'Usuário',
+        email: data.user.email!,
+        createdAt: data.user.created_at,
+      };
+      setUser(userData);
     }
   };
 
-  const register = async (name: string, email: string, password: string): Promise<boolean> => {
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: name,
-          },
+  const register = async (name: string, email: string, password: string): Promise<void> => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: name,
         },
-      });
+      },
+    });
 
-      if (error) {
-        console.error('Register error:', error);
-        return false;
-      }
-
-      // Retorna sucesso se o usuário foi criado, mesmo que precise confirmar o e-mail.
-      // Não fazemos o login automático aqui.
-      return data.user !== null;
-    } catch (error) {
+    if (error) {
       console.error('Register error:', error);
-      return false;
+      if (error instanceof AuthApiError) {
+        if (error.message.includes('Password should be at least')) {
+          throw new Error('A senha deve ter pelo menos 8 caracteres.');
+        }
+        if (error.message.includes('User already registered')) {
+          throw new Error('Este e-mail já está em uso.');
+        }
+      }
+      throw new Error('Ocorreu um erro ao criar a conta.');
+    }
+
+    if (!data.user) {
+      throw new Error('Não foi possível criar o usuário.');
     }
   };
 
