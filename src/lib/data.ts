@@ -165,3 +165,36 @@ export async function deleteTransaction(id: string): Promise<void> {
     throw error;
   }
 }
+
+// --- Funções de Exclusão em Massa ---
+
+/**
+ * Exclui todos os dados financeiros (transações, contas, categorias, orçamentos, itens de compra, contas a pagar)
+ * associados ao usuário logado.
+ */
+export async function deleteAllFinancialData(userId: string): Promise<void> {
+  const tablesToDelete = [
+    'transactions',
+    'accounts',
+    'categories',
+    'monthly_budgets',
+    'shopping_items',
+    'bills',
+  ];
+
+  const deletePromises = tablesToDelete.map(tableName => 
+    supabase
+      .from(tableName)
+      .delete()
+      .eq('user_id', userId)
+  );
+
+  const results = await Promise.all(deletePromises);
+
+  for (const result of results) {
+    if (result.error) {
+      console.error(`Error deleting data from table ${result.error.details}:`, result.error);
+      throw new Error(`Falha ao excluir dados: ${result.error.message}`);
+    }
+  }
+}
