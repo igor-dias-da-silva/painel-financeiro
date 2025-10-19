@@ -1,5 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
-import { Account, Category, CategoryInsert, Transaction, TransactionInsert } from '@/data/types';
+import { Account, Category, CategoryInsert, Transaction, TransactionInsert, AccountInsert } from '@/data/types';
 
 // --- Funções de Contas (Accounts) ---
 
@@ -14,6 +14,28 @@ export async function getAccounts(): Promise<Account[]> {
     throw error;
   }
   return data as Account[];
+}
+
+export async function insertAccount(account: AccountInsert): Promise<Account> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("User not authenticated for insert operation.");
+
+  const accountWithUser = {
+    ...account,
+    user_id: user.id,
+  };
+
+  const { data, error } = await supabase
+    .from('accounts')
+    .insert(accountWithUser)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error inserting account:', error);
+    throw error;
+  }
+  return data as Account;
 }
 
 // --- Funções de Categorias (Categories) ---

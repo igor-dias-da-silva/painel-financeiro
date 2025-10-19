@@ -18,7 +18,8 @@ import {
   Crown,
   Shield,
   DollarSign,
-  TrendingUp, // Importando TrendingUp para o ícone de Orçamento
+  TrendingUp,
+  Wallet, // Importando Wallet para o ícone de Contas
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -28,9 +29,10 @@ import { useProfile } from '@/hooks/useProfile';
 const navItems = [
   { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
   { name: 'Transações', icon: DollarSign, path: '/transactions' },
+  { name: 'Contas', icon: Wallet, path: '/accounts' }, // NOVO ITEM
   { name: 'Contas a Pagar', icon: Receipt, path: '/bills' },
   { name: 'Lista de Compras', icon: ShoppingCart, path: '/shopping-list' },
-  { name: 'Orçamento', icon: TrendingUp, path: '/budget' }, // NOVO ITEM
+  { name: 'Orçamento', icon: TrendingUp, path: '/budget' },
   { name: 'Planos', icon: Crown, path: '/pricing' },
   { name: 'Configurações', icon: Settings, path: '/settings' },
   { name: 'Perfil', icon: User, path: '/profile' },

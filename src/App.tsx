@@ -19,9 +19,10 @@ import Settings from './pages/Settings';
 import Help from './pages/Help';
 import PricingPage from './pages/PricingPage';
 import UpdatePassword from './pages/UpdatePassword';
-import AdminPage from './pages/AdminPage';
+import AdminPage from './pages/AdminDashboard'; // Corrigido para AdminDashboard
 import Transactions from './pages/Transactions';
-import BudgetPage from './pages/Budget'; // Importando a nova página
+import BudgetPage from './pages/Budget';
+import AccountsPage from './pages/Accounts'; // Importando a nova página
 
 const queryClient = new QueryClient();
 
@@ -44,12 +45,13 @@ const App = () => {
                 <Route path="/shopping-list" element={<ShoppingList />} />
                 <Route path="/bills" element={<Bills />} />
                 <Route path="/transactions" element={<Transactions />} />
+                <Route path="/accounts" element={<AccountsPage />} /> {/* Nova Rota */}
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/help" element={<Help />} />
                 <Route path="/pricing" element={<PricingPage />} />
                 <Route path="/admin" element={<AdminPage />} />
-                <Route path="/budget" element={<BudgetPage />} /> {/* Nova Rota */}
+                <Route path="/budget" element={<BudgetPage />} />
               </Route>
             </Routes>
           </AuthProvider>
