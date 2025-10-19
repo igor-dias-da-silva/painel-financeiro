@@ -1,0 +1,21 @@
+{
+  "settings": {
+    "title": "Configurações",
+    "description": "Gerencie suas preferências e dados do aplicativo FinanBoard",
+    "appearance": "Aparência",
+    "darkMode": "Modo Escuro",
+    "darkModeDescription": "Ative o tema escuro para melhor visualização noturna",
+    "notifications": "Notificações",
+    "notificationsToggle": "Notificações",
+    "notificationsDescription": "Receba notificações sobre suas finanças",
+    "data": "Dados",
+    "deleteAllData": "Excluir Todos os Dados",
+    "deleteAllDataDescription": "Esta ação excluirá permanentemente todos os seus dados financeiros.",
+    "language": "Idioma",
+    "languageDescription": "Escolha o idioma de sua preferência para o aplicativo."
+  },
+  "languages": {
+    "pt": "Português",
+    "en": "Inglês"
+  }
+}
