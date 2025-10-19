@@ -37,6 +37,7 @@ const ShoppingListPage = () => {
   const displayMonth = displayDate.getMonth() + 1;
   const displayYear = displayDate.getFullYear();
   const locale = i18n.language === 'en' ? enUS : ptBR;
+  const dateFormat = i18n.language === 'pt' ? "MMMM 'de' yyyy" : 'MMMM yyyy';
 
   // 1. Fetch/Create Budget for the month
   const { data: budget, isLoading: budgetLoading } = useQuery({
@@ -217,7 +218,7 @@ const ShoppingListPage = () => {
               <Card id={SHOPPING_LIST_ID}>
                 <CardHeader>
                   <div className="flex justify-between items-center">
-                    <CardTitle>{t('shoppingList.itemsForMonth', { month: format(displayDate, 'MMMM/yyyy', { locale }) })}</CardTitle>
+                    <CardTitle>{t('shoppingList.itemsForMonth', { month: format(displayDate, dateFormat, { locale }) })}</CardTitle>
                     <div className="flex items-center gap-2">
                       <Button variant="outline" size="icon" onClick={handlePrevMonth}>
                         <ChevronLeft className="h-4 w-4" />
