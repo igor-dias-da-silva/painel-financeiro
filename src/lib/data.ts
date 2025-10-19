@@ -1,5 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
-import { Account, Category, Transaction, TransactionInsert } from '@/data/types';
+import { Account, Category, CategoryInsert, Transaction, TransactionInsert } from '@/data/types';
 
 // --- Funções de Contas (Accounts) ---
 
@@ -31,6 +31,55 @@ export async function getCategories(): Promise<Category[]> {
   return data as Category[];
 }
 
+export async function insertCategory(category: CategoryInsert): Promise<Category> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("User not authenticated for insert operation.");
+
+  const categoryWithUser = {
+    ...category,
+    user_id: user.id,
+  };
+
+  const { data, error } = await supabase
+    .from('categories')
+    .insert(categoryWithUser)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error inserting category:', error);
+    throw error;
+  }
+  return data as Category;
+}
+
+export async function updateCategory(id: string, updates: Partial<CategoryInsert>): Promise<Category> {
+  const { data, error } = await supabase
+    .from('categories')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error updating category:', error);
+    throw error;
+  }
+  return data as Category;
+}
+
+export async function deleteCategory(id: string): Promise<void> {
+  const { error } = await supabase
+    .from('categories')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    console.error('Error deleting category:', error);
+    throw error;
+  }
+}
+
 // --- Funções de Transações (Transactions) ---
 
 export async function getTransactions(): Promise<Transaction[]> {
@@ -47,9 +96,17 @@ export async function getTransactions(): Promise<Transaction[]> {
 }
 
 export async function insertTransaction(transaction: TransactionInsert): Promise<Transaction> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("User not authenticated for insert operation.");
+
+  const transactionWithUser = {
+    ...transaction,
+    user_id: user.id,
+  };
+
   const { data, error } = await supabase
     .from('transactions')
-    .insert(transaction)
+    .insert(transactionWithUser)
     .select()
     .single();
 

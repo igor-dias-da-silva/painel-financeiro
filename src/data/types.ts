@@ -9,7 +9,7 @@ export type AccountInsert = Tables['accounts']['Insert'];
 
 // --- Tipos de Categorias ---
 export type Category = Tables['categories']['Row'];
-export type CategoryInsert = Tables['categories']['Insert'];
+export type CategoryInsert = Omit<Tables['categories']['Insert'], 'user_id' | 'created_at'>;
 
 // --- Tipos de Transações ---
 export type Transaction = Tables['transactions']['Row'];

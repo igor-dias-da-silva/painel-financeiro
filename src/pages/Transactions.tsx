@@ -108,7 +108,7 @@ const Transactions = () => {
 
     // Mapeamento dos campos do formulário (camelCase) para os campos do Supabase (snake_case)
     const payload: TransactionInsert = {
-      user_id: userId,
+      // user_id: userId, // <-- Erro corrigido: removido user_id para corresponder ao tipo TransactionInsert
       description: data.description,
       amount: data.amount,
       type: data.type,
