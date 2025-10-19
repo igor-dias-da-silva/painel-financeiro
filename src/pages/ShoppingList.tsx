@@ -8,12 +8,15 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Trash2, ShoppingCart, Loader2, CheckCircle } from 'lucide-react';
+import { Plus, Trash2, ShoppingCart, Loader2, CheckCircle, FileText } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getOrCreateBudget, getShoppingItems, addShoppingItem, updateShoppingItem, deleteShoppingItem, ShoppingItem } from '@/lib/shopping';
 import { showError, showSuccess } from '@/utils/toast';
 import { format } from 'date-fns';
+import { exportToPdf } from '@/utils/export';
+
+const SHOPPING_LIST_ID = 'shopping-list-export-content';
 
 const ShoppingListPage = () => {
   const { user, isLoading: authLoading } = useAuth();
@@ -21,6 +24,7 @@ const ShoppingListPage = () => {
 
   const [newItemName, setNewItemName] = useState('');
   const [newItemPrice, setNewItemPrice] = useState('');
+  const [isExporting, setIsExporting] = useState(false);
 
   const currentDate = new Date();
   const currentMonth = currentDate.getMonth() + 1;
@@ -82,6 +86,19 @@ const ShoppingListPage = () => {
     updateMutation.mutate({ itemId: item.id, updates: { purchased: !item.purchased } });
   };
 
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      const filename = `Lista_Compras_${format(currentDate, 'MM_yyyy')}.pdf`;
+      await exportToPdf(SHOPPING_LIST_ID, filename);
+      showSuccess('Lista exportada para PDF!');
+    } catch (e) {
+      // Erro já tratado dentro de exportToPdf
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   const formatCurrency = (value: number) => {
     return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   };
@@ -97,9 +114,19 @@ const ShoppingListPage = () => {
   return (
     <AuthGuard>
       <div className="container mx-auto p-4 md:p-6">
-        <div className="flex items-center mb-6">
-          <ShoppingCart className="h-8 w-8 mr-3 text-primary" />
-          <h1 className="text-3xl font-bold">Lista de Compras Mensal</h1>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center">
+            <ShoppingCart className="h-8 w-8 mr-3 text-primary" />
+            <h1 className="text-3xl font-bold">Lista de Compras Mensal</h1>
+          </div>
+          <Button onClick={handleExport} disabled={isLoading || isExporting || (items?.length === 0)}>
+            {isExporting ? (
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            ) : (
+              <FileText className="h-4 w-4 mr-2" />
+            )}
+            Exportar PDF
+          </Button>
         </div>
 
         {isLoading ? (
@@ -124,7 +151,7 @@ const ShoppingListPage = () => {
                       <Input id="itemPrice" type="number" value={newItemPrice} onChange={e => setNewItemPrice(e.target.value)} placeholder="Ex: 5.50" />
                     </div>
                     <Button type="submit" className="w-full" disabled={addMutation.isPending}>
-                      {addMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4 mr-2" />}
+                      {addMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
                       Adicionar Item
                     </Button>
                   </form>
@@ -151,7 +178,7 @@ const ShoppingListPage = () => {
             </div>
 
             <div className="lg:col-span-2">
-              <Card>
+              <Card id={SHOPPING_LIST_ID}> {/* Adicionado ID para exportação */}
                 <CardHeader>
                   <CardTitle>Itens para {format(currentDate, 'MMMM/yyyy')}</CardTitle>
                 </CardHeader>
