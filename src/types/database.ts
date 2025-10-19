@@ -1,6 +1,31 @@
 export interface Database {
   public: {
     Tables: {
+      // ... outras tabelas aqui ...
+      goals: { // Adicionando a nova tabela
+        Row: {
+          id: string;
+          user_id: string;
+          name: string;
+          target_amount: number;
+          current_amount: number;
+          due_date: string | null;
+          created_at: string;
+        };
+        Insert: {
+          user_id: string;
+          name: string;
+          target_amount: number;
+          current_amount?: number;
+          due_date?: string | null;
+        };
+        Update: {
+          name?: string;
+          target_amount?: number;
+          current_amount?: number;
+          due_date?: string | null;
+        };
+      };
       categories: {
         Row: {
           id: string;
