@@ -81,7 +81,7 @@ const UpdatePassword = () => {
         <CardHeader className="text-center">
           <div className="flex items-center justify-center text-2xl font-bold mb-2">
             <DollarSign className="h-8 w-8 mr-2 text-primary" />
-            <h1 className="text-3xl font-bold">FinanDash</h1>
+            <h1 className="text-3xl font-bold">FinanBoard</h1>
           </div>
           <CardTitle className="text-2xl font-bold">Crie sua nova senha</CardTitle>
           <CardDescription>Digite e confirme sua nova senha abaixo.</CardDescription>

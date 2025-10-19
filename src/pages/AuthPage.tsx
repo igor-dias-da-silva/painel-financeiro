@@ -34,7 +34,7 @@ const AuthPage = () => {
       <div className="hidden bg-muted lg:flex items-center justify-center p-10 flex-col text-center">
         <div className="flex items-center text-3xl font-bold mb-4">
           <DollarSign className="h-10 w-10 mr-2 text-primary" />
-          <h1 className="text-4xl font-bold">FinanDash</h1>
+          <h1 className="text-4xl font-bold">FinanBoard</h1>
         </div>
         <p className="text-lg text-muted-foreground max-w-md">
           Assuma o controle total de suas finanças. De contas a pagar a listas de compras, simplificamos tudo para você.

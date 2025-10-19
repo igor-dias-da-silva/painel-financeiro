@@ -27,7 +27,7 @@ const Home = () => {
 
   const testimonials = [
     {
-      quote: 'FinanDash transformou a maneira como eu lido com meu dinheiro. Finalmente sinto que tenho o controle total das minhas finanças!',
+      quote: 'FinanBoard transformou a maneira como eu lido com meu dinheiro. Finalmente sinto que tenho o controle total das minhas finanças!',
       name: 'Ana Silva',
       role: 'Designer Freelancer',
     },
@@ -45,7 +45,7 @@ const Home = () => {
         <div className="container flex h-14 items-center px-4">
           <div className="mr-4 flex items-center">
             <DollarSign className="h-6 w-6 mr-2" />
-            <span className="font-bold text-lg">FinanDash</span>
+            <span className="font-bold text-lg">FinanBoard</span>
           </div>
           <div className="flex flex-1 items-center justify-end space-x-2">
             <nav className="flex items-center space-x-2">
@@ -68,7 +68,7 @@ const Home = () => {
               Organize suas finanças com facilidade
             </h1>
             <p className="max-w-2xl mx-auto text-lg md:text-xl text-muted-foreground mb-8">
-              Assuma o controle de suas contas a pagar e listas de compras. FinanDash é a ferramenta simples e poderosa que você precisa para uma vida financeira mais tranquila.
+              Assuma o controle de suas contas a pagar e listas de compras. FinanBoard é a ferramenta simples e poderosa que você precisa para uma vida financeira mais tranquila.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/register">
@@ -122,7 +122,7 @@ const Home = () => {
         {/* CTA Section */}
         <section className="py-16 md:py-20 bg-muted/40">
           <div className="container px-4 text-center">
-            <h2 className="text-2xl md:text-4xl font-bold mb-4">Pronto para assumir o controle?</h2>
+            <h2 className="text-2xl md:text-4xl font-bold">Pronto para assumir o controle?</h2>
             <p className="text-muted-foreground mb-8 max-w-xl mx-auto dark:text-muted-foreground">
               Crie sua conta gratuita e comece a organizar suas finanças hoje mesmo. Leva apenas um minuto.
             </p>
@@ -136,7 +136,7 @@ const Home = () => {
       {/* Footer */}
       <footer className="border-t">
         <div className="container py-6 text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} FinanDash. Todos os direitos reservados.
+          © {new Date().getFullYear()} FinanBoard. Todos os direitos reservados.
         </div>
       </footer>
     </div>

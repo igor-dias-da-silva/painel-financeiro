@@ -88,7 +88,7 @@ const Help = () => {
         <div className="max-w-6xl mx-auto">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-800 dark:text-foreground mb-2">Central de Ajuda</h1>
-            <p className="text-gray-600 dark:text-muted-foreground">Encontre respostas para suas dúvidas e aprenda a usar o FinanDash</p>
+            <p className="text-gray-600 dark:text-muted-foreground">Encontre respostas para suas dúvidas e aprenda a usar o FinanBoard</p>
           </div>
 
           {/* Barra de Pesquisa */}
@@ -140,7 +140,7 @@ const Help = () => {
               <div className="text-center mb-8">
                 <h2 className="text-2xl font-bold text-gray-800 dark:text-foreground mb-4">Guia do Usuário</h2>
                 <p className="text-gray-600 dark:text-muted-foreground max-w-2xl mx-auto">
-                  Aprenda passo a passo como usar todas as funcionalidades do FinanDash
+                  Aprenda passo a passo como usar todas as funcionalidades do FinanBoard
                 </p>
               </div>
 
@@ -310,7 +310,7 @@ const Help = () => {
                         <Mail className="h-5 w-5 text-blue-600 dark:text-primary" />
                         <div>
                           <div className="font-medium dark:text-foreground">Email</div>
-                          <div className="text-sm text-gray-600 dark:text-muted-foreground">suporte@finandash.com</div>
+                          <div className="text-sm text-gray-600 dark:text-muted-foreground">suporte@finanboard.com</div>
                         </div>
                       </div>
                       
@@ -332,7 +332,7 @@ const Help = () => {
                         </div>
                         <div className="flex justify-between dark:text-muted-foreground">
                           <span>Sábado</span>
-                          <span className="font-medium dark:text-foreground">9:00 - 12:00</span>
+                          <span className="font-medium text-gray-500">Fechado</span>
                         </div>
                         <div className="flex justify-between dark:text-muted-foreground">
                           <span>Domingo</span>

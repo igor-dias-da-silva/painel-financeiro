@@ -35,7 +35,7 @@ const Settings = () => {
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">Configurações</h1>
-            <p className="text-gray-600 dark:text-gray-400">Gerencie suas preferências e dados do aplicativo</p>
+            <p className="text-gray-600 dark:text-gray-400">Gerencie suas preferências e dados do aplicativo FinanBoard</p>
           </div>
 
           <div className="space-y-6">
