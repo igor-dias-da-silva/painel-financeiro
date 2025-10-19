@@ -1,228 +1,238 @@
 "use client";
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, DollarSign, Tag, Loader2, Check } from 'lucide-react';
-import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
-import { useAuth } from '@/hooks/useAuth';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getCategories, addTransaction, Category, Transaction } from '@/lib/transactions';
-import { showError, showSuccess } from '@/utils/toast';
-import { Database } from '@/types/database';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { mockCategories, mockAccounts } from '@/data/mockData';
+import { Transaction } from '@/data/types';
+import { useToast } from '@/components/ui/use-toast';
+
+const transactionSchema = z.object({
+  description: z.string().min(1, 'A descrição é obrigatória.'),
+  amount: z.number().min(0.01, 'O valor deve ser maior que zero.'),
+  type: z.enum(['income', 'expense'], {
+    required_error: 'O tipo é obrigatório.',
+  }),
+  date: z.string().min(1, 'A data é obrigatória.'),
+  categoryId: z.string().min(1, 'A categoria é obrigatória.'),
+  accountId: z.string().min(1, 'A conta é obrigatória.'),
+});
+
+type TransactionFormValues = z.infer<typeof transactionSchema>;
 
 interface TransactionFormProps {
-  initialTransaction?: Transaction;
-  onSuccess?: () => void;
+  initialData?: Transaction;
+  onSubmit: (data: TransactionFormValues) => void;
 }
 
-const TransactionForm: React.FC<TransactionFormProps> = ({ initialTransaction, onSuccess }) => {
-  const { user } = useAuth();
-  const queryClient = useQueryClient();
+export const TransactionForm: React.FC<TransactionFormProps> = ({ initialData, onSubmit }) => {
+  const { toast } = useToast();
   
-  const [type, setType] = useState<'expense' | 'income'>(initialTransaction?.type || 'expense');
-  const [amount, setAmount] = useState(initialTransaction?.amount.toString() || '');
-  const [description, setDescription] = useState(initialTransaction?.description || '');
-  const [categoryId, setCategoryId] = useState(initialTransaction?.category_id || '');
-  const [date, setDate] = useState<Date | undefined>(
-    initialTransaction?.transaction_date ? new Date(initialTransaction.transaction_date) : new Date()
-  );
+  const defaultValues: Partial<TransactionFormValues> = initialData
+    ? {
+        ...initialData,
+        amount: initialData.amount,
+      }
+    : {
+        description: '',
+        amount: 0,
+        type: 'expense',
+        date: new Date().toISOString().split('T')[0],
+        categoryId: '', // Inicializa com string vazia para placeholder
+        accountId: '', // Inicializa com string vazia para placeholder
+      };
 
-  const { data: categories = [], isLoading: isLoadingCategories } = useQuery<Category[]>({
-    queryKey: ['categories', user?.id],
-    queryFn: () => getCategories(user!.id),
-    enabled: !!user?.id,
+  const form = useForm<TransactionFormValues>({
+    resolver: zodResolver(transactionSchema),
+    defaultValues: defaultValues as TransactionFormValues,
   });
 
-  const addTransactionMutation = useMutation({
-    mutationFn: addTransaction,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['transactions'] });
-      showSuccess('Transação registrada com sucesso!');
-      setAmount('');
-      setDescription('');
-      setCategoryId('');
-      setDate(new Date());
-      if (onSuccess) onSuccess();
-    },
-    onError: (error) => {
-      showError(`Erro ao registrar transação: ${error.message}`);
-    },
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user || !amount || !date) {
-      showError('Preencha o valor e a data.');
-      return;
+  const handleSubmit = (data: TransactionFormValues) => {
+    onSubmit(data);
+    toast({
+      title: initialData ? 'Transação Atualizada' : 'Transação Adicionada',
+      description: `A transação de ${data.description} foi salva com sucesso.`,
+    });
+    if (!initialData) {
+      form.reset(defaultValues as TransactionFormValues);
     }
-
-    const parsedAmount = parseFloat(amount.replace(',', '.'));
-    if (isNaN(parsedAmount) || parsedAmount <= 0) {
-      showError('O valor deve ser um número positivo.');
-      return;
-    }
-
-    const newTransaction: Database['public']['Tables']['transactions']['Insert'] = {
-      user_id: user.id,
-      amount: parsedAmount,
-      description: description || null,
-      transaction_date: format(date, 'yyyy-MM-dd'),
-      type: type,
-      category_id: categoryId || null,
-    };
-
-    addTransactionMutation.mutate(newTransaction);
   };
 
-  const isPending = addTransactionMutation.isPending;
-
-  const filteredCategories = categories.filter(cat => cat.type === type);
+  const filteredCategories = mockCategories.filter(
+    (cat) => cat.type === form.watch('type')
+  );
 
   return (
-    <Card className="dark:bg-card dark:border-border">
+    <Card className="w-full max-w-lg mx-auto">
       <CardHeader>
-        <CardTitle className="text-xl flex items-center">
-          <DollarSign className="h-5 w-5 mr-2" />
-          Registrar Nova Transação
-        </CardTitle>
+        <CardTitle>{initialData ? 'Editar Transação' : 'Nova Transação'}</CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Tipo de Transação */}
-          <div className="flex space-x-2">
-            <Button
-              type="button"
-              variant={type === 'expense' ? 'destructive' : 'outline'}
-              onClick={() => setType('expense')}
-              className="flex-1"
-              disabled={isPending}
-            >
-              Despesa
-            </Button>
-            <Button
-              type="button"
-              variant={type === 'income' ? 'default' : 'outline'}
-              onClick={() => setType('income')}
-              className="flex-1 bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800"
-              disabled={isPending}
-            >
-              Receita
-            </Button>
-          </div>
-
-          {/* Valor e Data */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="amount">Valor (R$)</Label>
-              <Input
-                id="amount"
-                type="number"
-                step="0.01"
-                placeholder="0.00"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                required
-                disabled={isPending}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="date">Data</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={'outline'}
-                    className={cn(
-                      'w-full justify-start text-left font-normal',
-                      !date && 'text-muted-foreground'
-                    )}
-                    disabled={isPending}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {date ? format(date, 'PPP') : <span>Selecione a data</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={setDate}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-          </div>
-
-          {/* Categoria */}
-          <div className="space-y-2">
-            <Label htmlFor="category">Categoria</Label>
-            <Select
-              value={categoryId}
-              onValueChange={setCategoryId}
-              disabled={isPending || isLoadingCategories}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione uma categoria" />
-              </SelectTrigger>
-              <SelectContent>
-                {isLoadingCategories ? (
-                  <SelectItem value="" disabled>Carregando categorias...</SelectItem>
-                ) : filteredCategories.length === 0 ? (
-                  <SelectItem value="" disabled>Nenhuma categoria de {type === 'expense' ? 'despesa' : 'receita'} encontrada.</SelectItem>
-                ) : (
-                  filteredCategories.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
-                      <div className="flex items-center">
-                        <div
-                          className="w-2 h-2 rounded-full mr-2"
-                          style={{ backgroundColor: category.color || '#6B7280' }}
-                        />
-                        {category.name}
-                      </div>
-                    </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Descrição */}
-          <div className="space-y-2">
-            <Label htmlFor="description">Descrição (Opcional)</Label>
-            <Textarea
-              id="description"
-              placeholder="Ex: Almoço com clientes, Venda de produto X"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              disabled={isPending}
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+            {/* Tipo (Receita/Despesa) */}
+            <FormField
+              control={form.control}
+              name="type"
+              render={({ field }) => (
+                <FormItem className="space-y-3">
+                  <FormLabel>Tipo</FormLabel>
+                  <FormControl>
+                    <RadioGroup
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      className="flex space-x-4"
+                    >
+                      <FormItem className="flex items-center space-x-3 space-y-0">
+                        <FormControl>
+                          <RadioGroupItem value="expense" />
+                        </FormControl>
+                        <FormLabel className="font-normal">Despesa</FormLabel>
+                      </FormItem>
+                      <FormItem className="flex items-center space-x-3 space-y-0">
+                        <FormControl>
+                          <RadioGroupItem value="income" />
+                        </FormControl>
+                        <FormLabel className="font-normal">Receita</FormLabel>
+                      </FormItem>
+                    </RadioGroup>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <Button type="submit" className="w-full" disabled={isPending}>
-            {isPending ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                Registrando...
-              </>
-            ) : (
-              <>
-                <Check className="h-4 w-4 mr-2" />
-                Salvar Transação
-              </>
-            )}
-          </Button>
-        </form>
+            {/* Descrição */}
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descrição</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Ex: Aluguel, Salário, etc." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Valor */}
+            <FormField
+              control={form.control}
+              name="amount"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Valor</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      placeholder="0.00"
+                      {...field}
+                      onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Data */}
+            <FormField
+              control={form.control}
+              name="date"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Data</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Categoria */}
+            <FormField
+              control={form.control}
+              name="categoryId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Categoria</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione a Categoria" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {filteredCategories.map((category) => (
+                        // Garantindo que o value seja o ID da categoria (string não vazia)
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Conta */}
+            <FormField
+              control={form.control}
+              name="accountId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Conta</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione a Conta" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {mockAccounts.map((account) => (
+                        // Garantindo que o value seja o ID da conta (string não vazia)
+                        <SelectItem key={account.id} value={account.id}>
+                          {account.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Button type="submit" className="w-full">
+              {initialData ? 'Salvar Alterações' : 'Adicionar Transação'}
+            </Button>
+          </form>
+        </Form>
       </CardContent>
     </Card>
   );
 };
-
-export default TransactionForm;
