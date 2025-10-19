@@ -13,11 +13,13 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth'; // Importando useAuth para obter o user id
 import { useQuery } from '@tanstack/react-query'; // Importando useQuery
+import { useTranslation } from 'react-i18next';
 
 // Cores para o gráfico de rosca
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
 
 const Dashboard = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const userId = user?.id;
   const { toast } = useToast();
@@ -75,7 +77,7 @@ const Dashboard = () => {
     const distributionData = Object.keys(expenseMap).map((categoryId, index) => {
       const category = categoriesMap[categoryId];
       return {
-        name: category ? category.name : 'Sem Categoria',
+        name: category ? category.name : t('dashboard.uncategorized'),
         value: expenseMap[categoryId],
         color: COLORS[index % COLORS.length],
       };
@@ -87,7 +89,7 @@ const Dashboard = () => {
       currentBalance: balance,
       expenseDistribution: distributionData,
     };
-  }, [transactions, categories]);
+  }, [transactions, categories, t]);
 
   // 5. Cálculo de Contas Pendentes
   const totalPendingBills = useMemo(() => {
@@ -115,20 +117,19 @@ const Dashboard = () => {
   return (
     <AuthGuard>
       <div className="p-4 md:p-6 space-y-6">
-        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <h1 className="text-3xl font-bold">{t('dashboard.title')}</h1>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {/* Card 1: Saldo Atual */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Saldo Atual</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('dashboard.currentBalance')}</CardTitle>
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{formatCurrency(currentBalance)}</div>
               <p className="text-xs text-muted-foreground">
-                {/* Placeholder para mudança mensal */}
-                +20.1% do mês passado
+                {t('dashboard.fromLastMonth')}
               </p>
             </CardContent>
           </Card>
@@ -136,13 +137,13 @@ const Dashboard = () => {
           {/* Card 2: Receitas */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium dark:text-foreground">Receitas</CardTitle>
+              <CardTitle className="text-sm font-medium dark:text-foreground">{t('dashboard.income')}</CardTitle>
               <ArrowUp className="h-4 w-4 text-green-500" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-600">{formatCurrency(totalIncome)}</div>
               <p className="text-xs text-muted-foreground">
-                Total de entradas no mês
+                {t('dashboard.totalIncomeThisMonth')}
               </p>
             </CardContent>
           </Card>
@@ -150,13 +151,13 @@ const Dashboard = () => {
           {/* Card 3: Despesas */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium dark:text-foreground">Despesas</CardTitle>
+              <CardTitle className="text-sm font-medium dark:text-foreground">{t('dashboard.expenses')}</CardTitle>
               <ArrowDown className="h-4 w-4 text-red-500" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-red-600">{formatCurrency(totalExpense)}</div>
               <p className="text-xs text-muted-foreground">
-                Total de saídas no mês
+                {t('dashboard.totalExpensesThisMonth')}
               </p>
             </CardContent>
           </Card>
@@ -164,13 +165,13 @@ const Dashboard = () => {
           {/* Card 4: Contas a Vencer */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium dark:text-foreground">Contas a Vencer</CardTitle>
+              <CardTitle className="text-sm font-medium dark:text-foreground">{t('dashboard.billsDue')}</CardTitle>
               <Receipt className="h-4 w-4 text-red-500" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-red-600">{formatCurrency(totalPendingBills)}</div>
               <p className="text-xs text-muted-foreground">
-                Valor total pendente
+                {t('dashboard.totalPendingAmount')}
               </p>
             </CardContent>
           </Card>
@@ -180,7 +181,7 @@ const Dashboard = () => {
           {/* Gráfico de Distribuição de Despesas */}
           <Card>
             <CardHeader>
-              <CardTitle>Distribuição de Despesas por Categoria</CardTitle>
+              <CardTitle>{t('dashboard.expenseDistribution')}</CardTitle>
             </CardHeader>
             <CardContent className="h-[350px]">
               {expenseDistribution.length > 0 ? (
@@ -207,7 +208,7 @@ const Dashboard = () => {
                 </ResponsiveContainer>
               ) : (
                 <div className="flex items-center justify-center h-full text-muted-foreground">
-                  Nenhuma despesa registrada para o período.
+                  {t('dashboard.noExpensesRecorded')}
                 </div>
               )}
             </CardContent>
@@ -216,15 +217,15 @@ const Dashboard = () => {
           {/* Card de Metas/Orçamento */}
           <Card>
             <CardHeader>
-              <CardTitle>Metas e Orçamento</CardTitle>
+              <CardTitle>{t('dashboard.goalsAndBudget')}</CardTitle>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-muted-foreground">
-                Acompanhe seu progresso em relação aos seus orçamentos mensais.
+                {t('dashboard.trackProgress')}
               </p>
               <Link to="/budget">
-                <Button className="w-full">Ver Orçamento Completo</Button>
+                <Button className="w-full">{t('dashboard.viewFullBudget')}</Button>
               </Link>
             </CardContent>
           </Card>

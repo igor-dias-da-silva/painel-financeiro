@@ -38,5 +38,22 @@
     "profile": "Perfil",
     "logout": "Sair",
     "userPlaceholder": "Usuário"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "currentBalance": "Saldo Atual",
+    "fromLastMonth": "+20.1% do mês passado",
+    "income": "Receitas",
+    "totalIncomeThisMonth": "Total de entradas no mês",
+    "expenses": "Despesas",
+    "totalExpensesThisMonth": "Total de saídas no mês",
+    "billsDue": "Contas a Vencer",
+    "totalPendingAmount": "Valor total pendente",
+    "expenseDistribution": "Distribuição de Despesas por Categoria",
+    "noExpensesRecorded": "Nenhuma despesa registrada para o período.",
+    "goalsAndBudget": "Metas e Orçamento",
+    "trackProgress": "Acompanhe seu progresso em relação aos seus orçamentos mensais.",
+    "viewFullBudget": "Ver Orçamento Completo",
+    "uncategorized": "Sem Categoria"
   }
 }

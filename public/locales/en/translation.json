@@ -38,5 +38,22 @@
     "profile": "Profile",
     "logout": "Log Out",
     "userPlaceholder": "User"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "currentBalance": "Current Balance",
+    "fromLastMonth": "+20.1% from last month",
+    "income": "Income",
+    "totalIncomeThisMonth": "Total income this month",
+    "expenses": "Expenses",
+    "totalExpensesThisMonth": "Total expenses this month",
+    "billsDue": "Bills Due",
+    "totalPendingAmount": "Total pending amount",
+    "expenseDistribution": "Expense Distribution by Category",
+    "noExpensesRecorded": "No expenses recorded for the period.",
+    "goalsAndBudget": "Goals and Budget",
+    "trackProgress": "Track your progress against your monthly budgets.",
+    "viewFullBudget": "View Full Budget",
+    "uncategorized": "Uncategorized"
   }
 }
