@@ -137,7 +137,7 @@
     "amount": "Amount",
     "date": "Date",
     "category": "Category",
-    "noCategory": "No category available",
+    "noCategory": "No account available",
     "selectCategory": "Select Category",
     "account": "Account",
     "noAccount": "No account available",
