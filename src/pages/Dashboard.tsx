@@ -2,48 +2,48 @@
 
 import React, { useMemo, useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { DollarSign, ArrowUp, ArrowDown, TrendingUp } from 'lucide-react';
+import { DollarSign, ArrowUp, ArrowDown, TrendingUp, Receipt } from 'lucide-react';
 import { AuthGuard } from '@/components/AuthGuard';
 import { Transaction, Category } from '@/data/types';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { getTransactions, getCategories } from '@/lib/data';
+import { getBills, Bill } from '@/lib/bills'; // Importando funções de Bills
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom'; // Importando Link
+import { Link } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth'; // Importando useAuth para obter o user id
+import { useQuery } from '@tanstack/react-query'; // Importando useQuery
 
 // Cores para o gráfico de rosca
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
 
 const Dashboard = () => {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuth();
+  const userId = user?.id;
   const { toast } = useToast();
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const [fetchedTransactions, fetchedCategories] = await Promise.all([
-          getTransactions(),
-          getCategories(),
-        ]);
-        setTransactions(fetchedTransactions);
-        setCategories(fetchedCategories);
-      } catch (error) {
-        toast({
-          title: "Erro ao carregar dados",
-          description: "Não foi possível carregar transações e categorias.",
-          variant: "destructive",
-        });
-        console.error(error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    fetchData();
-  }, [toast]);
+  // 1. Fetch Transações
+  const { data: transactions = [], isLoading: isLoadingTransactions } = useQuery<Transaction[]>({
+    queryKey: ['transactions', userId],
+    queryFn: getTransactions,
+    enabled: !!userId,
+  });
 
-  // 1. Lógica de Cálculo de Totais e Saldo
+  // 2. Fetch Categorias
+  const { data: categories = [], isLoading: isLoadingCategories } = useQuery<Category[]>({
+    queryKey: ['categories', userId],
+    queryFn: getCategories,
+    enabled: !!userId,
+  });
+
+  // 3. Fetch Contas a Pagar
+  const { data: bills = [], isLoading: isLoadingBills } = useQuery<Bill[]>({
+    queryKey: ['bills', userId],
+    queryFn: () => getBills(userId!),
+    enabled: !!userId,
+  });
+
+  // 4. Lógica de Cálculo de Totais e Saldo
   const { totalIncome, totalExpense, currentBalance, expenseDistribution } = useMemo(() => {
     let income = 0;
     let expense = 0;
@@ -89,11 +89,24 @@ const Dashboard = () => {
     };
   }, [transactions, categories]);
 
+  // 5. Cálculo de Contas Pendentes
+  const totalPendingBills = useMemo(() => {
+    return bills.filter(b => !b.is_paid).reduce((sum, b) => sum + Number(b.amount), 0);
+  }, [bills]);
+
+  const isLoading = isLoadingTransactions || isLoadingCategories || isLoadingBills;
+
+  const formatCurrency = (value: number) => {
+    return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  };
+
   if (isLoading) {
     return (
       <AuthGuard>
         <div className="p-4 md:p-6 flex justify-center items-center h-full">
-          <p>Carregando dados...</p>
+          <div className="flex justify-center items-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
         </div>
       </AuthGuard>
     );
@@ -104,7 +117,7 @@ const Dashboard = () => {
       <div className="p-4 md:p-6 space-y-6">
         <h1 className="text-3xl font-bold">Dashboard</h1>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {/* Card 1: Saldo Atual */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -112,7 +125,7 @@ const Dashboard = () => {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">R$ {currentBalance.toFixed(2)}</div>
+              <div className="text-2xl font-bold">{formatCurrency(currentBalance)}</div>
               <p className="text-xs text-muted-foreground">
                 {/* Placeholder para mudança mensal */}
                 +20.1% do mês passado
@@ -127,7 +140,7 @@ const Dashboard = () => {
               <ArrowUp className="h-4 w-4 text-green-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">R$ {totalIncome.toFixed(2)}</div>
+              <div className="text-2xl font-bold text-green-600">{formatCurrency(totalIncome)}</div>
               <p className="text-xs text-muted-foreground">
                 Total de entradas no mês
               </p>
@@ -141,9 +154,23 @@ const Dashboard = () => {
               <ArrowDown className="h-4 w-4 text-red-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-red-600">R$ {totalExpense.toFixed(2)}</div>
+              <div className="text-2xl font-bold text-red-600">{formatCurrency(totalExpense)}</div>
               <p className="text-xs text-muted-foreground">
                 Total de saídas no mês
+              </p>
+            </CardContent>
+          </Card>
+          
+          {/* Card 4: Contas a Vencer */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium dark:text-foreground">Contas a Vencer</CardTitle>
+              <Receipt className="h-4 w-4 text-red-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-red-600">{formatCurrency(totalPendingBills)}</div>
+              <p className="text-xs text-muted-foreground">
+                Valor total pendente
               </p>
             </CardContent>
           </Card>
@@ -174,7 +201,7 @@ const Dashboard = () => {
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(value) => `R$ ${Number(value).toFixed(2)}`} />
+                    <Tooltip formatter={(value) => formatCurrency(Number(value))} />
                     <Legend layout="vertical" align="right" verticalAlign="middle" />
                   </PieChart>
                 </ResponsiveContainer>
