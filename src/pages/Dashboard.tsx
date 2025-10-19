@@ -6,8 +6,9 @@ import { DollarSign, ArrowUp, ArrowDown, TrendingUp } from 'lucide-react';
 import { AuthGuard } from '@/components/AuthGuard';
 import { Transaction, Category } from '@/data/types';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
-import { getTransactions, getCategories } from '@/lib/data'; // Importando funções reais de dados
+import { getTransactions, getCategories } from '@/lib/data';
 import { useToast } from '@/components/ui/use-toast';
+import { Button } from '@/components/ui/button'; // <-- Importação adicionada
 
 // Cores para o gráfico de rosca
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];

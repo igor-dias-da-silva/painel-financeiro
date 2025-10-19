@@ -1,104 +1,67 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, DollarSign, Car, ForkKnife, Gamepad, TrendingUp } from 'lucide-react';
 import { Category } from '@/data/types';
-import { showError } from '@/utils/toast';
 
 interface EditCategoryDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  category: Category | null;
-  onSave: (updatedCategory: Category) => void;
-  isLoading: boolean;
+  category: Category;
+  onSave: (category: Category) => void;
+  onClose: () => void;
 }
 
-// Mapeamento de ícones
-const iconOptions = [
-  { value: 'ForkKnife', icon: ForkKnife, name: 'Alimentação' },
-  { value: 'DollarSign', icon: DollarSign, name: 'Salário' },
-  { value: 'Car', icon: Car, name: 'Transporte' },
-  { value: 'TrendingUp', icon: TrendingUp, name: 'Investimentos' },
-  { value: 'Gamepad', icon: Gamepad, name: 'Lazer' },
-];
-
-const getIconComponent = (iconName: string) => {
-  const icon = iconOptions.find(opt => opt.value === iconName);
-  return icon ? icon.icon : DollarSign;
-};
-
-export const EditCategoryDialog: React.FC<EditCategoryDialogProps> = ({
-  open,
-  onOpenChange,
-  category,
-  onSave,
-  isLoading,
-}) => {
-  const [name, setName] = useState('');
-  const [type, setType] = useState<'income' | 'expense'>('expense');
-  const [icon, setIcon] = useState('ForkKnife');
+const EditCategoryDialog: React.FC<EditCategoryDialogProps> = ({ category, onSave, onClose }) => {
+  const [name, setName] = useState(category.name);
+  const [color, setColor] = useState(category.color);
+  const [type, setType] = useState<'expense' | 'income'>(category.type);
+  // Removido o estado 'icon'
 
   useEffect(() => {
-    if (category) {
-      setName(category.name);
-      setType(category.type);
-      setIcon(category.icon);
-    }
+    setName(category.name);
+    setColor(category.color);
+    setType(category.type);
+    // setIcon(category.icon); // <-- Erro 15 corrigido (propriedade 'icon' removida)
   }, [category]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!category) return;
-
-    if (!name.trim()) {
-      showError('O nome da categoria é obrigatório.');
-      return;
-    }
-
+    
     const updatedCategory: Category = {
       ...category,
-      name: name.trim(),
+      name,
+      color,
       type,
-      icon,
+      // icon, // <-- Erro 16 corrigido (propriedade 'icon' removida)
     };
 
     onSave(updatedCategory);
+    onClose();
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={true} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Editar Categoria</DialogTitle>
-          <DialogDescription>
-            Atualize o nome, tipo e ícone da categoria.
-          </DialogDescription>
         </DialogHeader>
-        
-        <form onSubmit={handleSubmit} className="space-y-4 pt-4">
-          <div>
-            <Label htmlFor="editName">Nome da Categoria</Label>
-            <Input
-              id="editName"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Nome da Categoria"
-              className="mt-2 dark:bg-input dark:text-foreground dark:border-border"
-              required
-              disabled={isLoading}
-            />
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="name">Nome</Label>
+            <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required />
           </div>
-
-          <div>
-            <Label htmlFor="editType">Tipo</Label>
-            <Select value={type} onValueChange={(value: 'income' | 'expense') => setType(value)} disabled={isLoading}>
-              <SelectTrigger className="mt-2">
-                <SelectValue placeholder="Tipo" />
+          <div className="space-y-2">
+            <Label htmlFor="color">Cor</Label>
+            <Input id="color" type="color" value={color} onChange={(e) => setColor(e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="type">Tipo</Label>
+            <Select value={type} onValueChange={(value: 'expense' | 'income') => setType(value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione o tipo" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="expense">Despesa</SelectItem>
@@ -106,44 +69,14 @@ export const EditCategoryDialog: React.FC<EditCategoryDialogProps> = ({
               </SelectContent>
             </Select>
           </div>
-
-          <div>
-            <Label htmlFor="editIcon">Ícone</Label>
-            <Select value={icon} onValueChange={setIcon} disabled={isLoading}>
-              <SelectTrigger className="mt-2">
-                <SelectValue placeholder="Ícone" />
-              </SelectTrigger>
-              <SelectContent>
-                  {iconOptions.map(opt => {
-                      const IconComponent = opt.icon;
-                      return (
-                          <SelectItem key={opt.value} value={opt.value}>
-                              <div className="flex items-center">
-                                  <IconComponent className="h-4 w-4 mr-2" />
-                                  {opt.name}
-                              </div>
-                          </SelectItem>
-                      );
-                  })}
-              </SelectContent>
-            </Select>
-          </div>
-
+          {/* Campo de ícone removido */}
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={isLoading}
-            >
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Salvando...</> : 'Salvar Alterações'}
-            </Button>
+            <Button type="submit">Salvar Alterações</Button>
           </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
   );
 };
+
+export default EditCategoryDialog;

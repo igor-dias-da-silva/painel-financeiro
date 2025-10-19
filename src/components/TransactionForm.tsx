@@ -23,9 +23,9 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { mockCategories, mockAccounts } from '@/data/mockData';
-import { Transaction } from '@/data/types';
+import { Transaction, Category, Account } from '@/data/types';
 import { useToast } from '@/components/ui/use-toast';
+import { Loader2 } from 'lucide-react';
 
 const transactionSchema = z.object({
   description: z.string().min(1, 'A descrição é obrigatória.'),
@@ -43,23 +43,30 @@ type TransactionFormValues = z.infer<typeof transactionSchema>;
 interface TransactionFormProps {
   initialData?: Transaction;
   onSubmit: (data: TransactionFormValues) => void;
+  categories: Category[];
+  accounts: Account[];
 }
 
-const TransactionForm: React.FC<TransactionFormProps> = ({ initialData, onSubmit }) => {
+const TransactionForm: React.FC<TransactionFormProps> = ({ initialData, onSubmit, categories, accounts }) => {
   const { toast } = useToast();
   
+  // Mapeia dados do Supabase (snake_case) para o formulário (camelCase)
   const defaultValues: Partial<TransactionFormValues> = initialData
     ? {
-        ...initialData,
+        description: initialData.description || '',
         amount: initialData.amount,
+        type: initialData.type,
+        date: initialData.transaction_date,
+        categoryId: initialData.category_id || '',
+        accountId: initialData.account_id || '',
       }
     : {
         description: '',
         amount: 0,
         type: 'expense',
         date: new Date().toISOString().split('T')[0],
-        categoryId: '', // Inicializa com string vazia para placeholder
-        accountId: '', // Inicializa com string vazia para placeholder
+        categoryId: '',
+        accountId: '',
       };
 
   const form = useForm<TransactionFormValues>({
@@ -69,24 +76,16 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ initialData, onSubmit
 
   const handleSubmit = (data: TransactionFormValues) => {
     onSubmit(data);
-    toast({
-      title: initialData ? 'Transação Atualizada' : 'Transação Adicionada',
-      description: `A transação de ${data.description} foi salva com sucesso.`,
-    });
-    if (!initialData) {
-      form.reset(defaultValues as TransactionFormValues);
-    }
   };
 
-  const filteredCategories = mockCategories.filter(
+  const filteredCategories = categories.filter(
     (cat) => cat.type === form.watch('type')
   );
+  
+  const isSubmitting = form.formState.isSubmitting;
 
   return (
-    <Card className="w-full max-w-lg mx-auto">
-      <CardHeader>
-        <CardTitle>{initialData ? 'Editar Transação' : 'Nova Transação'}</CardTitle>
-      </CardHeader>
+    <Card className="w-full max-w-lg mx-auto border-0 shadow-none">
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
@@ -99,9 +98,14 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ initialData, onSubmit
                   <FormLabel>Tipo</FormLabel>
                   <FormControl>
                     <RadioGroup
-                      onValueChange={field.onChange}
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        // Resetar categoria ao mudar o tipo
+                        form.setValue('categoryId', '');
+                      }}
                       defaultValue={field.value}
                       className="flex space-x-4"
+                      disabled={isSubmitting}
                     >
                       <FormItem className="flex items-center space-x-3 space-y-0">
                         <FormControl>
@@ -130,7 +134,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ initialData, onSubmit
                 <FormItem>
                   <FormLabel>Descrição</FormLabel>
                   <FormControl>
-                    <Input placeholder="Ex: Aluguel, Salário, etc." {...field} />
+                    <Input placeholder="Ex: Aluguel, Salário, etc." {...field} disabled={isSubmitting} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -151,6 +155,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ initialData, onSubmit
                       placeholder="0.00"
                       {...field}
                       onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                      disabled={isSubmitting}
                     />
                   </FormControl>
                   <FormMessage />
@@ -166,7 +171,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ initialData, onSubmit
                 <FormItem>
                   <FormLabel>Data</FormLabel>
                   <FormControl>
-                    <Input type="date" {...field} />
+                    <Input type="date" {...field} disabled={isSubmitting} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -180,15 +185,14 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ initialData, onSubmit
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Categoria</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value} disabled={isSubmitting || filteredCategories.length === 0}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecione a Categoria" />
+                        <SelectValue placeholder={filteredCategories.length === 0 ? "Nenhuma categoria disponível" : "Selecione a Categoria"} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       {filteredCategories.map((category) => (
-                        // Garantindo que o value seja o ID da categoria (string não vazia)
                         <SelectItem key={category.id} value={category.id}>
                           {category.name}
                         </SelectItem>
@@ -207,15 +211,14 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ initialData, onSubmit
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Conta</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value} disabled={isSubmitting || accounts.length === 0}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecione a Conta" />
+                        <SelectValue placeholder={accounts.length === 0 ? "Nenhuma conta disponível" : "Selecione a Conta"} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {mockAccounts.map((account) => (
-                        // Garantindo que o value seja o ID da conta (string não vazia)
+                      {accounts.map((account) => (
                         <SelectItem key={account.id} value={account.id}>
                           {account.name}
                         </SelectItem>
@@ -227,8 +230,12 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ initialData, onSubmit
               )}
             />
 
-            <Button type="submit" className="w-full">
-              {initialData ? 'Salvar Alterações' : 'Adicionar Transação'}
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Salvando...</>
+              ) : (
+                initialData ? 'Salvar Alterações' : 'Adicionar Transação'
+              )}
             </Button>
           </form>
         </Form>

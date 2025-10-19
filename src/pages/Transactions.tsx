@@ -7,14 +7,16 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Edit, Trash2, PlusCircle } from 'lucide-react';
+import { Edit, Trash2, PlusCircle, Loader2 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
-import { mockCategories, mockAccounts, mockTransactions } from '@/data/mockData';
-import { Transaction, Category, Account } from '@/data/types';
-import { getTransactions } from '@/lib/transactions';
-import { AuthGuard } from '@/components/AuthGuard'; // <-- Importação adicionada
+import { Transaction, Category, Account, TransactionInsert } from '@/data/types';
+import { AuthGuard } from '@/components/AuthGuard';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getTransactions, getCategories, getAccounts, insertTransaction, updateTransaction, deleteTransaction } from '@/lib/data';
+import { useAuth } from '@/hooks/useAuth';
+import { showError, showSuccess } from '@/utils/toast';
 
-// Definindo o tipo de dados que o TransactionForm retorna
+// Definindo o tipo de dados que o TransactionForm retorna (usa camelCase para o formulário)
 interface TransactionFormValues {
   description: string;
   amount: number;
@@ -25,57 +27,119 @@ interface TransactionFormValues {
 }
 
 const Transactions = () => {
-  // Usando o tipo Transaction de src/data/types
-  const [transactions, setTransactions] = useState<Transaction[]>(mockTransactions);
+  const { user } = useAuth();
+  const userId = user?.id;
+  const queryClient = useQueryClient();
+
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | undefined>(undefined);
   const { toast } = useToast();
 
+  // 1. Fetch Data
+  const { data: transactions = [], isLoading: isLoadingTransactions } = useQuery<Transaction[]>({
+    queryKey: ['transactions', userId],
+    queryFn: () => getTransactions(),
+    enabled: !!userId,
+  });
+
+  const { data: categories = [], isLoading: isLoadingCategories } = useQuery<Category[]>({
+    queryKey: ['categories', userId],
+    queryFn: () => getCategories(),
+    enabled: !!userId,
+  });
+
+  const { data: accounts = [], isLoading: isLoadingAccounts } = useQuery<Account[]>({
+    queryKey: ['accounts', userId],
+    queryFn: () => getAccounts(),
+    enabled: !!userId,
+  });
+
   const categoriesMap = useMemo(() => {
-    return mockCategories.reduce((acc, cat) => {
+    return categories.reduce((acc, cat) => {
       acc[cat.id] = cat;
       return acc;
-    }, {} as Record<string, Category>); // Usando o tipo Category correto
-  }, []);
+    }, {} as Record<string, Category>);
+  }, [categories]);
 
   const accountsMap = useMemo(() => {
-    return mockAccounts.reduce((acc, accItem) => {
+    return accounts.reduce((acc, accItem) => {
       acc[accItem.id] = accItem;
       return acc;
-    }, {} as Record<string, Account>); // Usando o tipo Account correto
-  }, []);
+    }, {} as Record<string, Account>);
+  }, [accounts]);
 
-  const handleSaveTransaction = (data: TransactionFormValues) => { // Tipagem corrigida
-    if (editingTransaction) {
-      // Lógica de edição
-      setTransactions(
-        transactions.map((t) => (t.id === editingTransaction.id ? { ...t, ...data } : t))
-      );
-    } else {
-      // Lógica de adição
-      const newTransaction: Transaction = {
-        ...data,
-        id: Date.now().toString(),
-      };
-      setTransactions([...transactions, newTransaction]);
+  // 2. Mutations
+  const transactionMutation = useMutation({
+    mutationFn: (data: { id?: string, payload: TransactionInsert }) => {
+      if (data.id) {
+        return updateTransaction(data.id, data.payload);
+      }
+      return insertTransaction(data.payload);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['transactions', userId] });
+      queryClient.invalidateQueries({ queryKey: ['accounts', userId] }); // Invalida contas para atualizar saldos
+      showSuccess(editingTransaction ? 'Transação atualizada!' : 'Transação adicionada!');
+      setIsFormOpen(false);
+      setEditingTransaction(undefined);
+    },
+    onError: (error) => {
+      console.error(error);
+      showError('Erro ao salvar transação.');
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteTransaction(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['transactions', userId] });
+      queryClient.invalidateQueries({ queryKey: ['accounts', userId] });
+      showSuccess('Transação excluída.');
+    },
+    onError: () => showError('Erro ao excluir transação.'),
+  });
+
+  // 3. Handlers
+  const handleSaveTransaction = (data: TransactionFormValues) => {
+    if (!userId) {
+      showError('Usuário não autenticado.');
+      return;
     }
-    setIsFormOpen(false);
-    setEditingTransaction(undefined);
+
+    // Mapeamento dos campos do formulário (camelCase) para os campos do Supabase (snake_case)
+    const payload: TransactionInsert = {
+      user_id: userId,
+      description: data.description,
+      amount: data.amount,
+      type: data.type,
+      transaction_date: data.date,
+      category_id: data.categoryId,
+      account_id: data.accountId,
+    };
+
+    transactionMutation.mutate({ id: editingTransaction?.id, payload });
   };
 
-  const handleDeleteTransaction = (id: string) => {
-    setTransactions(transactions.filter((t) => t.id !== id));
-    toast({
-      title: 'Transação Excluída',
-      description: 'A transação foi removida com sucesso.',
-      variant: 'destructive',
-    });
+  const handleDelete = (id: string) => {
+    deleteMutation.mutate(id);
   };
 
   const handleEdit = (transaction: Transaction) => {
     setEditingTransaction(transaction);
     setIsFormOpen(true);
   };
+
+  const isLoading = isLoadingTransactions || isLoadingCategories || isLoadingAccounts || transactionMutation.isPending || deleteMutation.isPending;
+
+  if (isLoading) {
+    return (
+      <AuthGuard>
+        <div className="flex justify-center items-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </AuthGuard>
+    );
+  }
 
   return (
     <AuthGuard>
@@ -95,8 +159,10 @@ const Transactions = () => {
               <DialogTitle>{editingTransaction ? 'Editar Transação' : 'Nova Transação'}</DialogTitle>
             </DialogHeader>
             <TransactionForm
-              initialData={editingTransaction} // Tipo Transaction agora é compatível
+              initialData={editingTransaction}
               onSubmit={handleSaveTransaction}
+              categories={categories}
+              accounts={accounts}
             />
           </DialogContent>
         </Dialog>
@@ -121,32 +187,40 @@ const Transactions = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {transactions.map((t) => (
-                    <TableRow key={t.id} className={t.type === 'income' ? 'bg-green-50/50 dark:bg-green-900/10' : 'bg-red-50/50 dark:bg-red-900/10'}>
-                      <TableCell>{t.date}</TableCell> {/* CORRIGIDO: Propriedade 'date' existe em Transaction */}
-                      <TableCell className="font-medium">{t.description}</TableCell>
-                      <TableCell>
-                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                          t.type === 'income' ? 'bg-green-200 text-green-800 dark:bg-green-800 dark:text-green-200' : 'bg-red-200 text-red-800 dark:bg-red-800 dark:text-red-200'
-                        }`}>
-                          {t.type === 'income' ? 'Receita' : 'Despesa'}
-                        </span>
-                      </TableCell>
-                      <TableCell>{categoriesMap[t.categoryId]?.name || 'N/A'}</TableCell> {/* CORRIGIDO: Propriedade 'categoryId' existe em Transaction */}
-                      <TableCell>{accountsMap[t.accountId]?.name || 'N/A'}</TableCell> {/* CORRIGIDO: Propriedade 'accountId' existe em Transaction */}
-                      <TableCell className={`text-right font-semibold ${t.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                        {t.type === 'expense' ? '-' : ''}R$ {t.amount.toFixed(2)}
-                      </TableCell>
-                      <TableCell className="text-center space-x-2">
-                        <Button variant="ghost" size="icon" onClick={() => handleEdit(t)}>
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" onClick={() => handleDeleteTransaction(t.id)}>
-                          <Trash2 className="h-4 w-4 text-red-500" />
-                        </Button>
+                  {transactions.length > 0 ? (
+                    transactions.map((t) => (
+                      <TableRow key={t.id} className={t.type === 'income' ? 'bg-green-50/50 dark:bg-green-900/10' : 'bg-red-50/50 dark:bg-red-900/10'}>
+                        <TableCell>{t.transaction_date}</TableCell>
+                        <TableCell className="font-medium">{t.description}</TableCell>
+                        <TableCell>
+                          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                            t.type === 'income' ? 'bg-green-200 text-green-800 dark:bg-green-800 dark:text-green-200' : 'bg-red-200 text-red-800 dark:bg-red-800 dark:text-red-200'
+                          }`}>
+                            {t.type === 'income' ? 'Receita' : 'Despesa'}
+                          </span>
+                        </TableCell>
+                        <TableCell>{categoriesMap[t.category_id]?.name || 'N/A'}</TableCell>
+                        <TableCell>{accountsMap[t.account_id]?.name || 'N/A'}</TableCell>
+                        <TableCell className={`text-right font-semibold ${t.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                          {t.type === 'expense' ? '-' : ''}R$ {t.amount.toFixed(2)}
+                        </TableCell>
+                        <TableCell className="text-center space-x-2">
+                          <Button variant="ghost" size="icon" onClick={() => handleEdit(t)} disabled={isLoading}>
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => handleDelete(t.id)} disabled={isLoading}>
+                            <Trash2 className="h-4 w-4 text-red-500" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center h-24 text-muted-foreground">
+                        Nenhuma transação encontrada. Adicione a primeira!
                       </TableCell>
                     </TableRow>
-                  ))}
+                  )}
                 </TableBody>
               </Table>
             </div>
