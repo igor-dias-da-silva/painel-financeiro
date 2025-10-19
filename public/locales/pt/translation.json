@@ -329,6 +329,15 @@
     "role": "Função",
     "actions": "Ações",
     "demote": "Rebaixar",
-    "promote": "Promover a Admin"
+    "promote": "Promover a Admin",
+    "registeredUsers": "Usuários registrados",
+    "premiumUsers": "Usuários com plano Premium",
+    "totalAccessUsers": "Usuários com acesso total",
+    "mockActivityData": "Dados de atividade (mock)"
+  },
+  "premiumFeatureGuard": {
+    "title": "Recurso Premium",
+    "description": "Esta funcionalidade está disponível apenas para assinantes do plano Premium.",
+    "cta": "Ver Planos Premium"
   }
 }

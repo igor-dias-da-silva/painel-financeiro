@@ -329,6 +329,15 @@
     "role": "Role",
     "actions": "Actions",
     "demote": "Demote",
-    "promote": "Promote to Admin"
+    "promote": "Promote to Admin",
+    "registeredUsers": "Registered users",
+    "premiumUsers": "Users with Premium plan",
+    "totalAccessUsers": "Users with full access",
+    "mockActivityData": "Mock activity data"
+  },
+  "premiumFeatureGuard": {
+    "title": "Premium Feature",
+    "description": "This feature is only available to Premium plan subscribers.",
+    "cta": "View Premium Plans"
   }
 }

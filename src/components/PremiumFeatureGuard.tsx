@@ -6,12 +6,14 @@ import { Loader2, Crown } from 'lucide-react';
 import { useProfile } from '@/hooks/useProfile';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from 'react-i18next';
 
 interface PremiumFeatureGuardProps {
   children: React.ReactNode;
 }
 
 export const PremiumFeatureGuard: React.FC<PremiumFeatureGuardProps> = ({ children }) => {
+  const { t } = useTranslation();
   const { profile, isLoading } = useProfile();
 
   if (isLoading) {
@@ -31,14 +33,14 @@ export const PremiumFeatureGuard: React.FC<PremiumFeatureGuardProps> = ({ childr
         <Card className="w-full max-w-md text-center dark:bg-card dark:border-border">
           <CardHeader>
             <Crown className="h-12 w-12 text-yellow-500 mx-auto mb-2" />
-            <CardTitle className="text-2xl text-yellow-500">Recurso Premium</CardTitle>
+            <CardTitle className="text-2xl text-yellow-500">{t('premiumFeatureGuard.title')}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground mb-4">
-              Esta funcionalidade está disponível apenas para assinantes do plano Premium.
+              {t('premiumFeatureGuard.description')}
             </p>
             <Link to="/pricing">
-              <Button>Ver Planos Premium</Button>
+              <Button>{t('premiumFeatureGuard.cta')}</Button>
             </Link>
           </CardContent>
         </Card>

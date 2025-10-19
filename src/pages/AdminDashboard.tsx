@@ -76,7 +76,7 @@ const AdminDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold dark:text-foreground">{totalUsers}</div>
-            <p className="text-xs text-muted-foreground">Usuários registrados</p>
+            <p className="text-xs text-muted-foreground">{t('admin.registeredUsers')}</p>
           </CardContent>
         </Card>
         
@@ -87,7 +87,7 @@ const AdminDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold dark:text-foreground">{premiumUsers}</div>
-            <p className="text-xs text-muted-foreground">Usuários com plano Premium</p>
+            <p className="text-xs text-muted-foreground">{t('admin.premiumUsers')}</p>
           </CardContent>
         </Card>
         
@@ -98,7 +98,7 @@ const AdminDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold dark:text-foreground">{adminUsers}</div>
-            <p className="text-xs text-muted-foreground">Usuários com acesso total</p>
+            <p className="text-xs text-muted-foreground">{t('admin.totalAccessUsers')}</p>
           </CardContent>
         </Card>
         
@@ -109,7 +109,7 @@ const AdminDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold dark:text-foreground">N/A</div>
-            <p className="text-xs text-muted-foreground">Dados de atividade (mock)</p>
+            <p className="text-xs text-muted-foreground">{t('admin.mockActivityData')}</p>
           </CardContent>
         </Card>
       </div>
