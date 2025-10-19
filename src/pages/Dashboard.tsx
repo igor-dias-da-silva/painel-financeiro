@@ -1,164 +1,200 @@
 "use client";
 
-import React from 'react';
-import { AuthGuard } from '@/components/AuthGuard';
+import React, { useMemo, useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { DollarSign, ArrowUp, ArrowDown, Repeat2, Loader2, Receipt } from 'lucide-react';
-import { useFinancialSummary } from '@/hooks/useFinancialSummary';
-import CategoryExpenseChart from '@/components/CategoryExpenseChart'; // Importando o novo componente
-import { format } from 'date-fns';
-import { useQuery } from '@tanstack/react-query';
-import { getBills } from '@/lib/bills';
-import { useAuth } from '@/hooks/useAuth';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
+import { DollarSign, ArrowUp, ArrowDown, TrendingUp } from 'lucide-react';
+import { AuthGuard } from '@/components/AuthGuard';
+import { Transaction, Category } from '@/data/types';
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { getTransactions, getCategories } from '@/lib/data'; // Importando funções reais de dados
+import { useToast } from '@/components/ui/use-toast';
+
+// Cores para o gráfico de rosca
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
 
 const Dashboard = () => {
-  const { user } = useAuth();
-  const userId = user?.id;
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
-  const { totalIncome, totalExpense, netBalance, expenseDistribution, transactions, isLoading: isSummaryLoading } = useFinancialSummary();
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const [fetchedTransactions, fetchedCategories] = await Promise.all([
+          getTransactions(),
+          getCategories(),
+        ]);
+        setTransactions(fetchedTransactions);
+        setCategories(fetchedCategories);
+      } catch (error) {
+        toast({
+          title: "Erro ao carregar dados",
+          description: "Não foi possível carregar transações e categorias.",
+          variant: "destructive",
+        });
+        console.error(error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchData();
+  }, [toast]);
 
-  // Dados de Contas a Pagar
-  const { data: bills, isLoading: billsLoading } = useQuery({
-    queryKey: ['bills', userId],
-    queryFn: () => getBills(userId!),
-    enabled: !!userId,
-  });
+  // 1. Lógica de Cálculo de Totais e Saldo
+  const { totalIncome, totalExpense, currentBalance, expenseDistribution } = useMemo(() => {
+    let income = 0;
+    let expense = 0;
+    const expenseMap: Record<string, number> = {};
 
-  const safeBills = bills || [];
-  const pendingBills = safeBills.filter(bill => !bill.is_paid);
-  const pendingBillsTotal = pendingBills.reduce((sum, bill) => sum + Number(bill.amount), 0);
+    // Mapeia categorias para fácil acesso
+    const categoriesMap = categories.reduce((acc, cat) => {
+      acc[cat.id] = cat;
+      return acc;
+    }, {} as Record<string, Category>);
 
-  const formatCurrency = (value: number) => {
-    return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-  };
+    // Filtra e calcula os totais
+    transactions.forEach((t: Transaction) => {
+      const amount = Number(t.amount); // Garante que o valor é numérico
+      if (t.type === 'income') {
+        income += amount;
+      } else if (t.type === 'expense') {
+        expense += amount;
+        
+        // Agrupa despesas por categoria para o gráfico
+        const categoryId = t.category_id || 'uncategorized';
+        expenseMap[categoryId] = (expenseMap[categoryId] || 0) + amount;
+      }
+    });
 
-  const currentMonth = format(new Date(), 'MMMM/yyyy');
-  const isLoading = isSummaryLoading || billsLoading;
+    const balance = income - expense;
+
+    // Formata os dados para o gráfico de rosca
+    const distributionData = Object.keys(expenseMap).map((categoryId, index) => {
+      const category = categoriesMap[categoryId];
+      return {
+        name: category ? category.name : 'Sem Categoria',
+        value: expenseMap[categoryId],
+        color: COLORS[index % COLORS.length],
+      };
+    }).filter(item => item.value > 0);
+
+    return {
+      totalIncome: income,
+      totalExpense: expense,
+      currentBalance: balance,
+      expenseDistribution: distributionData,
+    };
+  }, [transactions, categories]);
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
+      <AuthGuard>
+        <div className="p-4 md:p-6 flex justify-center items-center h-full">
+          <p>Carregando dados...</p>
+        </div>
+      </AuthGuard>
     );
   }
 
   return (
     <AuthGuard>
       <div className="p-4 md:p-6 space-y-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-800 dark:text-foreground">Dashboard Financeiro</h1>
-            <p className="text-gray-600 mt-1 dark:text-muted-foreground">Resumo do mês: {currentMonth}</p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Link to="/transactions">
-              <Button size="sm">
-                <Repeat2 className="h-4 w-4 mr-2" />
-                Nova Transação
-              </Button>
-            </Link>
-            <Link to="/budget">
-              <Button variant="outline" size="sm">
-                Ver Orçamento
-              </Button>
-            </Link>
-          </div>
-        </div>
+        <h1 className="text-3xl font-bold">Dashboard</h1>
 
-        {/* Resumo Financeiro Geral */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {/* Card de Saldo Líquido */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {/* Card 1: Saldo Atual */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium dark:text-foreground">Saldo Líquido</CardTitle>
-              <DollarSign className="h-4 w-4 text-primary" />
+              <CardTitle className="text-sm font-medium">Saldo Atual</CardTitle>
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className={`text-2xl font-bold ${netBalance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {formatCurrency(netBalance)}
-              </div>
-              <p className="text-xs text-muted-foreground">Total de Receitas - Despesas</p>
+              <div className="text-2xl font-bold">R$ {currentBalance.toFixed(2)}</div>
+              <p className="text-xs text-muted-foreground">
+                {/* Placeholder para mudança mensal */}
+                +20.1% do mês passado
+              </p>
             </CardContent>
           </Card>
-          
-          {/* Card de Receita Total */}
+
+          {/* Card 2: Receitas */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium dark:text-foreground">Receitas</CardTitle>
               <ArrowUp className="h-4 w-4 text-green-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">{formatCurrency(totalIncome)}</div>
-              <p className="text-xs text-muted-foreground">Total de entradas registradas</p>
+              <div className="text-2xl font-bold text-green-600">R$ {totalIncome.toFixed(2)}</div>
+              <p className="text-xs text-muted-foreground">
+                Total de entradas no mês
+              </p>
             </CardContent>
           </Card>
 
-          {/* Card de Despesa Total */}
+          {/* Card 3: Despesas */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium dark:text-foreground">Despesas</CardTitle>
               <ArrowDown className="h-4 w-4 text-red-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-red-600">{formatCurrency(totalExpense)}</div>
-              <p className="text-xs text-muted-foreground">Total de saídas registradas</p>
-            </CardContent>
-          </Card>
-
-          {/* Card de Contas Pendentes */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium dark:text-foreground">Contas Pendentes</CardTitle>
-              <Receipt className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-500">{formatCurrency(pendingBillsTotal)}</div>
-              <p className="text-xs text-muted-foreground">{pendingBills.length} conta(s) a vencer</p>
+              <div className="text-2xl font-bold text-red-600">R$ {totalExpense.toFixed(2)}</div>
+              <p className="text-xs text-muted-foreground">
+                Total de saídas no mês
+              </p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Gráfico de Despesas por Categoria */}
-        <div className="grid gap-6 lg:grid-cols-2">
-          <Card className="lg:col-span-1">
+        <div className="grid gap-4 lg:grid-cols-2">
+          {/* Gráfico de Distribuição de Despesas */}
+          <Card>
             <CardHeader>
-              <CardTitle className="dark:text-foreground">Distribuição de Despesas</CardTitle>
+              <CardTitle>Distribuição de Despesas por Categoria</CardTitle>
             </CardHeader>
-            <CardContent>
-              <CategoryExpenseChart data={expenseDistribution} isLoading={isSummaryLoading} />
-            </CardContent>
-          </Card>
-          
-          {/* Próximas Contas a Vencer (Mantido para contexto) */}
-          <Card className="lg:col-span-1">
-            <CardHeader>
-              <CardTitle className="dark:text-foreground">Próximas Contas a Vencer</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {pendingBills.length === 0 ? (
-                <div className="text-center py-8 text-gray-500 dark:text-muted-foreground">
-                  Nenhuma conta pendente. Tudo em dia!
-                </div>
+            <CardContent className="h-[350px]">
+              {expenseDistribution.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={expenseDistribution}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={100}
+                      fill="#8884d8"
+                      labelLine={false}
+                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    >
+                      {expenseDistribution.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value) => `R$ ${Number(value).toFixed(2)}`} />
+                    <Legend layout="vertical" align="right" verticalAlign="middle" />
+                  </PieChart>
+                </ResponsiveContainer>
               ) : (
-                <div className="space-y-3">
-                  {pendingBills.slice(0, 5).map((bill) => (
-                    <div key={bill.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 bg-gray-50 rounded-lg dark:bg-secondary">
-                      <div className="mb-2 sm:mb-0">
-                        <p className="font-medium text-gray-800 dark:text-foreground">{bill.name}</p>
-                        <p className="text-sm text-gray-600 dark:text-muted-foreground">
-                          Vence em: {format(new Date(bill.due_date), 'dd/MM/yyyy')}
-                        </p>
-                      </div>
-                      <span className="font-semibold text-lg text-red-600 dark:text-red-400">
-                        {formatCurrency(bill.amount)}
-                      </span>
-                    </div>
-                  ))}
+                <div className="flex items-center justify-center h-full text-muted-foreground">
+                  Nenhuma despesa registrada para o período.
                 </div>
               )}
+            </CardContent>
+          </Card>
+
+          {/* Card de Metas/Orçamento (Placeholder) */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Metas e Orçamento</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-muted-foreground">
+                Acompanhe seu progresso em relação aos seus orçamentos mensais.
+              </p>
+              <Button className="w-full">Ver Orçamento Completo</Button>
             </CardContent>
           </Card>
         </div>

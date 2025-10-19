@@ -1,0 +1,88 @@
+import { supabase } from '@/integrations/supabase/client';
+import { Account, Category, Transaction, TransactionInsert } from '@/data/types';
+
+// --- Funções de Contas (Accounts) ---
+
+export async function getAccounts(): Promise<Account[]> {
+  const { data, error } = await supabase
+    .from('accounts')
+    .select('*')
+    .order('name', { ascending: true });
+
+  if (error) {
+    console.error('Error fetching accounts:', error);
+    throw error;
+  }
+  return data as Account[];
+}
+
+// --- Funções de Categorias (Categories) ---
+
+export async function getCategories(): Promise<Category[]> {
+  const { data, error } = await supabase
+    .from('categories')
+    .select('*')
+    .order('name', { ascending: true });
+
+  if (error) {
+    console.error('Error fetching categories:', error);
+    throw error;
+  }
+  return data as Category[];
+}
+
+// --- Funções de Transações (Transactions) ---
+
+export async function getTransactions(): Promise<Transaction[]> {
+  const { data, error } = await supabase
+    .from('transactions')
+    .select('*')
+    .order('transaction_date', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching transactions:', error);
+    throw error;
+  }
+  return data as Transaction[];
+}
+
+export async function insertTransaction(transaction: TransactionInsert): Promise<Transaction> {
+  const { data, error } = await supabase
+    .from('transactions')
+    .insert(transaction)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error inserting transaction:', error);
+    throw error;
+  }
+  return data as Transaction;
+}
+
+export async function updateTransaction(id: string, updates: Partial<TransactionInsert>): Promise<Transaction> {
+  const { data, error } = await supabase
+    .from('transactions')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error updating transaction:', error);
+    throw error;
+  }
+  return data as Transaction;
+}
+
+export async function deleteTransaction(id: string): Promise<void> {
+  const { error } = await supabase
+    .from('transactions')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    console.error('Error deleting transaction:', error);
+    throw error;
+  }
+}
