@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
 import { Account, AccountInsert } from '@/data/types';
+import { useTranslation } from 'react-i18next';
 
 const accountTypes = ['checking', 'savings', 'cash'] as const;
 
@@ -43,6 +44,7 @@ interface AccountFormProps {
 }
 
 const AccountForm: React.FC<AccountFormProps> = ({ initialData, onSubmit, isSubmitting }) => {
+  const { t } = useTranslation();
   
   const defaultValues: Partial<AccountFormValues> = initialData
     ? {
@@ -74,9 +76,9 @@ const AccountForm: React.FC<AccountFormProps> = ({ initialData, onSubmit, isSubm
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Nome da Conta</FormLabel>
+              <FormLabel>{t('accountForm.name')}</FormLabel>
               <FormControl>
-                <Input placeholder="Ex: Banco Principal, Carteira" {...field} disabled={isSubmitting} />
+                <Input placeholder={t('accountForm.namePlaceholder')} {...field} disabled={isSubmitting} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -89,17 +91,17 @@ const AccountForm: React.FC<AccountFormProps> = ({ initialData, onSubmit, isSubm
           name="type"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Tipo</FormLabel>
+              <FormLabel>{t('accountForm.type')}</FormLabel>
               <Select onValueChange={field.onChange} value={field.value} disabled={isSubmitting}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecione o tipo de conta" />
+                    <SelectValue placeholder={t('accountForm.selectType')} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="checking">Conta Corrente</SelectItem>
-                  <SelectItem value="savings">Poupança</SelectItem>
-                  <SelectItem value="cash">Dinheiro (Espécie)</SelectItem>
+                  <SelectItem value="checking">{t('accounts.checking')}</SelectItem>
+                  <SelectItem value="savings">{t('accounts.savings')}</SelectItem>
+                  <SelectItem value="cash">{t('accounts.cash')}</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -113,7 +115,7 @@ const AccountForm: React.FC<AccountFormProps> = ({ initialData, onSubmit, isSubm
           name="balance"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Saldo Inicial (R$)</FormLabel>
+              <FormLabel>{t('accountForm.initialBalance')}</FormLabel>
               <FormControl>
                 <Input
                   type="number"
@@ -131,9 +133,9 @@ const AccountForm: React.FC<AccountFormProps> = ({ initialData, onSubmit, isSubm
 
         <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting ? (
-            <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Salvando...</>
+            <><Loader2 className="h-4 w-4 animate-spin mr-2" /> {t('accountForm.saving')}</>
           ) : (
-            initialData ? 'Salvar Alterações' : 'Criar Conta'
+            initialData ? t('accountForm.saveChanges') : t('accountForm.create')
           )}
         </Button>
       </form>

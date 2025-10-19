@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Category } from '@/data/types';
+import { useTranslation } from 'react-i18next';
 
 interface EditCategoryDialogProps {
   category: Category;
@@ -15,16 +16,15 @@ interface EditCategoryDialogProps {
 }
 
 const EditCategoryDialog: React.FC<EditCategoryDialogProps> = ({ category, onSave, onClose }) => {
+  const { t } = useTranslation();
   const [name, setName] = useState(category.name);
   const [color, setColor] = useState(category.color);
   const [type, setType] = useState<'expense' | 'income'>(category.type);
-  // Removido o estado 'icon'
 
   useEffect(() => {
     setName(category.name);
     setColor(category.color);
     setType(category.type);
-    // setIcon(category.icon); // <-- Erro 15 corrigido (propriedade 'icon' removida)
   }, [category]);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -35,7 +35,6 @@ const EditCategoryDialog: React.FC<EditCategoryDialogProps> = ({ category, onSav
       name,
       color,
       type,
-      // icon, // <-- Erro 16 corrigido (propriedade 'icon' removida)
     };
 
     onSave(updatedCategory);
@@ -46,32 +45,31 @@ const EditCategoryDialog: React.FC<EditCategoryDialogProps> = ({ category, onSav
     <Dialog open={true} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Editar Categoria</DialogTitle>
+          <DialogTitle>{t('categories.editTitle')}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Nome</Label>
+            <Label htmlFor="name">{t('categories.name')}</Label>
             <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="color">Cor</Label>
-            <Input id="color" type="color" value={color} onChange={(e) => setColor(e.target.value)} />
+            <Label htmlFor="color">{t('categories.color')}</Label>
+            <Input id="color" type="color" value={color || '#000000'} onChange={(e) => setColor(e.target.value)} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="type">Tipo</Label>
+            <Label htmlFor="type">{t('categories.type')}</Label>
             <Select value={type} onValueChange={(value: 'expense' | 'income') => setType(value)}>
               <SelectTrigger>
-                <SelectValue placeholder="Selecione o tipo" />
+                <SelectValue placeholder={t('categories.selectType')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="expense">Despesa</SelectItem>
-                <SelectItem value="income">Receita</SelectItem>
+                <SelectItem value="expense">{t('categories.expense')}</SelectItem>
+                <SelectItem value="income">{t('categories.income')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
-          {/* Campo de ícone removido */}
           <DialogFooter>
-            <Button type="submit">Salvar Alterações</Button>
+            <Button type="submit">{t('categories.save')}</Button>
           </DialogFooter>
         </form>
       </DialogContent>

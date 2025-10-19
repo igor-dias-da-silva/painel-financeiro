@@ -19,8 +19,10 @@ import {
 } from "@/components/ui/tooltip";
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const PricingPage = () => {
+  const { t } = useTranslation();
   const { user, isLoading: authLoading } = useAuth();
   const { isAdmin } = useProfile();
   const queryClient = useQueryClient();
@@ -145,9 +147,9 @@ const PricingPage = () => {
   const plans = [
     {
       id: 'free',
-      name: 'Gratuito',
+      name: t('pricing.free'),
       price: 'R$ 0,00',
-      period: 'para sempre',
+      period: t('pricing.forever'),
       description: 'Perfeito para começar a organizar suas finanças',
       icon: Zap,
       features: [
@@ -162,14 +164,14 @@ const PricingPage = () => {
         'Suporte apenas por email'
       ],
       featured: false,
-      cta: 'Plano Gratuito',
+      cta: t('pricing.freeButton'),
       ctaVariant: 'outline' as const
     },
     {
       id: 'premium',
-      name: 'Premium',
+      name: t('pricing.premium'),
       price: 'R$ 19,90',
-      period: 'por mês',
+      period: t('pricing.perMonth'),
       description: 'Desbloqueie todos os recursos e recursos avançados',
       icon: Crown,
       features: [
@@ -182,7 +184,7 @@ const PricingPage = () => {
       ],
       limitations: [],
       featured: true,
-      cta: 'Assinar Agora',
+      cta: t('pricing.subscribe'),
       ctaVariant: 'default' as const,
       popular: true
     }
@@ -207,10 +209,10 @@ const PricingPage = () => {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold text-gray-900 dark:text-foreground mb-4">
-              Escolha seu plano
+              {t('pricing.title')}
             </h1>
             <p className="text-xl text-gray-600 dark:text-muted-foreground max-w-2xl mx-auto">
-              Comece de graça e atualize quando precisar de mais recursos
+              {t('pricing.subtitle')}
             </p>
           </div>
 
@@ -221,24 +223,24 @@ const PricingPage = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="text-lg font-semibold dark:text-foreground">
-                      Plano Atual: <span className={isPremium ? 'text-green-600' : 'text-blue-600'}>
-                        {isPremium ? 'Premium' : 'Gratuito'}
+                      {t('pricing.currentPlan')} <span className={isPremium ? 'text-green-600' : 'text-blue-600'}>
+                        {isPremium ? t('pricing.premium') : t('pricing.free')}
                       </span>
                     </h3>
                     <p className="text-sm text-gray-600 dark:text-muted-foreground">
                       {isPremium 
-                        ? 'Você tem acesso a todos os recursos premium.' 
-                        : 'Você está usando o plano gratuito. Atualize para desbloquear mais recursos.'
+                        ? t('pricing.premiumDescription')
+                        : t('pricing.freeDescription')
                       }
                     </p>
                   </div>
                   {isPremium && !isAdmin && (
                     <Button variant="outline" onClick={handleCancelSubscription} disabled={updateProfileMutation.isPending}>
-                      Cancelar Assinatura
+                      {t('pricing.cancel')}
                     </Button>
                   )}
                   {isPremium && isAdmin && (
-                    <Badge variant="destructive">Acesso Admin</Badge>
+                    <Badge variant="destructive">{t('pricing.adminAccess')}</Badge>
                   )}
                 </div>
               </CardContent>
@@ -260,9 +262,9 @@ const PricingPage = () => {
                   style={isFreePlanButtonForAdmin ? { pointerEvents: 'none' } : {}}
                 >
                   {isCurrentPlan ? (
-                    'Plano Atual'
+                    t('pricing.current')
                   ) : isProcessingPayment && plan.id === 'premium' ? (
-                    <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Redirecionando...</>
+                    <><Loader2 className="h-4 w-4 animate-spin mr-2" /> {t('pricing.redirecting')}</>
                   ) : (
                     plan.cta
                   )}
@@ -278,7 +280,7 @@ const PricingPage = () => {
                     <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                       <Badge className="bg-primary text-primary-foreground px-3 py-1">
                         <Star className="h-3 w-3 mr-1" />
-                        Mais Popular
+                        {t('pricing.mostPopular')}
                       </Badge>
                     </div>
                   )}
@@ -299,7 +301,7 @@ const PricingPage = () => {
                   
                   <CardContent className="space-y-6">
                     <div className="space-y-3">
-                      <h4 className="font-medium dark:text-foreground">Recursos incluídos:</h4>
+                      <h4 className="font-medium dark:text-foreground">{t('pricing.features')}</h4>
                       <ul className="space-y-2">
                         {plan.features.map((feature, index) => (
                           <li key={index} className="flex items-start">
@@ -312,7 +314,7 @@ const PricingPage = () => {
 
                     {plan.limitations.length > 0 && (
                       <div className="space-y-3">
-                        <h4 className="font-medium text-red-600">Limitações:</h4>
+                        <h4 className="font-medium text-red-600">{t('pricing.limitations')}</h4>
                         <ul className="space-y-2">
                           {plan.limitations.map((limitation, index) => (
                             <li key={index} className="flex items-start">
@@ -331,7 +333,7 @@ const PricingPage = () => {
                             <div className="w-full">{ctaButton}</div>
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>Administradores não podem usar o plano gratuito.</p>
+                            <p>{t('pricing.adminTooltip')}</p>
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
@@ -346,41 +348,33 @@ const PricingPage = () => {
 
           {/* Perguntas Frequentes */}
           <div className="mt-16">
-            <h2 className="text-2xl font-bold text-center mb-8 dark:text-foreground">Perguntas Frequentes</h2>
+            <h2 className="text-2xl font-bold text-center mb-8 dark:text-foreground">{t('pricing.faq')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
               <Card className="dark:bg-card dark:border-border">
                 <CardContent className="p-6">
-                  <h3 className="font-semibold mb-2 dark:text-foreground">Posso cancelar a qualquer momento?</h3>
-                  <p className="text-sm text-gray-600 dark:text-muted-foreground">
-                    Sim, você pode cancelar sua assinatura premium a qualquer momento. Seu plano será revertido para o gratuito no próximo ciclo de faturamento.
-                  </p>
+                  <h3 className="font-semibold mb-2 dark:text-foreground">{t('pricing.q1')}</h3>
+                  <p className="text-sm text-gray-600 dark:text-muted-foreground">{t('pricing.a1')}</p>
                 </CardContent>
               </Card>
               
               <Card className="dark:bg-card dark:border-border">
                 <CardContent className="p-6">
-                  <h3 className="font-semibold mb-2 dark:text-foreground">Quais métodos de pagamento são aceitos?</h3>
-                  <p className="text-sm text-gray-600 dark:text-muted-foreground">
-                    Aceitamos todos os principais cartões de crédito, débito e boletos bancários através do Mercado Pago.
-                  </p>
+                  <h3 className="font-semibold mb-2 dark:text-foreground">{t('pricing.q2')}</h3>
+                  <p className="text-sm text-gray-600 dark:text-muted-foreground">{t('pricing.a2')}</p>
                 </CardContent>
               </Card>
               
               <Card className="dark:bg-card dark:border-border">
                 <CardContent className="p-6">
-                  <h3 className="font-semibold mb-2 dark:text-foreground">Meus dados são seguros?</h3>
-                  <p className="text-sm text-gray-600 dark:text-muted-foreground">
-                    Sim, usamos criptografia de ponta a ponta e armazenamos seus dados em servidores seguros com backup diário.
-                  </p>
+                  <h3 className="font-semibold mb-2 dark:text-foreground">{t('pricing.q3')}</h3>
+                  <p className="text-sm text-gray-600 dark:text-muted-foreground">{t('pricing.a3')}</p>
                 </CardContent>
               </Card>
               
               <Card className="dark:bg-card dark:border-border">
                 <CardContent className="p-6">
-                  <h3 className="font-semibold mb-2 dark:text-foreground">E se eu não gostar do plano premium?</h3>
-                  <p className="text-sm text-gray-600 dark:text-muted-foreground">
-                    Oferecemos garantia de devolução de 7 dias. Se não estiver satisfeito, entre em contato com nosso suporte para reembolso.
-                  </p>
+                  <h3 className="font-semibold mb-2 dark:text-foreground">{t('pricing.q4')}</h3>
+                  <p className="text-sm text-gray-600 dark:text-muted-foreground">{t('pricing.a4')}</p>
                 </CardContent>
               </Card>
             </div>

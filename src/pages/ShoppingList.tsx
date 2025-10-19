@@ -19,10 +19,12 @@ import { exportToPdf } from '@/utils/export';
 import { useProfile } from '@/hooks/useProfile';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const SHOPPING_LIST_ID = 'shopping-list-export-content';
 
 const ShoppingListPage = () => {
+  const { t } = useTranslation();
   const { user, isLoading: authLoading } = useAuth();
   const { profile, isLoading: profileLoading } = useProfile();
   const queryClient = useQueryClient();
@@ -129,14 +131,14 @@ const ShoppingListPage = () => {
               ) : (
                 <FileText className="h-4 w-4 mr-2" />
               )}
-              Exportar PDF
+              {t('shoppingList.export')}
             </Button>
           </div>
         </TooltipTrigger>
         {!canExport && (
           <TooltipContent>
-            <p>A exportação de dados é um recurso Premium.</p>
-            <Link to="/pricing" className="text-primary underline">Faça upgrade.</Link>
+            <p>{t('shoppingList.exportTooltip')}</p>
+            <Link to="/pricing" className="text-primary underline">{t('shoppingList.upgrade')}</Link>
           </TooltipContent>
         )}
       </Tooltip>
@@ -149,7 +151,7 @@ const ShoppingListPage = () => {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center">
             <ShoppingCart className="h-8 w-8 mr-3 text-primary" />
-            <h1 className="text-3xl font-bold">Lista de Compras Mensal</h1>
+            <h1 className="text-3xl font-bold">{t('shoppingList.title')}</h1>
           </div>
           <ExportButton />
         </div>
@@ -163,40 +165,40 @@ const ShoppingListPage = () => {
             <div className="lg:col-span-1 space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Adicionar Novo Item</CardTitle>
+                  <CardTitle>{t('shoppingList.addNewItem')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={handleAddItem} className="space-y-4">
                     <div>
-                      <Label htmlFor="itemName">Nome do Item</Label>
-                      <Input id="itemName" value={newItemName} onChange={e => setNewItemName(e.target.value)} placeholder="Ex: Leite, Pão" />
+                      <Label htmlFor="itemName">{t('shoppingList.itemName')}</Label>
+                      <Input id="itemName" value={newItemName} onChange={e => setNewItemName(e.target.value)} placeholder={t('shoppingList.itemNamePlaceholder')} />
                     </div>
                     <div>
-                      <Label htmlFor="itemPrice">Preço Estimado (R$)</Label>
+                      <Label htmlFor="itemPrice">{t('shoppingList.itemPrice')}</Label>
                       <Input id="itemPrice" type="number" value={newItemPrice} onChange={e => setNewItemPrice(e.target.value)} placeholder="Ex: 5.50" />
                     </div>
                     <Button type="submit" className="w-full" disabled={addMutation.isPending}>
                       {addMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
-                      Adicionar Item
+                      {t('shoppingList.addItem')}
                     </Button>
                   </form>
                 </CardContent>
               </Card>
               <Card>
                 <CardHeader>
-                  <CardTitle>Resumo da Lista</CardTitle>
+                  <CardTitle>{t('shoppingList.summary')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Total Planejado:</span>
+                    <span className="text-muted-foreground">{t('shoppingList.totalPlanned')}</span>
                     <span className="font-semibold text-lg text-blue-600">{formatCurrency(totalPlanned)}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Total Comprado:</span>
+                    <span className="text-muted-foreground">{t('shoppingList.totalPurchased')}</span>
                     <span className="font-semibold text-lg text-green-600">{formatCurrency(totalPurchased)}</span>
                   </div>
                   <div className="text-sm text-muted-foreground pt-2">
-                    <CheckCircle className="h-4 w-4 inline mr-1" /> {items?.filter(i => i.purchased).length} de {items?.length} itens comprados.
+                    <CheckCircle className="h-4 w-4 inline mr-1" /> {t('shoppingList.itemsPurchased', { count: items?.filter(i => i.purchased).length, total: items?.length })}
                   </div>
                 </CardContent>
               </Card>
@@ -205,16 +207,16 @@ const ShoppingListPage = () => {
             <div className="lg:col-span-2">
               <Card id={SHOPPING_LIST_ID}> {/* Adicionado ID para exportação */}
                 <CardHeader>
-                  <CardTitle>Itens para {format(currentDate, 'MMMM/yyyy', { locale: ptBR })}</CardTitle>
+                  <CardTitle>{t('shoppingList.itemsForMonth', { month: format(currentDate, 'MMMM/yyyy', { locale: ptBR }) })}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="overflow-x-auto">
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead className="w-[50px]">Comprado</TableHead>
-                          <TableHead>Item</TableHead>
-                          <TableHead className="text-right">Preço Estimado</TableHead>
+                          <TableHead className="w-[50px]">{t('shoppingList.purchased')}</TableHead>
+                          <TableHead>{t('shoppingList.item')}</TableHead>
+                          <TableHead className="text-right">{t('shoppingList.price')}</TableHead>
                           <TableHead className="w-[50px]"></TableHead>
                         </TableRow>
                       </TableHeader>
@@ -241,7 +243,7 @@ const ShoppingListPage = () => {
                         ) : (
                           <TableRow>
                             <TableCell colSpan={4} className="text-center h-24">
-                              Sua lista de compras está vazia.
+                              {t('shoppingList.empty')}
                             </TableCell>
                           </TableRow>
                         )}

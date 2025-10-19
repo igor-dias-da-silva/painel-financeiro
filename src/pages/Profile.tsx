@@ -16,8 +16,10 @@ import { EditBioDialog } from '@/components/EditBioDialog';
 import { EditNameDialog } from '@/components/EditNameDialog';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 
 const Profile = () => {
+  const { t } = useTranslation();
   const { user, isLoading: authLoading, logout } = useAuth();
   const queryClient = useQueryClient();
   const userId = user?.id;
@@ -93,11 +95,11 @@ const Profile = () => {
     return (
       <div className="min-h-screen flex items-center justify-center dark:bg-background">
         <Card className="p-6 text-center dark:bg-card dark:border-border">
-          <CardTitle className="text-red-600 mb-4 dark:text-red-400">Erro ao carregar perfil</CardTitle>
+          <CardTitle className="text-red-600 mb-4 dark:text-red-400">{t('profile.loadError')}</CardTitle>
           <CardContent>
             <p className="text-gray-600 dark:text-gray-300">Não foi possível carregar seus dados. Tente novamente mais tarde.</p>
             <Button onClick={() => queryClient.invalidateQueries({ queryKey: ['profile', userId] })} className="mt-4">
-              Recarregar
+              {t('profile.reload')}
             </Button>
           </CardContent>
         </Card>
@@ -109,16 +111,16 @@ const Profile = () => {
   const joinDate = user.createdAt ? format(new Date(user.createdAt), 'dd/MM/yyyy') : "N/A";
 
   const getPlanIcon = (plan?: string) => (plan === 'premium' ? <Crown className="h-5 w-5 text-yellow-500" /> : <Zap className="h-5 w-5 text-blue-500" />);
-  const getPlanName = (plan?: string) => (plan === 'premium' ? 'Premium' : 'Gratuito');
-  const planStatus = profile?.subscription_status === 'active' ? { text: 'Ativo', color: 'text-green-600' } : { text: 'Inativo', color: 'text-red-600' };
+  const getPlanName = (plan?: string) => (plan === 'premium' ? t('pricing.premium') : t('pricing.free'));
+  const planStatus = profile?.subscription_status === 'active' ? { text: t('profile.active'), color: 'text-green-600' } : { text: t('profile.inactive'), color: 'text-red-600' };
 
   return (
     <AuthGuard>
       <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8 dark:bg-background">
         <div className="max-w-6xl mx-auto">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-800 dark:text-foreground mb-1">Meu Perfil</h1>
-            <p className="text-gray-600 dark:text-muted-foreground">Gerencie suas informações e preferências.</p>
+            <h1 className="text-3xl font-bold text-gray-800 dark:text-foreground mb-1">{t('profile.title')}</h1>
+            <p className="text-gray-600 dark:text-muted-foreground">{t('profile.description')}</p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
@@ -141,11 +143,11 @@ const Profile = () => {
                   <div className="space-y-4 text-sm text-muted-foreground">
                     <div className="flex items-center">
                       <Calendar className="h-4 w-4 mr-3 flex-shrink-0" />
-                      <span>Membro desde {joinDate}</span>
+                      <span>{t('profile.memberSince', { date: joinDate })}</span>
                     </div>
                     <div className="flex items-center">
                       {getPlanIcon(profile?.subscription_plan)}
-                      <span className="ml-3">Plano {getPlanName(profile?.subscription_plan)}</span>
+                      <span className="ml-3">{t('profile.plan', { plan: getPlanName(profile?.subscription_plan) })}</span>
                       <span className={`ml-auto font-semibold ${planStatus.color}`}>{planStatus.text}</span>
                     </div>
                   </div>
@@ -153,7 +155,7 @@ const Profile = () => {
                 <CardFooter>
                   <Link to="/pricing" className="w-full">
                     <Button variant="outline" className="w-full dark:bg-secondary dark:text-secondary-foreground dark:border-border dark:hover:bg-accent">
-                      Gerenciar Plano
+                      {t('profile.managePlan')}
                     </Button>
                   </Link>
                 </CardFooter>
@@ -164,29 +166,29 @@ const Profile = () => {
             <div className="lg:col-span-2 space-y-8">
               <Card className="dark:bg-card dark:border-border">
                 <CardHeader>
-                  <CardTitle className="dark:text-foreground">Informações Pessoais</CardTitle>
-                  <CardDescription>Atualize seus dados pessoais e biografia.</CardDescription>
+                  <CardTitle className="dark:text-foreground">{t('profile.personalInfo')}</CardTitle>
+                  <CardDescription>{t('profile.personalInfoDesc')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ul className="divide-y dark:divide-border">
                     <li className="py-4 flex items-center justify-between">
                       <div>
-                        <Label className="font-semibold dark:text-foreground">Nome Completo</Label>
+                        <Label className="font-semibold dark:text-foreground">{t('profile.fullName')}</Label>
                         <p className="text-muted-foreground text-sm">{displayName}</p>
                       </div>
                       <Button variant="ghost" size="sm" onClick={() => setShowEditNameDialog(true)} disabled={updateProfileMutation.isPending}>
-                        <Edit className="h-4 w-4 mr-2" /> Editar
+                        <Edit className="h-4 w-4 mr-2" /> {t('profile.edit')}
                       </Button>
                     </li>
                     <li className="py-4 flex items-start justify-between">
                       <div>
-                        <Label className="font-semibold dark:text-foreground">Biografia</Label>
+                        <Label className="font-semibold dark:text-foreground">{t('profile.bio')}</Label>
                         <p className="text-muted-foreground text-sm italic max-w-prose pt-1">
-                          {bio || 'Nenhuma biografia definida.'}
+                          {bio || t('profile.noBio')}
                         </p>
                       </div>
                       <Button variant="ghost" size="sm" onClick={() => setShowEditBioDialog(true)} disabled={updateProfileMutation.isPending} className="flex-shrink-0 ml-4">
-                        <Edit className="h-4 w-4 mr-2" /> Editar
+                        <Edit className="h-4 w-4 mr-2" /> {t('profile.edit')}
                       </Button>
                     </li>
                   </ul>
@@ -195,18 +197,18 @@ const Profile = () => {
 
               <Card className="dark:bg-card dark:border-border">
                 <CardHeader>
-                  <CardTitle className="dark:text-foreground">Segurança</CardTitle>
-                  <CardDescription>Gerencie sua senha e acesso à conta.</CardDescription>
+                  <CardTitle className="dark:text-foreground">{t('profile.security')}</CardTitle>
+                  <CardDescription>{t('profile.securityDesc')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ul className="divide-y dark:divide-border">
                     <li className="py-4 flex items-center justify-between">
                       <div>
-                        <Label className="font-semibold dark:text-foreground">Senha</Label>
+                        <Label className="font-semibold dark:text-foreground">{t('profile.password')}</Label>
                         <p className="text-muted-foreground text-sm">************</p>
                       </div>
                       <Button variant="outline" onClick={() => setShowChangePasswordDialog(true)} className="dark:bg-secondary dark:text-secondary-foreground dark:border-border dark:hover:bg-accent">
-                        Alterar Senha
+                        {t('profile.changePassword')}
                       </Button>
                     </li>
                   </ul>
@@ -214,10 +216,10 @@ const Profile = () => {
                 <CardFooter className="bg-red-50 dark:bg-destructive/10 p-4 border-t dark:border-destructive/20 rounded-b-lg">
                   <div className="flex items-center justify-between w-full">
                     <div>
-                      <h4 className="font-semibold text-destructive dark:text-red-400">Sair da Conta</h4>
-                      <p className="text-sm text-destructive/90 dark:text-red-400/90">Desconectar sua conta deste dispositivo.</p>
+                      <h4 className="font-semibold text-destructive dark:text-red-400">{t('profile.logout')}</h4>
+                      <p className="text-sm text-destructive/90 dark:text-red-400/90">{t('profile.logoutDesc')}</p>
                     </div>
-                    <Button variant="destructive" onClick={handleLogout}>Sair</Button>
+                    <Button variant="destructive" onClick={handleLogout}>{t('profileMenu.logout')}</Button>
                   </div>
                 </CardFooter>
               </Card>

@@ -9,8 +9,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { showError, showSuccess } from '@/utils/toast';
+import { useTranslation } from 'react-i18next';
 
 const AdminDashboard = () => {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   const { data: profiles, isLoading: profilesLoading, error: profilesError } = useQuery<Profile[]>({
@@ -63,13 +65,13 @@ const AdminDashboard = () => {
 
   return (
     <div className="p-4">
-      <h1 className="text-3xl font-bold mb-6 dark:text-foreground">Painel de Administração</h1>
-      <p className="text-muted-foreground mb-8">Gerenciamento de usuários e visão geral do sistema.</p>
+      <h1 className="text-3xl font-bold mb-6 dark:text-foreground">{t('admin.title')}</h1>
+      <p className="text-muted-foreground mb-8">{t('admin.description')}</p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card className="dark:bg-card dark:border-border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium dark:text-foreground">Total de Usuários</CardTitle>
+            <CardTitle className="text-sm font-medium dark:text-foreground">{t('admin.totalUsers')}</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -80,7 +82,7 @@ const AdminDashboard = () => {
         
         <Card className="dark:bg-card dark:border-border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium dark:text-foreground">Assinaturas Premium</CardTitle>
+            <CardTitle className="text-sm font-medium dark:text-foreground">{t('admin.premiumSubs')}</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -91,7 +93,7 @@ const AdminDashboard = () => {
         
         <Card className="dark:bg-card dark:border-border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium dark:text-foreground">Administradores</CardTitle>
+            <CardTitle className="text-sm font-medium dark:text-foreground">{t('admin.admins')}</CardTitle>
             <Settings className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -102,7 +104,7 @@ const AdminDashboard = () => {
         
         <Card className="dark:bg-card dark:border-border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium dark:text-foreground">Engajamento</CardTitle>
+            <CardTitle className="text-sm font-medium dark:text-foreground">{t('admin.engagement')}</CardTitle>
             <BarChart2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -114,18 +116,18 @@ const AdminDashboard = () => {
       
       <Card className="mt-8 dark:bg-card dark:border-border">
         <CardHeader>
-          <CardTitle className="dark:text-foreground">Gerenciamento de Usuários</CardTitle>
+          <CardTitle className="dark:text-foreground">{t('admin.userManagement')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Nome</TableHead>
-                  <TableHead>ID do Usuário</TableHead>
-                  <TableHead>Plano</TableHead>
-                  <TableHead>Função</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
+                  <TableHead>{t('admin.name')}</TableHead>
+                  <TableHead>{t('admin.userId')}</TableHead>
+                  <TableHead>{t('admin.plan')}</TableHead>
+                  <TableHead>{t('admin.role')}</TableHead>
+                  <TableHead className="text-right">{t('admin.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -152,7 +154,7 @@ const AdminDashboard = () => {
                         onClick={() => handleToggleRole(profile)}
                         disabled={updateRoleMutation.isPending}
                       >
-                        {profile.role === 'admin' ? 'Rebaixar' : 'Promover a Admin'}
+                        {profile.role === 'admin' ? t('admin.demote') : t('admin.promote')}
                       </Button>
                     </TableCell>
                   </TableRow>

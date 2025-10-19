@@ -17,8 +17,10 @@ import { AuthGuard } from '@/components/AuthGuard';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { PremiumFeatureGuard } from '@/components/PremiumFeatureGuard';
+import { useTranslation } from 'react-i18next';
 
 const BudgetPage = () => {
+  const { t } = useTranslation();
   const { user, isLoading: authLoading } = useAuth();
   const queryClient = useQueryClient();
   const userId = user?.id;
@@ -111,21 +113,21 @@ const BudgetPage = () => {
         <div className="container mx-auto p-4 md:p-6">
           <div className="flex items-center mb-6">
             <TrendingUp className="h-8 w-8 mr-3 text-primary" />
-            <h1 className="text-3xl font-bold">Orçamento Mensal</h1>
+            <h1 className="text-3xl font-bold">{t('budget.title')}</h1>
           </div>
           <p className="text-muted-foreground mb-6">
-            Defina limites de gastos para cada categoria neste mês ({format(currentDate, 'MMMM/yyyy', { locale: ptBR })}).
+            {t('budget.description', { month: format(currentDate, 'MMMM/yyyy', { locale: ptBR }) })}
           </p>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Coluna de Configuração de Limites */}
             <Card className="lg:col-span-1">
               <CardHeader>
-                <CardTitle>Definir Limites</CardTitle>
+                <CardTitle>{t('budget.setLimits')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {expenseCategories.length === 0 ? (
-                  <p className="text-muted-foreground">Crie categorias de despesa na página de Transações para começar a orçar.</p>
+                  <p className="text-muted-foreground">{t('budget.noCategories')}</p>
                 ) : (
                   <div className="space-y-4">
                     {expenseCategories.map(category => (
@@ -144,7 +146,7 @@ const BudgetPage = () => {
                     ))}
                     <Button onClick={handleSaveLimits} className="w-full" disabled={updateLimitsMutation.isPending}>
                       {updateLimitsMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
-                      Salvar Limites
+                      {t('budget.saveLimits')}
                     </Button>
                   </div>
                 )}
@@ -154,11 +156,11 @@ const BudgetPage = () => {
             {/* Coluna de Visualização de Progresso */}
             <Card className="lg:col-span-2">
               <CardHeader>
-                <CardTitle>Progresso do Orçamento</CardTitle>
+                <CardTitle>{t('budget.progress')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 {expenseCategories.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-8">Nenhum limite definido.</p>
+                  <p className="text-center text-muted-foreground py-8">{t('budget.noLimits')}</p>
                 ) : (
                   expenseCategories.map(category => {
                     const limit = localLimits[category.id] || 0;
@@ -180,11 +182,11 @@ const BudgetPage = () => {
                         </div>
                         <Progress value={percentage} className={`h-3 ${progressColor}`} />
                         <div className="flex justify-between text-xs text-muted-foreground">
-                          <span>Gasto: <span className="font-semibold text-foreground">{formatCurrency(spent)}</span></span>
-                          <span>Limite: <span className="font-semibold text-foreground">{formatCurrency(limit)}</span></span>
+                          <span>{t('budget.spent')} <span className="font-semibold text-foreground">{formatCurrency(spent)}</span></span>
+                          <span>{t('budget.limit')} <span className="font-semibold text-foreground">{formatCurrency(limit)}</span></span>
                         </div>
                         {percentage >= 100 && (
-                          <p className="text-xs text-red-500 font-medium">Limite excedido!</p>
+                          <p className="text-xs text-red-500 font-medium">{t('budget.limitExceeded')}</p>
                         )}
                       </div>
                     );

@@ -15,6 +15,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getTransactions, getCategories, getAccounts, insertTransaction, updateTransaction, deleteTransaction } from '@/lib/data';
 import { useAuth } from '@/hooks/useAuth';
 import { showError, showSuccess } from '@/utils/toast';
+import { useTranslation } from 'react-i18next';
 
 // Definindo o tipo de dados que o TransactionForm retorna (usa camelCase para o formulário)
 interface TransactionFormValues {
@@ -27,6 +28,7 @@ interface TransactionFormValues {
 }
 
 const Transactions = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const userId = user?.id;
   const queryClient = useQueryClient();
@@ -79,13 +81,13 @@ const Transactions = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['transactions', userId] });
       queryClient.invalidateQueries({ queryKey: ['accounts', userId] }); // Invalida contas para atualizar saldos
-      showSuccess(editingTransaction ? 'Transação atualizada!' : 'Transação adicionada!');
+      showSuccess(editingTransaction ? t('transactions.updateSuccess') : t('transactions.addSuccess'));
       setIsFormOpen(false);
       setEditingTransaction(undefined);
     },
     onError: (error) => {
       console.error(error);
-      showError('Erro ao salvar transação.');
+      showError(t('transactions.saveError'));
     },
   });
 
@@ -94,9 +96,9 @@ const Transactions = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['transactions', userId] });
       queryClient.invalidateQueries({ queryKey: ['accounts', userId] });
-      showSuccess('Transação excluída.');
+      showSuccess(t('transactions.deleteSuccess'));
     },
-    onError: () => showError('Erro ao excluir transação.'),
+    onError: () => showError(t('transactions.deleteError')),
   });
 
   // 3. Handlers
@@ -143,19 +145,19 @@ const Transactions = () => {
   return (
     <AuthGuard>
       <div className="p-4 md:p-6 space-y-6">
-        <h1 className="text-3xl font-bold">Transações</h1>
+        <h1 className="text-3xl font-bold">{t('transactions.title')}</h1>
 
         {/* Seção de Adicionar Transação */}
         <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => setEditingTransaction(undefined)}>
               <PlusCircle className="h-4 w-4 mr-2" />
-              Adicionar Transação
+              {t('transactions.add')}
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
-              <DialogTitle>{editingTransaction ? 'Editar Transação' : 'Nova Transação'}</DialogTitle>
+              <DialogTitle>{editingTransaction ? t('transactions.editTitle') : t('transactions.newTitle')}</DialogTitle>
             </DialogHeader>
             <TransactionForm
               initialData={editingTransaction}
@@ -169,20 +171,20 @@ const Transactions = () => {
         {/* Tabela de Transações */}
         <Card>
           <CardHeader>
-            <CardTitle>Histórico de Transações</CardTitle>
+            <CardTitle>{t('transactions.history')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Data</TableHead>
-                    <TableHead>Descrição</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Categoria</TableHead>
-                    <TableHead>Conta</TableHead>
-                    <TableHead className="text-right">Valor</TableHead>
-                    <TableHead className="text-center">Ações</TableHead>
+                    <TableHead>{t('transactions.date')}</TableHead>
+                    <TableHead>{t('transactions.description')}</TableHead>
+                    <TableHead>{t('transactions.type')}</TableHead>
+                    <TableHead>{t('transactions.category')}</TableHead>
+                    <TableHead>{t('transactions.account')}</TableHead>
+                    <TableHead className="text-right">{t('transactions.amount')}</TableHead>
+                    <TableHead className="text-center">{t('transactions.actions')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -195,11 +197,11 @@ const Transactions = () => {
                           <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
                             t.type === 'income' ? 'bg-green-200 text-green-800 dark:bg-green-800 dark:text-green-200' : 'bg-red-200 text-red-800 dark:bg-red-800 dark:text-red-200'
                           }`}>
-                            {t.type === 'income' ? 'Receita' : 'Despesa'}
+                            {t.type === 'income' ? t('transactions.income') : t('transactions.expense')}
                           </span>
                         </TableCell>
-                        <TableCell>{categoriesMap[t.category_id]?.name || 'N/A'}</TableCell>
-                        <TableCell>{accountsMap[t.account_id]?.name || 'N/A'}</TableCell>
+                        <TableCell>{categoriesMap[t.category_id]?.name || t('transactions.notApplicable')}</TableCell>
+                        <TableCell>{accountsMap[t.account_id]?.name || t('transactions.notApplicable')}</TableCell>
                         <TableCell className={`text-right font-semibold ${t.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                           {t.type === 'expense' ? '-' : ''}R$ {t.amount.toFixed(2)}
                         </TableCell>
@@ -216,7 +218,7 @@ const Transactions = () => {
                   ) : (
                     <TableRow>
                       <TableCell colSpan={7} className="text-center h-24 text-muted-foreground">
-                        Nenhuma transação encontrada. Adicione a primeira!
+                        {t('transactions.noneFound')}
                       </TableCell>
                     </TableRow>
                   )}

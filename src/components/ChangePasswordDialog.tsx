@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Eye, EyeOff, Lock } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { showError, showSuccess } from '@/utils/toast';
+import { useTranslation } from 'react-i18next';
 
 interface ChangePasswordDialogProps {
   open: boolean;
@@ -19,6 +20,7 @@ export const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
   open,
   onOpenChange,
 }) => {
+  const { t } = useTranslation();
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -32,12 +34,12 @@ export const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
     setError('');
 
     if (newPassword.length < 6) {
-      setError('A nova senha deve ter pelo menos 6 caracteres.');
+      setError(t('dialogs.passwordMinLength'));
       return;
     }
 
     if (newPassword !== confirmNewPassword) {
-      setError('As senhas não coincidem.');
+      setError(t('dialogs.passwordsNoMatch'));
       return;
     }
 
@@ -64,15 +66,13 @@ export const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Alterar Senha</DialogTitle>
-          <DialogDescription>
-            Digite e confirme sua nova senha. A senha deve ter no mínimo 6 caracteres.
-          </DialogDescription>
+          <DialogTitle>{t('dialogs.changePasswordTitle')}</DialogTitle>
+          <DialogDescription>{t('dialogs.changePasswordDesc')}</DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4 pt-4">
           <div>
-            <Label htmlFor="newPassword">Nova Senha</Label>
+            <Label htmlFor="newPassword">{t('dialogs.newPassword')}</Label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
@@ -97,7 +97,7 @@ export const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
           </div>
 
           <div>
-            <Label htmlFor="confirmNewPassword">Confirmar Nova Senha</Label>
+            <Label htmlFor="confirmNewPassword">{t('dialogs.confirmNewPassword')}</Label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
@@ -134,10 +134,10 @@ export const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
-              Cancelar
+              {t('dialogs.cancel')}
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? 'Salvando...' : 'Salvar Nova Senha'}
+              {isLoading ? t('dialogs.saving') : t('dialogs.saveNewPassword')}
             </Button>
           </DialogFooter>
         </form>

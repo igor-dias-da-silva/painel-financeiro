@@ -14,8 +14,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getCategories, insertCategory, updateCategory, deleteCategory } from '@/lib/data';
 import { useAuth } from '@/hooks/useAuth';
 import { showError, showSuccess } from '@/utils/toast';
+import { useTranslation } from 'react-i18next';
 
 const CategoryManager = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const userId = user?.id;
   const queryClient = useQueryClient();
@@ -39,11 +41,11 @@ const CategoryManager = () => {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['categories', userId] });
       queryClient.invalidateQueries({ queryKey: ['transactions', userId] }); // Invalida transações para atualizar o dashboard
-      showSuccess(`Categoria "${data.name}" adicionada!`);
+      showSuccess(t('categories.addSuccess', { name: data.name }));
       setNewCategoryName('');
       setNewCategoryColor('#000000');
     },
-    onError: () => showError('Erro ao adicionar categoria.'),
+    onError: () => showError(t('categories.addError')),
   });
 
   const updateMutation = useMutation({
@@ -51,10 +53,10 @@ const CategoryManager = () => {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['categories', userId] });
       queryClient.invalidateQueries({ queryKey: ['transactions', userId] });
-      showSuccess(`Categoria "${data.name}" atualizada!`);
+      showSuccess(t('categories.updateSuccess', { name: data.name }));
       setEditingCategory(null);
     },
-    onError: () => showError('Erro ao atualizar categoria.'),
+    onError: () => showError(t('categories.updateError')),
   });
 
   const deleteMutation = useMutation({
@@ -62,14 +64,14 @@ const CategoryManager = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories', userId] });
       queryClient.invalidateQueries({ queryKey: ['transactions', userId] });
-      showSuccess('Categoria excluída.');
+      showSuccess(t('categories.deleteSuccess'));
     },
-    onError: () => showError('Erro ao excluir categoria.'),
+    onError: () => showError(t('categories.deleteError')),
   });
 
   const handleAddCategory = () => {
     if (!newCategoryName.trim()) {
-      showError('O nome da categoria não pode ser vazio.');
+      showError(t('categories.nameRequired'));
       return;
     }
 
@@ -96,7 +98,7 @@ const CategoryManager = () => {
   const isMutating = addMutation.isPending || updateMutation.isPending || deleteMutation.isPending;
   const isLoading = isLoadingCategories || isMutating;
 
-  const renderCategoryTable = (title: string, list: Category[]) => (
+  const renderCategoryTable = (title: string, list: Category[], type: 'expense' | 'income') => (
     <Card>
       <CardHeader>
         <CardTitle>{title}</CardTitle>
@@ -107,14 +109,14 @@ const CategoryManager = () => {
             <Loader2 className="h-6 w-6 animate-spin text-primary" />
           </div>
         ) : list.length === 0 ? (
-          <p className="text-center text-muted-foreground py-4">Nenhuma categoria de {title.toLowerCase().replace('categorias de ', '')} cadastrada.</p>
+          <p className="text-center text-muted-foreground py-4">{t('categories.noneFound', { type: t(`categories.${type}`) })}</p>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Nome</TableHead>
-                <TableHead>Cor</TableHead>
-                <TableHead className="text-center">Ações</TableHead>
+                <TableHead>{t('categories.name')}</TableHead>
+                <TableHead>{t('categories.color')}</TableHead>
+                <TableHead className="text-center">{t('categories.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -146,17 +148,17 @@ const CategoryManager = () => {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-semibold">Gerenciar Categorias</h2>
+      <h2 className="text-2xl font-semibold">{t('categories.manageTitle')}</h2>
 
       {/* Formulário de Adição */}
       <Card>
         <CardHeader>
-          <CardTitle>Adicionar Nova Categoria</CardTitle>
+          <CardTitle>{t('categories.addNewTitle')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
             <Input
-              placeholder="Nome da Categoria"
+              placeholder={t('categories.name')}
               value={newCategoryName}
               onChange={(e) => setNewCategoryName(e.target.value)}
               className="flex-1"
@@ -171,16 +173,16 @@ const CategoryManager = () => {
             />
             <Select value={newCategoryType} onValueChange={(value: 'expense' | 'income') => setNewCategoryType(value)} disabled={isMutating}>
               <SelectTrigger className="w-full md:w-[180px]">
-                <SelectValue placeholder="Tipo" />
+                <SelectValue placeholder={t('categories.type')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="expense">Despesa</SelectItem>
-                <SelectItem value="income">Receita</SelectItem>
+                <SelectItem value="expense">{t('categories.expense')}</SelectItem>
+                <SelectItem value="income">{t('categories.income')}</SelectItem>
               </SelectContent>
             </Select>
             <Button onClick={handleAddCategory} disabled={isMutating || !newCategoryName.trim()}>
               {addMutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <PlusCircle className="h-4 w-4 mr-2" />}
-              Adicionar
+              {t('categories.add')}
             </Button>
           </div>
         </CardContent>
@@ -188,8 +190,8 @@ const CategoryManager = () => {
 
       {/* Tabelas de Categorias */}
       <div className="grid gap-4 md:grid-cols-2">
-        {renderCategoryTable('Categorias de Despesa', expenseCategories)}
-        {renderCategoryTable('Categorias de Receita', incomeCategories)}
+        {renderCategoryTable(t('categories.expenseTitle'), expenseCategories, 'expense')}
+        {renderCategoryTable(t('categories.incomeTitle'), incomeCategories, 'income')}
       </div>
 
       {/* Diálogo de Edição */}

@@ -22,6 +22,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 // Definindo o tipo de dados que o AccountForm retorna
 interface AccountFormValues {
@@ -31,6 +32,7 @@ interface AccountFormValues {
 }
 
 const AccountsPage = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { profile, isLoading: isLoadingProfile } = useProfile();
   const userId = user?.id;
@@ -52,12 +54,12 @@ const AccountsPage = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['accounts', userId] });
       queryClient.invalidateQueries({ queryKey: ['transactions', userId] }); // Invalida transações para atualizar o dashboard
-      showSuccess('Conta adicionada com sucesso!');
+      showSuccess(t('accounts.addSuccess'));
       setIsFormOpen(false);
     },
     onError: (error) => {
       console.error(error);
-      showError('Erro ao adicionar conta.');
+      showError(t('accounts.addError'));
     },
   });
 
@@ -69,7 +71,7 @@ const AccountsPage = () => {
 
     // Lógica de Limitação de Contas
     if (profile?.subscription_plan === 'free' && accounts.length >= 3) {
-      showError('Seu plano gratuito permite até 3 contas. Faça upgrade para Premium para adicionar mais.');
+      showError(t('accounts.limitReached'));
       setIsFormOpen(false);
       return;
     }
@@ -94,10 +96,10 @@ const AccountsPage = () => {
 
   const getAccountTypeName = (type: string) => {
     switch (type) {
-      case 'checking': return 'Conta Corrente';
-      case 'savings': return 'Poupança';
-      case 'cash': return 'Dinheiro';
-      default: return 'Outro';
+      case 'checking': return t('accounts.checking');
+      case 'savings': return t('accounts.savings');
+      case 'cash': return t('accounts.cash');
+      default: return t('accounts.other');
     }
   };
 
@@ -113,22 +115,22 @@ const AccountsPage = () => {
               <DialogTrigger asChild>
                 <Button onClick={() => setIsFormOpen(true)} disabled={isAddAccountDisabled}>
                   <PlusCircle className="h-4 w-4 mr-2" />
-                  Adicionar Conta
+                  {t('accounts.add')}
                 </Button>
               </DialogTrigger>
             </div>
           </TooltipTrigger>
           {isAddAccountDisabled && (
             <TooltipContent>
-              <p>Seu plano gratuito permite até 3 contas.</p>
-              <Link to="/pricing" className="text-primary underline">Faça upgrade para Premium.</Link>
+              <p>{t('accounts.limitReached')}</p>
+              <Link to="/pricing" className="text-primary underline">{t('accounts.upgrade')}</Link>
             </TooltipContent>
           )}
         </Tooltip>
       </TooltipProvider>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Nova Conta Financeira</DialogTitle>
+          <DialogTitle>{t('accounts.newTitle')}</DialogTitle>
         </DialogHeader>
         <AccountForm 
           onSubmit={handleSaveAccount} 
@@ -144,7 +146,7 @@ const AccountsPage = () => {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center">
             <Wallet className="h-8 w-8 mr-3 text-primary" />
-            <h1 className="text-3xl font-bold">Minhas Contas</h1>
+            <h1 className="text-3xl font-bold">{t('accounts.title')}</h1>
           </div>
           <AddAccountButton />
         </div>
@@ -156,17 +158,17 @@ const AccountsPage = () => {
         ) : (
           <Card>
             <CardHeader>
-              <CardTitle>Contas Cadastradas</CardTitle>
+              <CardTitle>{t('accounts.registered')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Nome</TableHead>
-                      <TableHead>Tipo</TableHead>
-                      <TableHead className="text-right">Saldo Atual</TableHead>
-                      <TableHead className="text-center">Ações</TableHead>
+                      <TableHead>{t('accounts.name')}</TableHead>
+                      <TableHead>{t('accounts.type')}</TableHead>
+                      <TableHead className="text-right">{t('accounts.balance')}</TableHead>
+                      <TableHead className="text-center">{t('accounts.actions')}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -191,7 +193,7 @@ const AccountsPage = () => {
                     ) : (
                       <TableRow>
                         <TableCell colSpan={4} className="text-center h-24 text-muted-foreground">
-                          Nenhuma conta cadastrada. Clique em "Adicionar Conta" para começar.
+                          {t('accounts.noneFound')}
                         </TableCell>
                       </TableRow>
                     )}

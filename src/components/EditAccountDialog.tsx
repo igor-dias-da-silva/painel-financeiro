@@ -9,6 +9,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateAccount, deleteAccount } from '@/lib/data';
 import { showError, showSuccess } from '@/utils/toast';
 import { Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface EditAccountDialogProps {
   account: Account;
@@ -23,6 +24,7 @@ interface AccountFormValues {
 }
 
 export const EditAccountDialog: React.FC<EditAccountDialogProps> = ({ account, open, onOpenChange }) => {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const userId = account.user_id;
 
@@ -31,10 +33,10 @@ export const EditAccountDialog: React.FC<EditAccountDialogProps> = ({ account, o
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['accounts', userId] });
       queryClient.invalidateQueries({ queryKey: ['transactions', userId] }); // Atualiza saldos no dashboard
-      showSuccess('Conta atualizada com sucesso!');
+      showSuccess(t('accounts.updateSuccess'));
       onOpenChange(false);
     },
-    onError: () => showError('Erro ao atualizar conta.'),
+    onError: () => showError(t('accounts.updateError')),
   });
 
   const deleteMutation = useMutation({
@@ -42,10 +44,10 @@ export const EditAccountDialog: React.FC<EditAccountDialogProps> = ({ account, o
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['accounts', userId] });
       queryClient.invalidateQueries({ queryKey: ['transactions', userId] });
-      showSuccess('Conta excluída com sucesso!');
+      showSuccess(t('accounts.deleteSuccess'));
       onOpenChange(false);
     },
-    onError: () => showError('Erro ao excluir conta. Verifique se há transações associadas.'),
+    onError: () => showError(t('accounts.deleteError')),
   });
 
   const handleUpdateAccount = (data: AccountFormValues) => {
@@ -58,7 +60,7 @@ export const EditAccountDialog: React.FC<EditAccountDialogProps> = ({ account, o
   };
 
   const handleDelete = () => {
-    if (confirm(`Tem certeza que deseja excluir a conta "${account.name}"?`)) {
+    if (confirm(t('accounts.confirmDelete', { name: account.name }))) {
       deleteMutation.mutate();
     }
   };
@@ -69,7 +71,7 @@ export const EditAccountDialog: React.FC<EditAccountDialogProps> = ({ account, o
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Editar Conta: {account.name}</DialogTitle>
+          <DialogTitle>{t('accounts.editTitle', { name: account.name })}</DialogTitle>
         </DialogHeader>
         
         <AccountForm 
@@ -85,7 +87,7 @@ export const EditAccountDialog: React.FC<EditAccountDialogProps> = ({ account, o
             disabled={isMutating}
             className="w-full sm:w-auto mb-2 sm:mb-0"
           >
-            {deleteMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : 'Excluir Conta'}
+            {deleteMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : t('accounts.delete')}
           </Button>
           <Button 
             variant="outline" 
@@ -93,7 +95,7 @@ export const EditAccountDialog: React.FC<EditAccountDialogProps> = ({ account, o
             disabled={isMutating}
             className="w-full sm:w-auto"
           >
-            Cancelar
+            {t('accounts.cancel')}
           </Button>
         </DialogFooter>
       </DialogContent>
