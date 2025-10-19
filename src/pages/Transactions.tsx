@@ -2,8 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { AuthGuard } from '@/components/AuthGuard';
-import { getTransactions, deleteTransaction, Transaction, Category, getCategories } from '@/lib/transactions';
-import { TransactionForm } from '@/components/TransactionForm'; // CORRIGIDO: Importação nomeada
+import { TransactionForm } from '@/components/TransactionForm';
 import CategoryManager from '@/components/CategoryManager';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,8 +11,20 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Edit, Trash2, PlusCircle } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { mockCategories, mockAccounts, mockTransactions } from '@/data/mockData';
+import { Transaction, Category, Account } from '@/data/types'; // Importando tipos corretos
+
+// Definindo o tipo de dados que o TransactionForm retorna
+interface TransactionFormValues {
+  description: string;
+  amount: number;
+  type: 'income' | 'expense';
+  date: string;
+  categoryId: string;
+  accountId: string;
+}
 
 const Transactions = () => {
+  // Usando o tipo Transaction de src/data/types
   const [transactions, setTransactions] = useState<Transaction[]>(mockTransactions);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | undefined>(undefined);
@@ -23,17 +34,17 @@ const Transactions = () => {
     return mockCategories.reduce((acc, cat) => {
       acc[cat.id] = cat;
       return acc;
-    }, {} as Record<string, Category>);
+    }, {} as Record<string, Category>); // Usando o tipo Category correto
   }, []);
 
   const accountsMap = useMemo(() => {
     return mockAccounts.reduce((acc, accItem) => {
       acc[accItem.id] = accItem;
       return acc;
-    }, {} as Record<string, any>); // Usando 'any' temporariamente, idealmente Account
+    }, {} as Record<string, Account>); // Usando o tipo Account correto
   }, []);
 
-  const handleSaveTransaction = (data: any) => {
+  const handleSaveTransaction = (data: TransactionFormValues) => { // Tipagem corrigida
     if (editingTransaction) {
       // Lógica de edição
       setTransactions(
@@ -83,7 +94,7 @@ const Transactions = () => {
               <DialogTitle>{editingTransaction ? 'Editar Transação' : 'Nova Transação'}</DialogTitle>
             </DialogHeader>
             <TransactionForm
-              initialData={editingTransaction}
+              initialData={editingTransaction} // Tipo Transaction agora é compatível
               onSubmit={handleSaveTransaction}
             />
           </DialogContent>
@@ -111,7 +122,7 @@ const Transactions = () => {
                 <TableBody>
                   {transactions.map((t) => (
                     <TableRow key={t.id} className={t.type === 'income' ? 'bg-green-50/50 dark:bg-green-900/10' : 'bg-red-50/50 dark:bg-red-900/10'}>
-                      <TableCell>{t.date}</TableCell>
+                      <TableCell>{t.date}</TableCell> {/* CORRIGIDO: Propriedade 'date' existe em Transaction */}
                       <TableCell className="font-medium">{t.description}</TableCell>
                       <TableCell>
                         <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
@@ -120,8 +131,8 @@ const Transactions = () => {
                           {t.type === 'income' ? 'Receita' : 'Despesa'}
                         </span>
                       </TableCell>
-                      <TableCell>{categoriesMap[t.categoryId]?.name || 'N/A'}</TableCell>
-                      <TableCell>{accountsMap[t.accountId]?.name || 'N/A'}</TableCell>
+                      <TableCell>{categoriesMap[t.categoryId]?.name || 'N/A'}</TableCell> {/* CORRIGIDO: Propriedade 'categoryId' existe em Transaction */}
+                      <TableCell>{accountsMap[t.accountId]?.name || 'N/A'}</TableCell> {/* CORRIGIDO: Propriedade 'accountId' existe em Transaction */}
                       <TableCell className={`text-right font-semibold ${t.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                         {t.type === 'expense' ? '-' : ''}R$ {t.amount.toFixed(2)}
                       </TableCell>

@@ -5,14 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Trash2, Edit, DollarSign, Car, ForkAndKnife, Gamepad, TrendingUp, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, Trash2, Edit, DollarSign, Car, ForkKnife, Gamepad, TrendingUp, ChevronDown, ChevronUp } from 'lucide-react'; // CORRIGIDO: ForkAndKnife -> ForkKnife
 import { mockCategories } from '@/data/mockData';
 import { Category } from '@/data/types';
 import { useToast } from '@/components/ui/use-toast';
 
 // Mapeamento de ícones para facilitar a seleção (simplificado)
 const iconOptions = [
-  { value: 'ForkAndKnife', icon: ForkAndKnife, name: 'Alimentação' },
+  { value: 'ForkKnife', icon: ForkKnife, name: 'Alimentação' }, // CORRIGIDO
   { value: 'DollarSign', icon: DollarSign, name: 'Salário' },
   { value: 'Car', icon: Car, name: 'Transporte' },
   { value: 'TrendingUp', icon: TrendingUp, name: 'Investimentos' },
@@ -23,7 +23,7 @@ const CategoryManager: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>(mockCategories);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [newCategoryType, setNewCategoryType] = useState<'income' | 'expense'>('expense');
-  const [newCategoryIcon, setNewCategoryIcon] = useState('ForkAndKnife');
+  const [newCategoryIcon, setNewCategoryIcon] = useState('ForkKnife'); // CORRIGIDO
   const [isExpanded, setIsExpanded] = useState(false);
   const { toast } = useToast();
 
