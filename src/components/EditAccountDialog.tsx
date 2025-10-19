@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import AccountForm from './AccountForm';
 import { Account, AccountInsert } from '@/data/types';
@@ -70,6 +70,9 @@ export const EditAccountDialog: React.FC<EditAccountDialogProps> = ({ account, o
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>{`Editar Conta: ${account.name}`}</DialogTitle>
+          <DialogDescription>
+            Altere os detalhes desta conta financeira.
+          </DialogDescription>
         </DialogHeader>
         
         <AccountForm 
