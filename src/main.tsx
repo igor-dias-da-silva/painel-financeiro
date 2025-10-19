@@ -3,14 +3,14 @@ import App from "./App.tsx";
 import "./globals.css";
 import { AuthProvider } from "./hooks/useAuth";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ThemeProvider } from "./components/ThemeProvider.tsx"; // Importar ThemeProvider
+import { ThemeProvider } from "./components/ThemeProvider.tsx";
 
 const queryClient = new QueryClient();
 
 createRoot(document.getElementById("root")!).render(
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <ThemeProvider defaultTheme="system" attribute="class" enableSystem> {/* Adicionar ThemeProvider */}
+      <ThemeProvider defaultTheme="light" attribute="class" enableSystem={false}>
         <App />
       </ThemeProvider>
     </AuthProvider>
