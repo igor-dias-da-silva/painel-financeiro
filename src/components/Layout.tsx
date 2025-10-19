@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom'; // Adicionando Outlet
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import {
@@ -17,7 +17,7 @@ import {
   Receipt,
   Crown,
   Shield,
-  DollarSign, // Novo ícone para Transações
+  DollarSign,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -26,7 +26,7 @@ import { useProfile } from '@/hooks/useProfile';
 
 const navItems = [
   { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
-  { name: 'Transações', icon: DollarSign, path: '/transactions' }, // Novo Item
+  { name: 'Transações', icon: DollarSign, path: '/transactions' },
   { name: 'Contas a Pagar', icon: Receipt, path: '/bills' },
   { name: 'Lista de Compras', icon: ShoppingCart, path: '/shopping-list' },
   { name: 'Planos', icon: Crown, path: '/pricing' },
@@ -35,7 +35,8 @@ const navItems = [
   { name: 'Ajuda', icon: HelpCircle, path: '/help' },
 ];
 
-export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+// Removendo a prop 'children' da assinatura do componente
+export const Layout: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const { user, logout } = useAuth();
@@ -202,9 +203,9 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
           </div>
         </header>
         
-        {/* Main content */}
+        {/* Main content - Usando Outlet para renderizar a rota filha */}
         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-4 md:p-6 dark:bg-background">
-          {children}
+          <Outlet />
         </main>
       </div>
     </div>

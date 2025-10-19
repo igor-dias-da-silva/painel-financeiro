@@ -20,7 +20,7 @@ import Help from './pages/Help';
 import PricingPage from './pages/PricingPage';
 import UpdatePassword from './pages/UpdatePassword';
 import AdminPage from './pages/AdminPage';
-import Transactions from './pages/Transactions'; // Importando a nova página
+import Transactions from './pages/Transactions';
 
 const queryClient = new QueryClient();
 
@@ -38,11 +38,11 @@ const App = () => {
               <Route path="/update-password" element={<UpdatePassword />} />
 
               {/* Protected Routes (using Layout) */}
-              <Route element={<Layout children={undefined} />}>
+              <Route element={<Layout />}>
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/shopping-list" element={<ShoppingList />} />
                 <Route path="/bills" element={<Bills />} />
-                <Route path="/transactions" element={<Transactions />} /> {/* Nova Rota */}
+                <Route path="/transactions" element={<Transactions />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/help" element={<Help />} />
