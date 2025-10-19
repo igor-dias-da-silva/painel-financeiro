@@ -14,17 +14,15 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getOrCreateBudget, getShoppingItems, addShoppingItem, updateShoppingItem, deleteShoppingItem, ShoppingItem } from '@/lib/shopping';
 import { showError, showSuccess } from '@/utils/toast';
 import { format, addMonths, subMonths } from 'date-fns';
-import { ptBR, enUS } from 'date-fns/locale';
+import { ptBR } from 'date-fns/locale';
 import { exportToPdf } from '@/utils/export';
 import { useProfile } from '@/hooks/useProfile';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 
 const SHOPPING_LIST_ID = 'shopping-list-export-content';
 
 const ShoppingListPage = () => {
-  const { t, i18n } = useTranslation();
   const { user, isLoading: authLoading } = useAuth();
   const { profile, isLoading: profileLoading } = useProfile();
   const queryClient = useQueryClient();
@@ -36,8 +34,8 @@ const ShoppingListPage = () => {
 
   const displayMonth = displayDate.getMonth() + 1;
   const displayYear = displayDate.getFullYear();
-  const locale = i18n.language === 'en' ? enUS : ptBR;
-  const dateFormat = i18n.language === 'pt' ? "MMMM 'de' yyyy" : 'MMMM yyyy';
+  const locale = ptBR;
+  const dateFormat = "MMMM 'de' yyyy";
 
   // 1. Fetch/Create Budget for the month
   const { data: budget, isLoading: budgetLoading } = useQuery({
@@ -141,14 +139,14 @@ const ShoppingListPage = () => {
               ) : (
                 <FileText className="h-4 w-4 mr-2" />
               )}
-              {t('shoppingList.export')}
+              Exportar PDF
             </Button>
           </div>
         </TooltipTrigger>
         {!canExport && (
           <TooltipContent>
-            <p>{t('shoppingList.exportTooltip')}</p>
-            <Link to="/pricing" className="text-primary underline">{t('shoppingList.upgrade')}</Link>
+            <p>A exportação de dados é um recurso Premium.</p>
+            <Link to="/pricing" className="text-primary underline">Faça upgrade.</Link>
           </TooltipContent>
         )}
       </Tooltip>
@@ -161,7 +159,7 @@ const ShoppingListPage = () => {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center">
             <ShoppingCart className="h-8 w-8 mr-3 text-primary" />
-            <h1 className="text-3xl font-bold">{t('shoppingList.title')}</h1>
+            <h1 className="text-3xl font-bold">Lista de Compras Mensal</h1>
           </div>
           <ExportButton />
         </div>
@@ -175,40 +173,40 @@ const ShoppingListPage = () => {
             <div className="lg:col-span-1 space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>{t('shoppingList.addNewItem')}</CardTitle>
+                  <CardTitle>Adicionar Novo Item</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={handleAddItem} className="space-y-4">
                     <div>
-                      <Label htmlFor="itemName">{t('shoppingList.itemName')}</Label>
-                      <Input id="itemName" value={newItemName} onChange={e => setNewItemName(e.target.value)} placeholder={t('shoppingList.itemNamePlaceholder')} />
+                      <Label htmlFor="itemName">Nome do Item</Label>
+                      <Input id="itemName" value={newItemName} onChange={e => setNewItemName(e.target.value)} placeholder="Ex: Leite, Pão" />
                     </div>
                     <div>
-                      <Label htmlFor="itemPrice">{t('shoppingList.itemPrice')}</Label>
+                      <Label htmlFor="itemPrice">Preço Estimado (R$)</Label>
                       <Input id="itemPrice" type="number" value={newItemPrice} onChange={e => setNewItemPrice(e.target.value)} placeholder="Ex: 5.50" />
                     </div>
                     <Button type="submit" className="w-full" disabled={addMutation.isPending}>
                       {addMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
-                      {t('shoppingList.addItem')}
+                      Adicionar Item
                     </Button>
                   </form>
                 </CardContent>
               </Card>
               <Card>
                 <CardHeader>
-                  <CardTitle>{t('shoppingList.summary')}</CardTitle>
+                  <CardTitle>Resumo da Lista</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">{t('shoppingList.totalPlanned')}</span>
+                    <span className="text-muted-foreground">Total Planejado:</span>
                     <span className="font-semibold text-lg text-blue-600">{formatCurrency(totalPlanned)}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">{t('shoppingList.totalPurchased')}</span>
+                    <span className="text-muted-foreground">Total Comprado:</span>
                     <span className="font-semibold text-lg text-green-600">{formatCurrency(totalPurchased)}</span>
                   </div>
                   <div className="text-sm text-muted-foreground pt-2">
-                    <CheckCircle className="h-4 w-4 inline mr-1" /> {t('shoppingList.itemsPurchased', { count: items?.filter(i => i.purchased).length, total: items?.length })}
+                    <CheckCircle className="h-4 w-4 inline mr-1" /> {`${items?.filter(i => i.purchased).length} de ${items?.length} itens comprados.`}
                   </div>
                 </CardContent>
               </Card>
@@ -218,7 +216,7 @@ const ShoppingListPage = () => {
               <Card id={SHOPPING_LIST_ID}>
                 <CardHeader>
                   <div className="flex justify-between items-center">
-                    <CardTitle>{t('shoppingList.itemsForMonth', { month: format(displayDate, dateFormat, { locale }) })}</CardTitle>
+                    <CardTitle>{`Itens para ${format(displayDate, dateFormat, { locale })}`}</CardTitle>
                     <div className="flex items-center gap-2">
                       <Button variant="outline" size="icon" onClick={handlePrevMonth}>
                         <ChevronLeft className="h-4 w-4" />
@@ -234,9 +232,9 @@ const ShoppingListPage = () => {
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead className="w-[50px]">{t('shoppingList.purchased')}</TableHead>
-                          <TableHead>{t('shoppingList.item')}</TableHead>
-                          <TableHead className="text-right">{t('shoppingList.price')}</TableHead>
+                          <TableHead className="w-[50px]">Comprado</TableHead>
+                          <TableHead>Item</TableHead>
+                          <TableHead className="text-right">Preço Estimado</TableHead>
                           <TableHead className="w-[50px]"></TableHead>
                         </TableRow>
                       </TableHeader>
@@ -263,7 +261,7 @@ const ShoppingListPage = () => {
                         ) : (
                           <TableRow>
                             <TableCell colSpan={4} className="text-center h-24">
-                              {t('shoppingList.empty')}
+                              Sua lista de compras está vazia.
                             </TableCell>
                           </TableRow>
                         )}

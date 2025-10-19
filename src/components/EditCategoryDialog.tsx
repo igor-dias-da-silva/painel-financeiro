@@ -7,7 +7,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Category } from '@/data/types';
-import { useTranslation } from 'react-i18next';
 
 interface EditCategoryDialogProps {
   category: Category;
@@ -16,7 +15,6 @@ interface EditCategoryDialogProps {
 }
 
 const EditCategoryDialog: React.FC<EditCategoryDialogProps> = ({ category, onSave, onClose }) => {
-  const { t } = useTranslation();
   const [name, setName] = useState(category.name);
   const [color, setColor] = useState(category.color);
   const [type, setType] = useState<'expense' | 'income'>(category.type);
@@ -45,31 +43,31 @@ const EditCategoryDialog: React.FC<EditCategoryDialogProps> = ({ category, onSav
     <Dialog open={true} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{t('categories.editTitle')}</DialogTitle>
+          <DialogTitle>Editar Categoria</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">{t('categories.name')}</Label>
+            <Label htmlFor="name">Nome da Categoria</Label>
             <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="color">{t('categories.color')}</Label>
+            <Label htmlFor="color">Cor</Label>
             <Input id="color" type="color" value={color || '#000000'} onChange={(e) => setColor(e.target.value)} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="type">{t('categories.type')}</Label>
+            <Label htmlFor="type">Tipo</Label>
             <Select value={type} onValueChange={(value: 'expense' | 'income') => setType(value)}>
               <SelectTrigger>
-                <SelectValue placeholder={t('categories.selectType')} />
+                <SelectValue placeholder="Selecione o tipo" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="expense">{t('categories.expense')}</SelectItem>
-                <SelectItem value="income">{t('categories.income')}</SelectItem>
+                <SelectItem value="expense">Despesa</SelectItem>
+                <SelectItem value="income">Receita</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <DialogFooter>
-            <Button type="submit">{t('categories.save')}</Button>
+            <Button type="submit">Salvar Alterações</Button>
           </DialogFooter>
         </form>
       </DialogContent>

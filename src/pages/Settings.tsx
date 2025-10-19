@@ -1,13 +1,11 @@
 "use client";
 
 import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Palette, Bell, Shield, Loader2, Languages } from 'lucide-react';
+import { Palette, Bell, Shield, Loader2 } from 'lucide-react';
 import { AuthGuard } from '@/components/AuthGuard';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from 'next-themes';
@@ -16,7 +14,6 @@ import { deleteAllFinancialData } from '@/lib/data';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 const Settings = () => {
-  const { t, i18n } = useTranslation();
   const { user, isLoading: authLoading } = useAuth();
   const { theme, setTheme } = useTheme();
   const queryClient = useQueryClient();
@@ -59,44 +56,23 @@ const Settings = () => {
       <div className="min-h-screen bg-gray-50 p-4 dark:bg-background">
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-800 dark:text-foreground mb-2">{t('settings.title')}</h1>
-            <p className="text-gray-600 dark:text-muted-foreground">{t('settings.description')}</p>
+            <h1 className="text-3xl font-bold text-gray-800 dark:text-foreground mb-2">Configurações</h1>
+            <p className="text-gray-600 dark:text-muted-foreground">Gerencie suas preferências e dados do aplicativo FinanBoard</p>
           </div>
 
           <div className="space-y-6">
             <Card className="dark:bg-card dark:border-border">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2 dark:text-foreground">
-                  <Languages className="h-5 w-5" />
-                  <span>{t('settings.language')}</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground mb-4">{t('settings.languageDescription')}</p>
-                <Select value={i18n.language} onValueChange={(lang) => i18n.changeLanguage(lang)}>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Selecione o idioma" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pt">{t('languages.pt')}</SelectItem>
-                    <SelectItem value="en">{t('languages.en')}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </CardContent>
-            </Card>
-
-            <Card className="dark:bg-card dark:border-border">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2 dark:text-foreground">
                   <Palette className="h-5 w-5" />
-                  <span>{t('settings.appearance')}</span>
+                  <span>Aparência</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label className="dark:text-foreground">{t('settings.darkMode')}</Label>
-                    <p className="text-sm text-muted-foreground">{t('settings.darkModeDescription')}</p>
+                    <Label className="dark:text-foreground">Modo Escuro</Label>
+                    <p className="text-sm text-muted-foreground">Ative o tema escuro para melhor visualização noturna</p>
                   </div>
                   <Switch
                     checked={theme === 'dark'}
@@ -111,14 +87,14 @@ const Settings = () => {
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2 dark:text-foreground">
                   <Bell className="h-5 w-5" />
-                  <span>{t('settings.notifications')}</span>
+                  <span>Notificações</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label className="dark:text-foreground">{t('settings.notificationsToggle')}</Label>
-                    <p className="text-sm text-muted-foreground">{t('settings.notificationsDescription')}</p>
+                    <Label className="dark:text-foreground">Notificações</Label>
+                    <p className="text-sm text-muted-foreground">Receba notificações sobre suas finanças</p>
                   </div>
                   <Switch
                     checked={notifications}
@@ -133,7 +109,7 @@ const Settings = () => {
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2 dark:text-foreground">
                   <Shield className="h-5 w-5" />
-                  <span>{t('settings.data')}</span>
+                  <span>Dados</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -147,11 +123,11 @@ const Settings = () => {
                     {deleteDataMutation.isPending ? (
                       <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Excluindo...</>
                     ) : (
-                      t('settings.deleteAllData')
+                      'Excluir Todos os Dados'
                     )}
                   </Button>
                   <p className="text-xs text-muted-foreground mt-2">
-                    {t('settings.deleteAllDataDescription')}
+                    Esta ação excluirá permanentemente todos os seus dados financeiros.
                   </p>
                 </div>
               </CardContent>

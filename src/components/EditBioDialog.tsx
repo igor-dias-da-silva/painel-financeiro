@@ -5,8 +5,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { showError, showSuccess } from '@/utils/toast';
-import { useTranslation } from 'react-i18next';
 
 interface EditBioDialogProps {
   open: boolean;
@@ -23,7 +21,6 @@ export const EditBioDialog: React.FC<EditBioDialogProps> = ({
   onSave,
   isLoading,
 }) => {
-  const { t } = useTranslation();
   const [bio, setBio] = useState(currentBio);
 
   useEffect(() => {
@@ -39,13 +36,13 @@ export const EditBioDialog: React.FC<EditBioDialogProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{t('dialogs.editBioTitle')}</DialogTitle>
-          <DialogDescription>{t('dialogs.editBioDesc')}</DialogDescription>
+          <DialogTitle>Editar Biografia</DialogTitle>
+          <DialogDescription>Conte um pouco sobre você. Esta informação será exibida em seu perfil.</DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4 pt-4">
           <div>
-            <Label htmlFor="bio">{t('dialogs.yourBio')}</Label>
+            <Label htmlFor="bio">Sua Biografia</Label>
             <Textarea
               id="bio"
               value={bio}
@@ -64,10 +61,10 @@ export const EditBioDialog: React.FC<EditBioDialogProps> = ({
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
-              {t('dialogs.cancel')}
+              Cancelar
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? t('dialogs.saving') : t('dialogs.saveBio')}
+              {isLoading ? 'Salvando...' : 'Salvar Biografia'}
             </Button>
           </DialogFooter>
         </form>

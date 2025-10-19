@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { showError } from '@/utils/toast';
-import { useTranslation } from 'react-i18next';
 
 interface EditNameDialogProps {
   open: boolean;
@@ -25,7 +24,6 @@ export const EditNameDialog: React.FC<EditNameDialogProps> = ({
   onSave,
   isLoading,
 }) => {
-  const { t } = useTranslation();
   const [firstName, setFirstName] = useState(currentFirstName);
   const [lastName, setLastName] = useState(currentLastName);
 
@@ -47,13 +45,13 @@ export const EditNameDialog: React.FC<EditNameDialogProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{t('dialogs.editNameTitle')}</DialogTitle>
-          <DialogDescription>{t('dialogs.editNameDesc')}</DialogDescription>
+          <DialogTitle>Editar Nome</DialogTitle>
+          <DialogDescription>Atualize seu primeiro nome e sobrenome.</DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4 pt-4">
           <div>
-            <Label htmlFor="firstName">{t('dialogs.firstName')}</Label>
+            <Label htmlFor="firstName">Primeiro Nome</Label>
             <Input
               id="firstName"
               value={firstName}
@@ -66,7 +64,7 @@ export const EditNameDialog: React.FC<EditNameDialogProps> = ({
           </div>
 
           <div>
-            <Label htmlFor="lastName">{t('dialogs.lastName')}</Label>
+            <Label htmlFor="lastName">Sobrenome</Label>
             <Input
               id="lastName"
               value={lastName}
@@ -84,10 +82,10 @@ export const EditNameDialog: React.FC<EditNameDialogProps> = ({
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
-              {t('dialogs.cancel')}
+              Cancelar
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? t('dialogs.saving') : t('dialogs.saveName')}
+              {isLoading ? 'Salvando...' : 'Salvar Nomes'}
             </Button>
           </DialogFooter>
         </form>

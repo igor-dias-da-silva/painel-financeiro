@@ -15,7 +15,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getTransactions, getCategories, getAccounts, insertTransaction, updateTransaction, deleteTransaction } from '@/lib/data';
 import { useAuth } from '@/hooks/useAuth';
 import { showError, showSuccess } from '@/utils/toast';
-import { useTranslation } from 'react-i18next';
 
 // Definindo o tipo de dados que o TransactionForm retorna (usa camelCase para o formulário)
 interface TransactionFormValues {
@@ -28,7 +27,6 @@ interface TransactionFormValues {
 }
 
 const Transactions = () => {
-  const { t } = useTranslation();
   const { user } = useAuth();
   const userId = user?.id;
   const queryClient = useQueryClient();
@@ -81,13 +79,13 @@ const Transactions = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['transactions', userId] });
       queryClient.invalidateQueries({ queryKey: ['accounts', userId] }); // Invalida contas para atualizar saldos
-      showSuccess(editingTransaction ? t('transactions.updateSuccess') : t('transactions.addSuccess'));
+      showSuccess(editingTransaction ? 'Transação atualizada!' : 'Transação adicionada!');
       setIsFormOpen(false);
       setEditingTransaction(undefined);
     },
     onError: (error) => {
       console.error(error);
-      showError(t('transactions.saveError'));
+      showError('Erro ao salvar transação.');
     },
   });
 
@@ -96,9 +94,9 @@ const Transactions = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['transactions', userId] });
       queryClient.invalidateQueries({ queryKey: ['accounts', userId] });
-      showSuccess(t('transactions.deleteSuccess'));
+      showSuccess('Transação excluída.');
     },
-    onError: () => showError(t('transactions.deleteError')),
+    onError: () => showError('Erro ao excluir transação.'),
   });
 
   // 3. Handlers
@@ -145,19 +143,19 @@ const Transactions = () => {
   return (
     <AuthGuard>
       <div className="p-4 md:p-6 space-y-6">
-        <h1 className="text-3xl font-bold">{t('transactions.title')}</h1>
+        <h1 className="text-3xl font-bold">Transações</h1>
 
         {/* Seção de Adicionar Transação */}
         <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => setEditingTransaction(undefined)}>
               <PlusCircle className="h-4 w-4 mr-2" />
-              {t('transactions.add')}
+              Adicionar Transação
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
-              <DialogTitle>{editingTransaction ? t('transactions.editTitle') : t('transactions.newTitle')}</DialogTitle>
+              <DialogTitle>{editingTransaction ? 'Editar Transação' : 'Nova Transação'}</DialogTitle>
             </DialogHeader>
             <TransactionForm
               initialData={editingTransaction}
@@ -171,20 +169,20 @@ const Transactions = () => {
         {/* Tabela de Transações */}
         <Card>
           <CardHeader>
-            <CardTitle>{t('transactions.history')}</CardTitle>
+            <CardTitle>Histórico de Transações</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>{t('transactions.date')}</TableHead>
-                    <TableHead>{t('transactions.description')}</TableHead>
-                    <TableHead>{t('transactions.type')}</TableHead>
-                    <TableHead>{t('transactions.category')}</TableHead>
-                    <TableHead>{t('transactions.account')}</TableHead>
-                    <TableHead className="text-right">{t('transactions.amount')}</TableHead>
-                    <TableHead className="text-center">{t('transactions.actions')}</TableHead>
+                    <TableHead>Data</TableHead>
+                    <TableHead>Descrição</TableHead>
+                    <TableHead>Tipo</TableHead>
+                    <TableHead>Categoria</TableHead>
+                    <TableHead>Conta</TableHead>
+                    <TableHead className="text-right">Valor</TableHead>
+                    <TableHead className="text-center">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -197,11 +195,11 @@ const Transactions = () => {
                           <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
                             transaction.type === 'income' ? 'bg-green-200 text-green-800 dark:bg-green-800 dark:text-green-200' : 'bg-red-200 text-red-800 dark:bg-red-800 dark:text-red-200'
                           }`}>
-                            {transaction.type === 'income' ? t('transactions.income') : t('transactions.expense')}
+                            {transaction.type === 'income' ? 'Receita' : 'Despesa'}
                           </span>
                         </TableCell>
-                        <TableCell>{categoriesMap[transaction.category_id]?.name || t('transactions.notApplicable')}</TableCell>
-                        <TableCell>{accountsMap[transaction.account_id]?.name || t('transactions.notApplicable')}</TableCell>
+                        <TableCell>{categoriesMap[transaction.category_id]?.name || 'N/A'}</TableCell>
+                        <TableCell>{accountsMap[transaction.account_id]?.name || 'N/A'}</TableCell>
                         <TableCell className={`text-right font-semibold ${transaction.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                           {transaction.type === 'expense' ? '-' : ''}R$ {transaction.amount.toFixed(2)}
                         </TableCell>
@@ -218,7 +216,7 @@ const Transactions = () => {
                   ) : (
                     <TableRow>
                       <TableCell colSpan={7} className="text-center h-24 text-muted-foreground">
-                        {t('transactions.noneFound')}
+                        Nenhuma transação encontrada. Adicione a primeira!
                       </TableCell>
                     </TableRow>
                   )}

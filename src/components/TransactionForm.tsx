@@ -21,12 +21,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Transaction, Category, Account } from '@/data/types';
-import { useToast } from '@/components/ui/use-toast';
 import { Loader2 } from 'lucide-react'; // Importação de Loader2
-import { useTranslation } from 'react-i18next';
 
 const transactionSchema = z.object({
   description: z.string().min(1, 'A descrição é obrigatória.'),
@@ -49,9 +47,6 @@ interface TransactionFormProps {
 }
 
 const TransactionForm: React.FC<TransactionFormProps> = ({ initialData, onSubmit, categories, accounts }) => {
-  const { t } = useTranslation();
-  const { toast } = useToast();
-  
   // Mapeia dados do Supabase (snake_case) para o formulário (camelCase)
   const defaultValues: Partial<TransactionFormValues> = initialData
     ? {
@@ -97,7 +92,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ initialData, onSubmit
               name="type"
               render={({ field }) => (
                 <FormItem className="space-y-3">
-                  <FormLabel>{t('transactionForm.type')}</FormLabel>
+                  <FormLabel>Tipo</FormLabel>
                   <FormControl>
                     <RadioGroup
                       onValueChange={(value) => {
@@ -113,13 +108,13 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ initialData, onSubmit
                         <FormControl>
                           <RadioGroupItem value="expense" />
                         </FormControl>
-                        <FormLabel className="font-normal">{t('transactionForm.expense')}</FormLabel>
+                        <FormLabel className="font-normal">Despesa</FormLabel>
                       </FormItem>
                       <FormItem className="flex items-center space-x-3 space-y-0">
                         <FormControl>
                           <RadioGroupItem value="income" />
                         </FormControl>
-                        <FormLabel className="font-normal">{t('transactionForm.income')}</FormLabel>
+                        <FormLabel className="font-normal">Receita</FormLabel>
                       </FormItem>
                     </RadioGroup>
                   </FormControl>
@@ -134,9 +129,9 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ initialData, onSubmit
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t('transactionForm.description')}</FormLabel>
+                  <FormLabel>Descrição</FormLabel>
                   <FormControl>
-                    <Input placeholder={t('transactionForm.descriptionPlaceholder')} {...field} disabled={isSubmitting} />
+                    <Input placeholder="Ex: Aluguel, Salário, etc." {...field} disabled={isSubmitting} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -149,7 +144,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ initialData, onSubmit
               name="amount"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t('transactionForm.amount')}</FormLabel>
+                  <FormLabel>Valor</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -171,7 +166,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ initialData, onSubmit
               name="date"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t('transactionForm.date')}</FormLabel>
+                  <FormLabel>Data</FormLabel>
                   <FormControl>
                     <Input type="date" {...field} disabled={isSubmitting} />
                   </FormControl>
@@ -186,11 +181,11 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ initialData, onSubmit
               name="categoryId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t('transactionForm.category')}</FormLabel>
+                  <FormLabel>Categoria</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value} disabled={isSubmitting || filteredCategories.length === 0}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder={filteredCategories.length === 0 ? t('transactionForm.noCategory') : t('transactionForm.selectCategory')} />
+                        <SelectValue placeholder={filteredCategories.length === 0 ? 'Nenhuma conta disponível' : 'Selecione a Categoria'} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -212,11 +207,11 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ initialData, onSubmit
               name="accountId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t('transactionForm.account')}</FormLabel>
+                  <FormLabel>Conta</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value} disabled={isSubmitting || accounts.length === 0}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder={accounts.length === 0 ? t('transactionForm.noAccount') : t('transactionForm.selectAccount')} />
+                        <SelectValue placeholder={accounts.length === 0 ? 'Nenhuma conta disponível' : 'Selecione a Conta'} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -234,9 +229,9 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ initialData, onSubmit
 
             <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting ? (
-                <><Loader2 className="h-4 w-4 animate-spin mr-2" /> {t('transactionForm.saving')}</>
+                <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Salvando...</>
               ) : (
-                initialData ? t('transactionForm.saveChanges') : t('transactionForm.addTransaction')
+                initialData ? 'Salvar Alterações' : 'Adicionar Transação'
               )}
             </Button>
           </form>

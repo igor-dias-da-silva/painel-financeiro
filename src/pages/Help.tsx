@@ -18,10 +18,8 @@ import {
   CheckCircle,
 } from 'lucide-react';
 import { AuthGuard } from '@/components/AuthGuard';
-import { useTranslation } from 'react-i18next';
 
 const Help = () => {
-  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('faq');
 
@@ -89,8 +87,8 @@ const Help = () => {
       <div className="min-h-screen bg-gray-50 dark:bg-background p-4">
         <div className="max-w-6xl mx-auto">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-800 dark:text-foreground mb-2">{t('help.title')}</h1>
-            <p className="text-gray-600 dark:text-muted-foreground">{t('help.description')}</p>
+            <h1 className="text-3xl font-bold text-gray-800 dark:text-foreground mb-2">Central de Ajuda</h1>
+            <p className="text-gray-600 dark:text-muted-foreground">Encontre respostas para suas dúvidas e aprenda a usar o FinanBoard</p>
           </div>
 
           {/* Barra de Pesquisa */}
@@ -98,7 +96,7 @@ const Help = () => {
             <div className="relative max-w-2xl mx-auto">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
-                placeholder={t('help.search')}
+                placeholder="Buscar ajuda..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 dark:bg-input dark:text-foreground dark:border-border"
@@ -115,7 +113,7 @@ const Help = () => {
                 className="flex-1"
               >
                 <HelpCircle className="h-4 w-4 mr-2" />
-                {t('help.faq')}
+                Perguntas Frequentes
               </Button>
               <Button
                 variant={activeTab === 'guide' ? 'default' : 'ghost'}
@@ -123,7 +121,7 @@ const Help = () => {
                 className="flex-1"
               >
                 <BookOpen className="h-4 w-4 mr-2" />
-                {t('help.guide')}
+                Guia
               </Button>
               <Button
                 variant={activeTab === 'contact' ? 'default' : 'ghost'}
@@ -131,7 +129,7 @@ const Help = () => {
                 className="flex-1"
               >
                 <MessageCircle className="h-4 w-4 mr-2" />
-                {t('help.contact')}
+                Contato
               </Button>
             </div>
           </div>
@@ -140,9 +138,9 @@ const Help = () => {
           {activeTab === 'guide' && (
             <div className="space-y-6">
               <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-gray-800 dark:text-foreground mb-4">{t('help.userGuide')}</h2>
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-foreground mb-4">Guia do Usuário</h2>
                 <p className="text-gray-600 dark:text-muted-foreground max-w-2xl mx-auto">
-                  {t('help.userGuideDesc')}
+                  Aprenda passo a passo como usar todas as funcionalidades do FinanBoard
                 </p>
               </div>
 
@@ -177,7 +175,7 @@ const Help = () => {
 
               <Card className="dark:bg-card dark:border-border">
                 <CardHeader>
-                  <CardTitle className="dark:text-card-foreground">{t('help.availableResources')}</CardTitle>
+                  <CardTitle className="dark:text-card-foreground">Recursos Disponíveis</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -185,14 +183,14 @@ const Help = () => {
                       <div className="flex items-center space-x-3">
                         <Video className="h-5 w-5 text-blue-600 dark:text-primary" />
                         <div>
-                          <div className="font-medium dark:text-foreground">{t('help.videoTutorials')}</div>
+                          <div className="font-medium dark:text-foreground">Vídeo Tutoriais</div>
                           <div className="text-sm text-gray-600 dark:text-muted-foreground">Assista a vídeos explicativos</div>
                         </div>
                       </div>
                       <div className="flex items-center space-x-3">
                         <BookOpen className="h-5 w-5 text-green-600 dark:text-green-400" />
                         <div>
-                          <div className="font-medium dark:text-foreground">{t('help.fullDocs')}</div>
+                          <div className="font-medium dark:text-foreground">Documentação Completa</div>
                           <div className="text-sm text-gray-600 dark:text-muted-foreground">Acesse a documentação detalhada</div>
                         </div>
                       </div>
@@ -201,14 +199,14 @@ const Help = () => {
                       <div className="flex items-center space-x-3">
                         <MessageCircle className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                         <div>
-                          <div className="font-medium dark:text-foreground">{t('help.community')}</div>
+                          <div className="font-medium dark:text-foreground">Comunidade</div>
                           <div className="text-sm text-gray-600 dark:text-muted-foreground">Participe da nossa comunidade</div>
                         </div>
                       </div>
                       <div className="flex items-center space-x-3">
                         <Mail className="h-5 w-5 text-orange-600 dark:text-orange-400" />
                         <div>
-                          <div className="font-medium dark:text-foreground">{t('help.emailSupport')}</div>
+                          <div className="font-medium dark:text-foreground">Suporte por Email</div>
                           <div className="text-sm text-gray-600 dark:text-muted-foreground">Entre em contato com nossa equipe</div>
                         </div>
                       </div>
@@ -222,7 +220,7 @@ const Help = () => {
           {activeTab === 'faq' && (
             <div className="space-y-6">
               <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-gray-800 dark:text-foreground mb-4">{t('help.faq')}</h2>
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-foreground mb-4">Perguntas Frequentes</h2>
                 <p className="text-gray-600 dark:text-muted-foreground max-w-2xl mx-auto">
                   Encontre respostas para as perguntas mais comuns sobre o aplicativo
                 </p>
@@ -250,7 +248,7 @@ const Help = () => {
                 <Card className="dark:bg-card dark:border-border">
                   <CardContent className="text-center py-12">
                     <HelpCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-foreground mb-2">{t('help.noFaqFound')}</h3>
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-foreground mb-2">Nenhuma pergunta encontrada</h3>
                     <p className="text-gray-500 dark:text-muted-foreground">Tente usar termos diferentes na sua busca</p>
                   </CardContent>
                 </Card>
@@ -261,35 +259,35 @@ const Help = () => {
           {activeTab === 'contact' && (
             <div className="space-y-6">
               <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-gray-800 dark:text-foreground mb-4">{t('help.contactTitle')}</h2>
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-foreground mb-4">Entre em Contato</h2>
                 <p className="text-gray-600 dark:text-muted-foreground max-w-2xl mx-auto">
-                  {t('help.contactDesc')}
+                  Tem alguma dúvida ou sugestão? Estamos aqui para ajudar!
                 </p>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <Card className="dark:bg-card dark:border-border">
                   <CardHeader>
-                    <CardTitle className="dark:text-card-foreground">{t('help.sendMessage')}</CardTitle>
+                    <CardTitle className="dark:text-card-foreground">Envie uma Mensagem</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div>
-                      <Label htmlFor="name" className="dark:text-foreground">{t('help.name')}</Label>
+                      <Label htmlFor="name" className="dark:text-foreground">Nome</Label>
                       <Input id="name" placeholder="Seu nome" className="dark:bg-input dark:text-foreground dark:border-border" />
                     </div>
                     
                     <div>
-                      <Label htmlFor="email" className="dark:text-foreground">{t('help.email')}</Label>
+                      <Label htmlFor="email" className="dark:text-foreground">Email</Label>
                       <Input id="email" type="email" placeholder="seu@email.com" className="dark:bg-input dark:text-foreground dark:border-border" />
                     </div>
                     
                     <div>
-                      <Label htmlFor="subject" className="dark:text-foreground">{t('help.subject')}</Label>
+                      <Label htmlFor="subject" className="dark:text-foreground">Assunto</Label>
                       <Input id="subject" placeholder="Assunto da mensagem" className="dark:bg-input dark:text-foreground dark:border-border" />
                     </div>
                     
                     <div>
-                      <Label htmlFor="message" className="dark:text-foreground">{t('help.message')}</Label>
+                      <Label htmlFor="message" className="dark:text-foreground">Mensagem</Label>
                       <Textarea 
                         id="message" 
                         placeholder="Descreva sua dúvida ou sugestão..." 
@@ -298,20 +296,20 @@ const Help = () => {
                       />
                     </div>
                     
-                    <Button className="w-full">{t('help.send')}</Button>
+                    <Button className="w-full">Enviar Mensagem</Button>
                   </CardContent>
                 </Card>
 
                 <Card className="dark:bg-card dark:border-border">
                   <CardHeader>
-                    <CardTitle className="dark:text-card-foreground">{t('help.otherContacts')}</CardTitle>
+                    <CardTitle className="dark:text-card-foreground">Outras Formas de Contato</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-6">
                     <div className="space-y-4">
                       <div className="flex items-center space-x-3">
                         <Mail className="h-5 w-5 text-blue-600 dark:text-primary" />
                         <div>
-                          <div className="font-medium dark:text-foreground">{t('help.email')}</div>
+                          <div className="font-medium dark:text-foreground">Email</div>
                           <div className="text-sm text-gray-600 dark:text-muted-foreground">suporte@finanboard.com</div>
                         </div>
                       </div>
@@ -326,7 +324,7 @@ const Help = () => {
                     </div>
 
                     <div className="border-t dark:border-border pt-6">
-                      <h4 className="font-medium mb-3 dark:text-foreground">{t('help.businessHours')}</h4>
+                      <h4 className="font-medium mb-3 dark:text-foreground">Horário de Atendimento</h4>
                       <div className="space-y-2 text-sm">
                         <div className="flex justify-between dark:text-muted-foreground">
                           <span>Segunda a Sexta</span>
@@ -344,7 +342,7 @@ const Help = () => {
                     </div>
 
                     <div className="border-t dark:border-border pt-6">
-                      <h4 className="font-medium mb-3 dark:text-foreground">{t('help.systemStatus')}</h4>
+                      <h4 className="font-medium mb-3 dark:text-foreground">Status do Sistema</h4>
                       <div className="flex items-center space-x-2">
                         <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                         <span className="text-sm text-green-600 dark:text-green-400">Todos os sistemas operando normalmente</span>

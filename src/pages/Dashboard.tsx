@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useEffect, useState } from 'react';
+import React, { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DollarSign, ArrowUp, ArrowDown, TrendingUp, Receipt, Loader2 } from 'lucide-react';
 import { AuthGuard } from '@/components/AuthGuard';
@@ -8,21 +8,17 @@ import { Transaction, Category } from '@/data/types';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { getTransactions, getCategories } from '@/lib/data';
 import { getBills, Bill } from '@/lib/bills'; // Importando funções de Bills
-import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth'; // Importando useAuth para obter o user id
 import { useQuery } from '@tanstack/react-query'; // Importando useQuery
-import { useTranslation } from 'react-i18next';
 
 // Cores para o gráfico de rosca
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
 
 const Dashboard = () => {
-  const { t } = useTranslation();
   const { user } = useAuth();
   const userId = user?.id;
-  const { toast } = useToast();
 
   // 1. Fetch Transações
   const { data: transactions = [], isLoading: isLoadingTransactions } = useQuery<Transaction[]>({
@@ -77,7 +73,7 @@ const Dashboard = () => {
     const distributionData = Object.keys(expenseMap).map((categoryId, index) => {
       const category = categoriesMap[categoryId];
       return {
-        name: category ? category.name : t('dashboard.uncategorized'),
+        name: category ? category.name : 'Sem Categoria',
         value: expenseMap[categoryId],
         color: COLORS[index % COLORS.length],
       };
@@ -89,7 +85,7 @@ const Dashboard = () => {
       currentBalance: balance,
       expenseDistribution: distributionData,
     };
-  }, [transactions, categories, t]);
+  }, [transactions, categories]);
 
   // 5. Cálculo de Contas Pendentes
   const totalPendingBills = useMemo(() => {
@@ -117,19 +113,19 @@ const Dashboard = () => {
   return (
     <AuthGuard>
       <div className="p-4 md:p-6 space-y-6">
-        <h1 className="text-3xl font-bold">{t('dashboard.title')}</h1>
+        <h1 className="text-3xl font-bold">Dashboard</h1>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {/* Card 1: Saldo Atual */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{t('dashboard.currentBalance')}</CardTitle>
+              <CardTitle className="text-sm font-medium">Saldo Atual</CardTitle>
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{formatCurrency(currentBalance)}</div>
               <p className="text-xs text-muted-foreground">
-                {t('dashboard.fromLastMonth')}
+                +20.1% do mês passado
               </p>
             </CardContent>
           </Card>
@@ -137,13 +133,13 @@ const Dashboard = () => {
           {/* Card 2: Receitas */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium dark:text-foreground">{t('dashboard.income')}</CardTitle>
+              <CardTitle className="text-sm font-medium dark:text-foreground">Receitas</CardTitle>
               <ArrowUp className="h-4 w-4 text-green-500" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-600">{formatCurrency(totalIncome)}</div>
               <p className="text-xs text-muted-foreground">
-                {t('dashboard.totalIncomeThisMonth')}
+                Total de entradas no mês
               </p>
             </CardContent>
           </Card>
@@ -151,13 +147,13 @@ const Dashboard = () => {
           {/* Card 3: Despesas */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium dark:text-foreground">{t('dashboard.expenses')}</CardTitle>
+              <CardTitle className="text-sm font-medium dark:text-foreground">Despesas</CardTitle>
               <ArrowDown className="h-4 w-4 text-red-500" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-red-600">{formatCurrency(totalExpense)}</div>
               <p className="text-xs text-muted-foreground">
-                {t('dashboard.totalExpensesThisMonth')}
+                Total de saídas no mês
               </p>
             </CardContent>
           </Card>
@@ -165,13 +161,13 @@ const Dashboard = () => {
           {/* Card 4: Contas a Vencer */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium dark:text-foreground">{t('dashboard.billsDue')}</CardTitle>
+              <CardTitle className="text-sm font-medium dark:text-foreground">Contas a Vencer</CardTitle>
               <Receipt className="h-4 w-4 text-red-500" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-red-600">{formatCurrency(totalPendingBills)}</div>
               <p className="text-xs text-muted-foreground">
-                {t('dashboard.totalPendingAmount')}
+                Valor total pendente
               </p>
             </CardContent>
           </Card>
@@ -181,7 +177,7 @@ const Dashboard = () => {
           {/* Gráfico de Distribuição de Despesas */}
           <Card>
             <CardHeader>
-              <CardTitle>{t('dashboard.expenseDistribution')}</CardTitle>
+              <CardTitle>Distribuição de Despesas por Categoria</CardTitle>
             </CardHeader>
             <CardContent className="h-[350px]">
               {expenseDistribution.length > 0 ? (
@@ -208,7 +204,7 @@ const Dashboard = () => {
                 </ResponsiveContainer>
               ) : (
                 <div className="flex items-center justify-center h-full text-muted-foreground">
-                  {t('dashboard.noExpensesRecorded')}
+                  Nenhuma despesa registrada para o período.
                 </div>
               )}
             </CardContent>
@@ -217,15 +213,15 @@ const Dashboard = () => {
           {/* Card de Metas/Orçamento */}
           <Card>
             <CardHeader>
-              <CardTitle>{t('dashboard.goalsAndBudget')}</CardTitle>
+              <CardTitle>Metas e Orçamento</CardTitle>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-muted-foreground">
-                {t('dashboard.trackProgress')}
+                Acompanhe seu progresso em relação aos seus orçamentos mensais.
               </p>
               <Link to="/budget">
-                <Button className="w-full">{t('dashboard.viewFullBudget')}</Button>
+                <Button className="w-full">Ver Orçamento Completo</Button>
               </Link>
             </CardContent>
           </Card>
