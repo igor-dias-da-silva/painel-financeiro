@@ -41,40 +41,40 @@ const PricingPage = () => {
     const paymentStatus = searchParams.get('payment');
     if (paymentStatus) {
       if (paymentStatus === 'success') {
-        showSuccess('Pagamento aprovado! Seu plano Premium será ativado em breve.');
+        showSuccess(t('pricing.paymentSuccess'));
       } else if (paymentStatus === 'pending') {
-        showSuccess('Pagamento pendente. Seu plano será ativado após a confirmação.');
+        showSuccess(t('pricing.paymentPending'));
       } else if (paymentStatus === 'failure') {
-        showError('Falha no pagamento. Por favor, tente novamente.');
+        showError(t('pricing.paymentFailure'));
       }
       // Limpa os parâmetros da URL
       navigate('/pricing', { replace: true });
     }
-  }, [searchParams, navigate]);
+  }, [searchParams, navigate, t]);
 
   const updateProfileMutation = useMutation({
     mutationFn: (updates: any) => updateProfile(user!.id, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['profile', user?.id] });
-      showSuccess('Plano atualizado para Gratuito.');
+      showSuccess(t('pricing.planUpdatedFree'));
     },
-    onError: () => showError('Erro ao atualizar plano.'),
+    onError: () => showError(t('pricing.updateError')),
   });
 
   const handleSubscribe = async (plan: 'free' | 'premium') => {
     if (!user) {
-      showError('Você precisa estar logado para assinar um plano.');
+      showError(t('pricing.loginRequired'));
       return;
     }
 
     if (isAdmin) {
-      showError('Administradores possuem acesso Premium permanente.');
+      showError(t('pricing.adminPermanentAccess'));
       return;
     }
     
     if (plan === 'free') {
       if (profile?.subscription_plan === 'free') {
-        showSuccess('Você já está no plano Gratuito.');
+        showSuccess(t('pricing.alreadyFree'));
         return;
       }
       updateProfileMutation.mutate({ 
@@ -88,7 +88,7 @@ const PricingPage = () => {
     // Fluxo de Pagamento Premium
     if (plan === 'premium') {
       if (profile?.subscription_plan === 'premium' && profile.subscription_status === 'active') {
-        showSuccess('Você já possui o plano Premium ativo.');
+        showSuccess(t('pricing.alreadyPremium'));
         return;
       }
 
@@ -115,12 +115,12 @@ const PricingPage = () => {
           // 2. Redirecionar para o Checkout do Mercado Pago
           window.location.href = init_point;
         } else {
-          throw new Error('Não foi possível obter o link de pagamento.');
+          throw new Error(t('pricing.paymentLinkError'));
         }
 
       } catch (error: any) {
         console.error('Erro no pagamento:', error);
-        showError(error.message || 'Erro ao iniciar o pagamento. Tente novamente.');
+        showError(error.message || t('pricing.paymentStartError'));
       } finally {
         setIsProcessingPayment(false);
       }
@@ -131,7 +131,7 @@ const PricingPage = () => {
     if (!user) return;
 
     if (isAdmin) {
-      showError('Administradores não podem cancelar a assinatura premium.');
+      showError(t('pricing.adminCannotCancel'));
       return;
     }
     
@@ -150,18 +150,18 @@ const PricingPage = () => {
       name: t('pricing.free'),
       price: 'R$ 0,00',
       period: t('pricing.forever'),
-      description: 'Perfeito para começar a organizar suas finanças',
+      description: t('pricing.freePlanDesc'),
       icon: Zap,
       features: [
-        'Controle de contas a pagar',
-        'Lista de compras',
-        'Dashboard e Transações',
-        'Até 3 contas ativas',
+        t('pricing.featureBills'),
+        t('pricing.featureShopping'),
+        t('pricing.featureDashboard'),
+        t('pricing.featureAccountsLimit'),
       ],
       limitations: [
-        'Sem Orçamento por Categoria',
-        'Sem Exportação de Dados',
-        'Suporte apenas por email'
+        t('pricing.limitBudget'),
+        t('pricing.limitExport'),
+        t('pricing.limitSupport'),
       ],
       featured: false,
       cta: t('pricing.freeButton'),
@@ -172,15 +172,15 @@ const PricingPage = () => {
       name: t('pricing.premium'),
       price: 'R$ 19,90',
       period: t('pricing.perMonth'),
-      description: 'Desbloqueie todos os recursos e recursos avançados',
+      description: t('pricing.premiumPlanDesc'),
       icon: Crown,
       features: [
-        'Tudo do plano gratuito',
-        'Contas ativas ilimitadas',
-        'Orçamento por Categoria',
-        'Exportação de Dados (PDF)',
-        'Análises financeiras avançadas',
-        'Suporte prioritário',
+        t('pricing.featureAllFree'),
+        t('pricing.featureAccountsUnlimited'),
+        t('pricing.featureBudgetCategory'),
+        t('pricing.featureExportData'),
+        t('pricing.featureAdvancedAnalytics'),
+        t('pricing.featurePrioritySupport'),
       ],
       limitations: [],
       featured: true,
