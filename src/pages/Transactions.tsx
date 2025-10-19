@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from 'react';
-import TransactionForm from '@/components/TransactionForm'; // Importação padrão
+import TransactionForm from '@/components/TransactionForm';
 import CategoryManager from '@/components/CategoryManager';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,6 +12,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { mockCategories, mockAccounts, mockTransactions } from '@/data/mockData';
 import { Transaction, Category, Account } from '@/data/types';
 import { getTransactions } from '@/lib/transactions';
+import { AuthGuard } from '@/components/AuthGuard'; // <-- Importação adicionada
 
 // Definindo o tipo de dados que o TransactionForm retorna
 interface TransactionFormValues {

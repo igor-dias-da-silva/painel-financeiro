@@ -1,7 +1,7 @@
 "use client";
 
 import { Home, Repeat2, Receipt, Wallet, ShoppingCart, TrendingUp, Settings, LogOut } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom'; // Substituído 'next/link' e 'next/navigation'
+import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -15,8 +15,8 @@ const navItems = [
 ];
 
 const Sidebar = () => {
-  const pathname = useLocation().pathname; // Usando useLocation().pathname
-  const { logout } = useAuth(); // Corrigido de 'signOut' para 'logout'
+  const pathname = useLocation().pathname;
+  const { logout } = useAuth();
 
   return (
     <div className="flex flex-col h-full border-r bg-card">
@@ -28,7 +28,7 @@ const Sidebar = () => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
           return (
-            <Link key={item.href} to={item.href} passHref>
+            <Link key={item.href} to={item.href}> {/* Removido passHref */}
               <Button
                 variant={isActive ? 'secondary' : 'ghost'}
                 className="w-full justify-start text-lg h-12"
@@ -41,7 +41,7 @@ const Sidebar = () => {
         })}
       </nav>
       <div className="p-4 border-t">
-        <Link to="/settings" passHref>
+        <Link to="/settings"> {/* Removido passHref */}
           <Button variant="ghost" className="w-full justify-start text-lg h-12 mb-2">
             <Settings className="h-5 w-5 mr-3" />
             Configurações
