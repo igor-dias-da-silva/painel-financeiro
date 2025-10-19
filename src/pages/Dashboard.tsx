@@ -37,16 +37,6 @@ const Dashboard = () => {
     enabled: !!userId,
   });
 
-  const isLoading = authLoading || billsLoading || shoppingLoading;
-
-  // Verifica se há erros nas queries e exibe uma mensagem
-  if (billsError) {
-    console.error('Erro ao carregar contas:', billsError);
-  }
-  if (shoppingError) {
-    console.error('Erro ao carregar dados de compras:', shoppingError);
-  }
-
   // Garante que os dados sejam arrays vazios se forem undefined
   const safeBills = bills || [];
   const safeShoppingData = shoppingData || { budget: { amount: 0 }, totalExpenses: 0 };
@@ -58,7 +48,7 @@ const Dashboard = () => {
     return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   };
 
-  if (isLoading) {
+  if (isLoading || billsLoading || shoppingLoading) {
     return (
       <div className="flex justify-center items-center h-64">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
@@ -67,21 +57,21 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="p-4">
+    <div className="p-4 md:p-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-800 dark:text-foreground">Dashboard Financeiro</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800 dark:text-foreground">Dashboard Financeiro</h1>
           <p className="text-gray-600 mt-1 dark:text-muted-foreground">Sua visão geral de contas e compras.</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Link to="/bills">
-            <Button>
+            <Button size="sm">
               <Plus className="h-4 w-4 mr-2" />
               Adicionar Conta
             </Button>
           </Link>
           <Link to="/shopping-list">
-            <Button variant="outline">
+            <Button variant="outline" size="sm">
               Ver Lista de Compras
             </Button>
           </Link>
@@ -89,7 +79,7 @@ const Dashboard = () => {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
         <Card className="dark:bg-card dark:border-border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium dark:text-foreground">Contas a Pagar</CardTitle>
@@ -123,10 +113,10 @@ const Dashboard = () => {
               Nenhuma conta pendente. Tudo em dia!
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {pendingBills.slice(0, 5).map((bill) => (
-                <div key={bill.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg dark:bg-secondary">
-                  <div>
+                <div key={bill.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 bg-gray-50 rounded-lg dark:bg-secondary">
+                  <div className="mb-2 sm:mb-0">
                     <p className="font-medium text-gray-800 dark:text-foreground">{bill.name}</p>
                     <p className="text-sm text-gray-600 dark:text-muted-foreground">
                       Vence em: {format(new Date(bill.due_date), 'dd/MM/yyyy')}

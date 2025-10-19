@@ -16,12 +16,12 @@ import {
   ShoppingCart,
   Receipt,
   Crown,
-  Shield, // Adicionado Shield para Admin
+  Shield,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ThemeToggle } from './ThemeToggle';
-import { useProfile } from '@/hooks/useProfile'; // Importando useProfile
+import { useProfile } from '@/hooks/useProfile';
 
 const navItems = [
   { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
@@ -37,7 +37,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const { user, logout } = useAuth();
-  const { isAdmin } = useProfile(); // Usando useProfile para verificar o admin
+  const { isAdmin } = useProfile();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -47,16 +47,14 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   };
 
   const adminNavItem = { name: 'Admin', icon: Shield, path: '/admin' };
-  
-  // Adiciona o item Admin se o usuário for administrador
   const fullNavItems = isAdmin ? [...navItems, adminNavItem] : navItems;
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full bg-sidebar-background text-sidebar-foreground border-r border-sidebar-border">
       <div className="p-4 border-b border-sidebar-border">
-        <h1 className="text-2xl font-bold">FinanDash</h1>
+        <h1 className="text-xl font-bold">FinanDash</h1>
       </div>
-      <nav className="flex-1 p-4 space-y-2">
+      <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
         {fullNavItems.map((item) => (
           <Link
             key={item.name}
@@ -65,8 +63,8 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               location.pathname === item.path ? 'bg-sidebar-primary text-sidebar-primary-foreground' : ''
             }`}
           >
-            <item.icon className="h-5 w-5 mr-3" />
-            {item.name}
+            <item.icon className="h-5 w-5 mr-3 flex-shrink-0" />
+            <span className="truncate">{item.name}</span>
           </Link>
         ))}
       </nav>
@@ -75,11 +73,13 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
           className="flex items-center space-x-2 cursor-pointer"
           onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
         >
-          <Avatar>
+          <Avatar className="h-10 w-10">
             <AvatarFallback>{user?.name?.charAt(0) || 'U'}</AvatarFallback>
           </Avatar>
-          <span className="text-sm font-medium truncate flex-1">{user?.name || 'Usuário'}</span>
-          {isProfileMenuOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          <div className="flex-1 min-w-0">
+            <span className="text-sm font-medium truncate">{user?.name || 'Usuário'}</span>
+          </div>
+          {isProfileMenuOpen ? <ChevronUp className="h-4 w-4 flex-shrink-0" /> : <ChevronDown className="h-4 w-4 flex-shrink-0" />}
         </div>
         {isProfileMenuOpen && (
           <div className="absolute left-4 right-4 bottom-full mb-2 bg-sidebar-accent rounded-md shadow-lg py-1 z-10">
@@ -91,7 +91,10 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               Perfil
             </Link>
             <button
-              onClick={handleLogout}
+              onClick={() => {
+                handleLogout();
+                setIsProfileMenuOpen(false);
+              }}
               className="w-full text-left flex items-center px-4 py-2 text-sm text-destructive-foreground hover:bg-destructive"
             >
               <LogOut className="h-4 w-4 mr-2" />
@@ -105,17 +108,20 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
   return (
     <div className="flex h-screen bg-gray-100 dark:bg-background">
+      {/* Sidebar Desktop */}
       <aside
-        className={`hidden md:flex flex-col transition-all duration-300 w-64`}
+        className={`hidden md:flex flex-col transition-all duration-300 w-64 ${
+          isSidebarOpen ? 'w-64' : 'w-16'
+        }`}
       >
         <div className="flex flex-col h-full bg-sidebar-background text-sidebar-foreground border-r border-sidebar-border">
-          <div className="p-4 border-b flex items-center justify-between border-sidebar-border">
-            <h1 className="text-2xl font-bold">FinanDash</h1>
+          <div className="p-4 border-b flex items-center justify-between">
+            <h1 className={`text-xl font-bold ${isSidebarOpen ? '' : 'hidden'}`}>FinanDash</h1>
             <Button variant="ghost" size="icon" onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="text-sidebar-foreground hover:bg-sidebar-accent">
               <Menu className="h-6 w-6" />
             </Button>
           </div>
-          <nav className="flex-1 p-4 space-y-2">
+          <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
             {fullNavItems.map((item) => (
               <Link
                 key={item.name}
@@ -126,7 +132,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                 title={item.name}
               >
                 <item.icon className="h-5 w-5" />
-                <span className="ml-3">{item.name}</span>
+                {isSidebarOpen && <span className="ml-3 truncate">{item.name}</span>}
               </Link>
             ))}
           </nav>
@@ -135,11 +141,13 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               className="flex items-center space-x-2 cursor-pointer"
               onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
             >
-              <Avatar>
+              <Avatar className="h-10 w-10">
                 <AvatarFallback>{user?.name?.charAt(0) || 'U'}</AvatarFallback>
               </Avatar>
-              <span className="text-sm font-medium truncate flex-1">{user?.name || 'Usuário'}</span>
-              {isProfileMenuOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              <div className="flex-1 min-w-0">
+                <span className="text-sm font-medium truncate">{user?.name || 'Usuário'}</span>
+              </div>
+              {isProfileMenuOpen ? <ChevronUp className="h-4 w-4 flex-shrink-0" /> : <ChevronDown className="h-4 w-4 flex-shrink-0" />}
             </div>
             {isProfileMenuOpen && (
               <div className="absolute left-4 right-4 bottom-full mb-2 bg-sidebar-accent rounded-md shadow-lg py-1 z-10">
@@ -151,7 +159,10 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                   Perfil
                 </Link>
                 <button
-                  onClick={handleLogout}
+                  onClick={() => {
+                    handleLogout();
+                    setIsProfileMenuOpen(false);
+                  }}
                   className="w-full text-left flex items-center px-4 py-2 text-sm text-destructive-foreground hover:bg-destructive"
                 >
                   <LogOut className="h-4 w-4 mr-2" />
@@ -164,24 +175,32 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
       </aside>
 
       <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Header */}
         <header className="bg-white shadow-sm p-4 flex justify-between items-center dark:bg-card">
-          <div className="md:hidden">
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <Menu className="h-6 w-6" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="p-0 w-64">
-                <SidebarContent />
-              </SheetContent>
-            </Sheet>
+          <div className="flex items-center space-x-4">
+            {/* Mobile menu button */}
+            <div className="md:hidden">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Menu className="h-6 w-6" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="p-0 w-64">
+                  <SidebarContent />
+                </SheetContent>
+              </Sheet>
+            </div>
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
+              {fullNavItems.find(item => item.path === location.pathname)?.name || 'Página'}
+            </h2>
           </div>
-          <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
-            {fullNavItems.find(item => item.path === location.pathname)?.name || 'Página'}
-          </h2>
-          <ThemeToggle />
+          <div className="flex items-center space-x-2">
+            <ThemeToggle />
+          </div>
         </header>
+        
+        {/* Main content */}
         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-4 md:p-6 dark:bg-background">
           {children}
         </main>

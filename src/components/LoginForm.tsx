@@ -46,7 +46,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
 
   return (
     <>
-      <Card className="w-full border-0 shadow-none">
+      <Card className="w-full max-w-md mx-auto border-0 shadow-none">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">Bem-vindo de volta!</CardTitle>
           <CardDescription>Entre na sua conta para continuar</CardDescription>
