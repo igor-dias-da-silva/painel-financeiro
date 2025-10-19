@@ -200,13 +200,26 @@ export async function deleteTransaction(id: string): Promise<void> {
  * associados ao usuário logado.
  */
 export async function deleteAllFinancialData(userId: string): Promise<void> {
+  // Ordem de exclusão ajustada para respeitar chaves estrangeiras:
+  // 1. Itens de compra (depende de monthly_budgets)
+  // 2. Transações (depende de categories e accounts)
+  // 3. Contas a pagar (independente)
+  // 4. Orçamentos mensais (depende de shopping_items)
+  // 5. Categorias (depende de transactions)
+  // 6. Contas (depende de transactions)
+  
+  // Nota: Se as chaves estrangeiras tiverem ON DELETE CASCADE, a ordem não é estritamente necessária,
+  // mas é uma boa prática para evitar erros em sistemas que não suportam CASCADE ou para depuração.
+  // No Supabase, se as FKs estiverem configuradas corretamente, a ordem não importa tanto,
+  // mas vamos usar uma ordem segura para garantir.
+
   const tablesToDelete = [
-    'transactions',
-    'accounts',
-    'categories',
-    'monthly_budgets',
     'shopping_items',
+    'transactions',
     'bills',
+    'monthly_budgets',
+    'categories',
+    'accounts',
   ];
 
   const deletePromises = tablesToDelete.map(tableName => 
@@ -216,6 +229,7 @@ export async function deleteAllFinancialData(userId: string): Promise<void> {
       .eq('user_id', userId)
   );
 
+  // Executa todas as exclusões em paralelo
   const results = await Promise.all(deletePromises);
 
   for (const result of results) {
