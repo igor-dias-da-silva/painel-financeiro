@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuth } from './useAuth';
 import { getTransactions, getCategories, Transaction, Category } from '@/lib/transactions';
 import { useMemo } from 'react';
+import { format } from 'date-fns';
 
 interface ExpenseDistribution {
   name: string;
@@ -16,46 +17,59 @@ interface FinancialSummary {
   totalExpense: number;
   netBalance: number;
   expenseDistribution: ExpenseDistribution[];
+  transactions: Transaction[];
   isLoading: boolean;
 }
 
+/**
+ * Hook para buscar e resumir transações do mês atual, incluindo distribuição de despesas.
+ */
 export const useFinancialSummary = (): FinancialSummary => {
   const { user, isLoading: isAuthLoading } = useAuth();
   const userId = user?.id;
 
-  const { data: transactions = [], isLoading: isLoadingTransactions } = useQuery<Transaction[]>({
-    queryKey: ['transactions', userId],
-    queryFn: () => getTransactions(userId!),
-    enabled: !!userId,
-  });
+  const currentMonthYear = format(new Date(), 'yyyy-MM');
 
+  // 1. Fetch Categories (needed for names and colors)
   const { data: categories = [], isLoading: isLoadingCategories } = useQuery<Category[]>({
     queryKey: ['categories', userId],
     queryFn: () => getCategories(userId!),
     enabled: !!userId,
   });
 
+  // 2. Fetch all transactions
+  const { data: allTransactions = [], isLoading: isLoadingTransactions } = useQuery<Transaction[]>({
+    queryKey: ['transactions', userId],
+    queryFn: () => getTransactions(userId!),
+    enabled: !!userId,
+  });
+
+  // 3. Calculate summary and distribution for the current month
   const summary = useMemo(() => {
-    const totalIncome = transactions
-      .filter(t => t.type === 'income')
-      .reduce((sum, t) => sum + Number(t.amount), 0);
+    const filteredTransactions = allTransactions.filter(t => 
+      t.transaction_date.startsWith(currentMonthYear)
+    );
 
-    const totalExpense = transactions
-      .filter(t => t.type === 'expense')
-      .reduce((sum, t) => sum + Number(t.amount), 0);
-
-    const netBalance = totalIncome - totalExpense;
-
+    let totalIncome = 0;
+    let totalExpense = 0;
     const expenseMap = new Map<string, number>();
     const expenseCategories = categories.filter(c => c.type === 'expense');
 
-    transactions
-      .filter(t => t.type === 'expense' && t.category_id)
-      .forEach(t => {
-        const categoryId = t.category_id!;
-        const currentTotal = expenseMap.get(categoryId) || 0;
-        expenseMap.set(categoryId, currentTotal + Number(t.amount));
-      });
+    filteredTransactions.forEach(t => {
+      const amount = Number(t.amount);
+      if (t.type === 'income') {
+        totalIncome += amount;
+      } else if (t.type === 'expense') {
+        totalExpense += amount;
+        if (t.category_id) {
+          const categoryId = t.category_id;
+          const currentTotal = expenseMap.get(categoryId) || 0;
+          expenseMap.set(categoryId, currentTotal + amount);
+        }
+      }
+    });
+
+    const netBalance = totalIncome - totalExpense;
 
     const expenseDistribution: ExpenseDistribution[] = Array.from(expenseMap.entries()).map(([categoryId, value]) => {
       const category = expenseCategories.find(c => c.id === categoryId);
@@ -71,8 +85,9 @@ export const useFinancialSummary = (): FinancialSummary => {
       totalExpense,
       netBalance,
       expenseDistribution,
+      transactions: filteredTransactions,
     };
-  }, [transactions, categories]);
+  }, [allTransactions, categories, currentMonthYear]);
 
   return {
     ...summary,

@@ -6,12 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
-import { TrendingUp, Loader2, Save, DollarSign } from 'lucide-react';
+import { TrendingUp, Loader2, Save } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getCategories, Transaction } from '@/lib/transactions';
+import { getCategories } from '@/lib/transactions'; // Mantendo getCategories
 import { getMonthlyBudget, updateCategoryLimits, CategoryLimit } from '@/lib/budget';
-import { useFinancialSummary } from '@/hooks/useFinancialSummary';
+import { useFinancialSummary } from '@/hooks/useFinancialSummary'; // Importando o hook correto
 import { showError, showSuccess } from '@/utils/toast';
 import { AuthGuard } from '@/components/AuthGuard';
 import { format } from 'date-fns';
@@ -25,6 +25,9 @@ const BudgetPage = () => {
   const currentMonth = currentDate.getMonth() + 1;
   const currentYear = currentDate.getFullYear();
 
+  // Dados de transações e resumo do mês atual
+  const { transactions, isLoading: transactionsLoading } = useFinancialSummary();
+
   // Fetch Categories
   const { data: categories = [], isLoading: categoriesLoading } = useQuery({
     queryKey: ['categories', userId],
@@ -36,13 +39,6 @@ const BudgetPage = () => {
   const { data: monthlyBudget, isLoading: budgetLoading } = useQuery({
     queryKey: ['monthlyBudget', userId, currentMonth, currentYear],
     queryFn: () => getMonthlyBudget(userId!, currentMonth, currentYear),
-    enabled: !!userId,
-  });
-
-  // Get actual spending data
-  const { transactions = [], isLoading: transactionsLoading } = useQuery<Transaction[]>({
-    queryKey: ['transactions', userId],
-    queryFn: () => getTransactions(userId!),
     enabled: !!userId,
   });
 

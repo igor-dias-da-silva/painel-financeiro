@@ -1,36 +1,20 @@
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/types/database';
 
-export type Category = Database['public']['Tables']['categories']['Row'];
-export type Transaction = Database['public']['Tables']['transactions']['Row'];
-
-// --- Category Functions ---
-
-export const getCategories = async (userId: string): Promise<Category[]> => {
-  const { data, error } = await supabase
-    .from('categories')
-    .select('*')
-    .eq('user_id', userId)
-    .order('name', { ascending: true });
-
-  if (error) throw error;
-  return data || [];
+export type Transaction = Database['public']['Tables']['transactions']['Row'] & {
+  date: string; // Adicionando 'date' para compatibilidade com o front-end
+  categoryId: string; // Adicionando 'categoryId' para compatibilidade
+  accountId: string; // Adicionando 'accountId' para compatibilidade
 };
-
-export const addCategory = async (category: Database['public']['Tables']['categories']['Insert']): Promise<Category> => {
-  const { data, error } = await supabase
-    .from('categories')
-    .insert(category)
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data;
+export type Category = Database['public']['Tables']['categories']['Row'] & {
+  icon: string; // Adicionando 'icon' para compatibilidade
 };
+export type Account = Database['public']['Tables']['accounts']['Row'];
 
-// --- Transaction Functions ---
-
-export const getTransactions = async (userId: string): Promise<Transaction[]> => {
+/**
+ * Busca todas as transações de um usuário.
+ */
+export async function getTransactions(userId: string): Promise<Transaction[]> {
   const { data, error } = await supabase
     .from('transactions')
     .select('*')
@@ -38,37 +22,45 @@ export const getTransactions = async (userId: string): Promise<Transaction[]> =>
     .order('transaction_date', { ascending: false });
 
   if (error) throw error;
-  return data || [];
-};
 
-export const addTransaction = async (transaction: Database['public']['Tables']['transactions']['Insert']): Promise<Transaction> => {
+  // Mapeia para o tipo Transaction esperado pelo front-end
+  return data.map(t => ({
+    ...t,
+    date: t.transaction_date,
+    categoryId: t.category_id || '',
+    accountId: t.account_id || '',
+  })) as Transaction[];
+}
+
+/**
+ * Busca todas as categorias de um usuário.
+ */
+export async function getCategories(userId: string): Promise<Category[]> {
   const { data, error } = await supabase
-    .from('transactions')
-    .insert(transaction)
-    .select()
-    .single();
+    .from('categories')
+    .select('*')
+    .eq('user_id', userId)
+    .order('name', { ascending: true });
 
   if (error) throw error;
-  return data;
-};
 
-export const updateTransaction = async (transactionId: string, updates: Database['public']['Tables']['transactions']['Update']): Promise<Transaction> => {
+  // Mapeia para o tipo Category esperado pelo front-end
+  return data.map(c => ({
+    ...c,
+    icon: c.color || 'DollarSign', // Usando 'color' como fallback para 'icon'
+  })) as Category[];
+}
+
+/**
+ * Busca todas as contas de um usuário.
+ */
+export async function getAccounts(userId: string): Promise<Account[]> {
   const { data, error } = await supabase
-    .from('transactions')
-    .update(updates)
-    .eq('id', transactionId)
-    .select()
-    .single();
+    .from('accounts')
+    .select('*')
+    .eq('user_id', userId)
+    .order('name', { ascending: true });
 
   if (error) throw error;
-  return data;
-};
-
-export const deleteTransaction = async (transactionId: string): Promise<void> => {
-  const { error } = await supabase
-    .from('transactions')
-    .delete()
-    .eq('id', transactionId);
-
-  if (error) throw error;
-};
+  return data as Account[];
+}
