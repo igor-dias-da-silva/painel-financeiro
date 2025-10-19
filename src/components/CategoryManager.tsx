@@ -1,201 +1,156 @@
 "use client";
 
 import React, { useState } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useAuth } from '@/hooks/useAuth';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getCategories, addCategory, Category } from '@/lib/transactions';
-import { showError, showSuccess } from '@/utils/toast';
-import { Plus, Loader2, Tag, Trash2, Edit, Check } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Plus, Trash2, Edit, DollarSign, Car, ForkAndKnife, Gamepad, TrendingUp, ChevronDown, ChevronUp } from 'lucide-react';
+import { mockCategories } from '@/data/mockData';
+import { Category } from '@/data/types';
+import { useToast } from '@/components/ui/use-toast';
 
-// Cores pré-definidas para as categorias
-const categoryColors = [
-  '#EF4444', // Red
-  '#F97316', // Orange
-  '#F59E0B', // Amber
-  '#10B981', // Emerald
-  '#3B82F6', // Blue
-  '#8B5CF6', // Violet
-  '#EC4899', // Pink
-  '#6B7280', // Gray
+// Mapeamento de ícones para facilitar a seleção (simplificado)
+const iconOptions = [
+  { value: 'ForkAndKnife', icon: ForkAndKnife, name: 'Alimentação' },
+  { value: 'DollarSign', icon: DollarSign, name: 'Salário' },
+  { value: 'Car', icon: Car, name: 'Transporte' },
+  { value: 'TrendingUp', icon: TrendingUp, name: 'Investimentos' },
+  { value: 'Gamepad', icon: Gamepad, name: 'Lazer' },
 ];
 
 const CategoryManager: React.FC = () => {
-  const { user } = useAuth();
-  const queryClient = useQueryClient();
+  const [categories, setCategories] = useState<Category[]>(mockCategories);
   const [newCategoryName, setNewCategoryName] = useState('');
-  const [newCategoryType, setNewCategoryType] = useState<'expense' | 'income'>('expense');
-  const [newCategoryColor, setNewCategoryColor] = useState(categoryColors[0]);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-  const { data: categories = [], isLoading } = useQuery<Category[]>({
-    queryKey: ['categories', user?.id],
-    queryFn: () => getCategories(user!.id),
-    enabled: !!user?.id,
-  });
-
-  const addCategoryMutation = useMutation({
-    mutationFn: addCategory,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['categories'] });
-      showSuccess('Categoria adicionada com sucesso!');
-      setNewCategoryName('');
-      setNewCategoryColor(categoryColors[0]);
-    },
-    onError: (error) => {
-      showError(`Erro ao adicionar categoria: ${error.message}`);
-    },
-  });
+  const [newCategoryType, setNewCategoryType] = useState<'income' | 'expense'>('expense');
+  const [newCategoryIcon, setNewCategoryIcon] = useState('ForkAndKnife');
+  const [isExpanded, setIsExpanded] = useState(false);
+  const { toast } = useToast();
 
   const handleAddCategory = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !newCategoryName.trim()) return;
+    if (!newCategoryName.trim()) {
+      toast({
+        title: 'Erro',
+        description: 'O nome da categoria não pode ser vazio.',
+        variant: 'destructive',
+      });
+      return;
+    }
 
-    addCategoryMutation.mutate({
-      user_id: user.id,
+    const newCategory: Category = {
+      id: Date.now().toString(), // ID temporário
       name: newCategoryName.trim(),
       type: newCategoryType,
-      color: newCategoryColor,
+      icon: newCategoryIcon,
+    };
+
+    setCategories((prevCategories) => [...prevCategories, newCategory]);
+    setNewCategoryName('');
+    
+    toast({
+      title: 'Sucesso',
+      description: `Categoria '${newCategory.name}' adicionada.`,
     });
   };
 
-  // TODO: Implementar mutações para update e delete de categorias
+  const handleDeleteCategory = (id: string) => {
+    setCategories((prevCategories) => prevCategories.filter(cat => cat.id !== id));
+    toast({
+      title: 'Excluída',
+      description: 'Categoria removida.',
+      variant: 'destructive',
+    });
+  };
+
+  const getIconComponent = (iconName: string) => {
+    const icon = iconOptions.find(opt => opt.value === iconName);
+    return icon ? icon.icon : DollarSign;
+  };
 
   return (
-    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="flex items-center">
-          <Tag className="h-4 w-4 mr-2" />
-          Gerenciar Categorias
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0">
+        <CardTitle className="text-xl">Gerenciar Categorias</CardTitle>
+        <Button variant="ghost" size="icon" onClick={() => setIsExpanded(!isExpanded)}>
+          {isExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
         </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>Gerenciar Categorias</DialogTitle>
-        </DialogHeader>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Coluna de Adição */}
-          <div className="space-y-4 border-r pr-4 dark:border-gray-700">
-            <h3 className="text-lg font-semibold">Adicionar Nova</h3>
-            <form onSubmit={handleAddCategory} className="space-y-3">
-              <div>
-                <Label htmlFor="categoryName">Nome</Label>
-                <Input
-                  id="categoryName"
-                  value={newCategoryName}
-                  onChange={(e) => setNewCategoryName(e.target.value)}
-                  placeholder="Ex: Lazer, Salário"
-                  required
-                  disabled={addCategoryMutation.isPending}
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="categoryType">Tipo</Label>
-                <Select
-                  value={newCategoryType}
-                  onValueChange={(value: 'expense' | 'income') => setNewCategoryType(value)}
-                  disabled={addCategoryMutation.isPending}
+      </CardHeader>
+      {isExpanded && (
+        <CardContent className="space-y-6">
+          {/* Formulário de Adição */}
+          <form onSubmit={handleAddCategory} className="flex flex-col md:flex-row gap-2">
+            <Input
+              placeholder="Nome da Categoria"
+              value={newCategoryName}
+              onChange={(e) => setNewCategoryName(e.target.value)}
+              className="flex-1"
+            />
+            <Select value={newCategoryType} onValueChange={(value: 'income' | 'expense') => setNewCategoryType(value)}>
+              <SelectTrigger className="w-full md:w-[150px]">
+                <SelectValue placeholder="Tipo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="expense">Despesa</SelectItem>
+                <SelectItem value="income">Receita</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={newCategoryIcon} onValueChange={setNewCategoryIcon}>
+              <SelectTrigger className="w-full md:w-[150px]">
+                <SelectValue placeholder="Ícone" />
+              </SelectTrigger>
+              <SelectContent>
+                  {iconOptions.map(opt => {
+                      const IconComponent = opt.icon;
+                      return (
+                          <SelectItem key={opt.value} value={opt.value}>
+                              <div className="flex items-center">
+                                  <IconComponent className="h-4 w-4 mr-2" />
+                                  {opt.name}
+                              </div>
+                          </SelectItem>
+                      );
+                  })}
+              </SelectContent>
+            </Select>
+            <Button type="submit" className="w-full md:w-auto">
+              <Plus className="h-4 w-4 mr-2" /> Adicionar
+            </Button>
+          </form>
+
+          {/* Lista de Categorias */}
+          <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
+            {categories.map((category) => {
+              const IconComponent = getIconComponent(category.icon);
+              return (
+                <div
+                  key={category.id}
+                  className="flex items-center justify-between p-3 rounded-md border hover:bg-muted/50"
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Tipo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="expense">Despesa</SelectItem>
-                    <SelectItem value="income">Receita</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label>Cor</Label>
-                <div className="flex space-x-2 mt-1">
-                  {categoryColors.map((color) => (
-                    <button
-                      key={color}
-                      type="button"
-                      className={`w-6 h-6 rounded-full border-2 ${
-                        newCategoryColor === color ? 'ring-2 ring-offset-2 ring-primary' : 'border-gray-300 dark:border-gray-600'
-                      }`}
-                      style={{ backgroundColor: color }}
-                      onClick={() => setNewCategoryColor(color)}
-                      disabled={addCategoryMutation.isPending}
-                    >
-                      {newCategoryColor === color && <Check className="h-4 w-4 text-white mx-auto" />}
-                    </button>
-                  ))}
+                  <div className="flex items-center space-x-3">
+                    <IconComponent className={`h-5 w-5 ${category.type === 'income' ? 'text-green-500' : 'text-red-500'}`} />
+                    <span className="font-medium">{category.name}</span>
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${
+                        category.type === 'income' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+                    }`}>
+                        {category.type === 'income' ? 'Receita' : 'Despesa'}
+                    </span>
+                  </div>
+                  <div className="space-x-2">
+                    {/* <Button variant="ghost" size="icon" title="Editar">
+                      <Edit className="h-4 w-4" />
+                    </Button> */}
+                    <Button variant="ghost" size="icon" title="Excluir" onClick={() => handleDeleteCategory(category.id)}>
+                      <Trash2 className="h-4 w-4 text-red-500" />
+                    </Button>
+                  </div>
                 </div>
-              </div>
-
-              <Button type="submit" className="w-full" disabled={addCategoryMutation.isPending || !newCategoryName}>
-                {addCategoryMutation.isPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : (
-                  <Plus className="h-4 w-4 mr-2" />
-                )}
-                Adicionar
-              </Button>
-            </form>
+              );
+            })}
           </div>
-
-          {/* Coluna de Listagem */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Minhas Categorias ({categories.length})</h3>
-            {isLoading ? (
-              <div className="flex justify-center items-center h-24">
-                <Loader2 className="h-6 w-6 animate-spin text-primary" />
-              </div>
-            ) : (
-              <ScrollArea className="h-64 pr-4">
-                <div className="space-y-2">
-                  {categories.map((category) => (
-                    <div
-                      key={category.id}
-                      className="flex items-center justify-between p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                    >
-                      <div className="flex items-center space-x-3">
-                        <div
-                          className="w-3 h-3 rounded-full"
-                          style={{ backgroundColor: category.color || '#6B7280' }}
-                        />
-                        <span className="font-medium">{category.name}</span>
-                        <Badge 
-                          variant="secondary" 
-                          className={`text-xs ${category.type === 'income' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'}`}
-                        >
-                          {category.type === 'income' ? 'Receita' : 'Despesa'}
-                        </Badge>
-                      </div>
-                      <div className="flex space-x-1">
-                        <Button variant="ghost" size="icon" className="h-7 w-7">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-7 w-7 text-red-500 hover:bg-red-100 dark:hover:bg-red-900">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
-            )}
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+        </CardContent>
+      )}
+    </Card>
   );
 };
 
