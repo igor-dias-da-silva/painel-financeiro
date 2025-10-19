@@ -55,5 +55,30 @@
     "trackProgress": "Track your progress against your monthly budgets.",
     "viewFullBudget": "View Full Budget",
     "uncategorized": "Uncategorized"
+  },
+  "bills": {
+    "title": "Bills to Pay",
+    "addNewBill": "Add New Bill",
+    "billName": "Bill Name",
+    "billNamePlaceholder": "E.g., Electricity Bill",
+    "amount": "Amount ($)",
+    "amountPlaceholder": "E.g., 150.00",
+    "dueDate": "Due Date",
+    "addBillButton": "Add Bill",
+    "monthlySummary": "Monthly Summary",
+    "totalPaid": "Total Paid:",
+    "totalPending": "Total Pending:",
+    "myBills": "My Bills",
+    "status": "Status",
+    "description": "Description",
+    "due": "Due",
+    "value": "Value",
+    "noBills": "No bills registered.",
+    "mobileDueDate": "Due on: {{date}}",
+    "addSuccess": "Bill added successfully!",
+    "addError": "Error adding bill.",
+    "updateError": "Error updating bill.",
+    "deleteError": "Error deleting bill.",
+    "formError": "Please fill in all fields correctly."
   }
 }

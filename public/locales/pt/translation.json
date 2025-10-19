@@ -55,5 +55,30 @@
     "trackProgress": "Acompanhe seu progresso em relação aos seus orçamentos mensais.",
     "viewFullBudget": "Ver Orçamento Completo",
     "uncategorized": "Sem Categoria"
+  },
+  "bills": {
+    "title": "Contas a Pagar",
+    "addNewBill": "Adicionar Nova Conta",
+    "billName": "Nome da Conta",
+    "billNamePlaceholder": "Ex: Conta de Luz",
+    "amount": "Valor (R$)",
+    "amountPlaceholder": "Ex: 150.00",
+    "dueDate": "Data de Vencimento",
+    "addBillButton": "Adicionar Conta",
+    "monthlySummary": "Resumo Mensal",
+    "totalPaid": "Total Pago:",
+    "totalPending": "Total Pendente:",
+    "myBills": "Minhas Contas",
+    "status": "Status",
+    "description": "Descrição",
+    "due": "Vencimento",
+    "value": "Valor",
+    "noBills": "Nenhuma conta cadastrada.",
+    "mobileDueDate": "Vence em: {{date}}",
+    "addSuccess": "Conta adicionada com sucesso!",
+    "addError": "Erro ao adicionar conta.",
+    "updateError": "Erro ao atualizar conta.",
+    "deleteError": "Erro ao deletar conta.",
+    "formError": "Por favor, preencha todos os campos corretamente."
   }
 }

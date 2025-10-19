@@ -15,8 +15,10 @@ import { showError, showSuccess } from '@/utils/toast';
 import { DatePicker } from '@/components/ui/date-picker';
 import { format } from 'date-fns';
 import { AuthGuard } from '@/components/AuthGuard';
+import { useTranslation } from 'react-i18next';
 
 const BillsPage = () => {
+  const { t } = useTranslation();
   const { user, isLoading: authLoading } = useAuth();
   const queryClient = useQueryClient();
 
@@ -38,24 +40,24 @@ const BillsPage = () => {
     mutationFn: (newBill: Omit<Bill, 'id' | 'created_at'>) => addBill(newBill),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bills', user?.id] });
-      showSuccess('Conta adicionada com sucesso!');
+      showSuccess(t('bills.addSuccess'));
       setNewBillName('');
       setNewBillAmount('');
       setNewBillDueDate(new Date());
     },
-    onError: () => showError('Erro ao adicionar conta.'),
+    onError: () => showError(t('bills.addError')),
   });
 
   const updateBillMutation = useMutation({
     mutationFn: ({ billId, updates }: { billId: string, updates: Partial<Bill> }) => updateBill(billId, updates),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['bills', user?.id] }),
-    onError: () => showError('Erro ao atualizar conta.'),
+    onError: () => showError(t('bills.updateError')),
   });
 
   const deleteBillMutation = useMutation({
     mutationFn: (billId: string) => deleteBill(billId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['bills', user?.id] }),
-    onError: () => showError('Erro ao deletar conta.'),
+    onError: () => showError(t('bills.deleteError')),
   });
 
   const displayBills = useMemo(() => {
@@ -82,7 +84,7 @@ const BillsPage = () => {
         is_paid: false,
       });
     } else {
-      showError('Por favor, preencha todos os campos corretamente.');
+      showError(t('bills.formError'));
     }
   };
 
@@ -101,7 +103,7 @@ const BillsPage = () => {
       <div className="container mx-auto p-4 md:p-6">
         <div className="flex items-center mb-6">
           <Receipt className="h-8 w-8 mr-3 text-primary" />
-          <h1 className="text-3xl font-bold">Contas a Pagar</h1>
+          <h1 className="text-3xl font-bold">{t('bills.title')}</h1>
         </div>
 
         {isLoading ? (
@@ -113,40 +115,40 @@ const BillsPage = () => {
             <div className="lg:col-span-1 space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Adicionar Nova Conta</CardTitle>
+                  <CardTitle>{t('bills.addNewBill')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={handleAddBill} className="space-y-4">
                     <div>
-                      <Label htmlFor="billName">Nome da Conta</Label>
-                      <Input id="billName" value={newBillName} onChange={e => setNewBillName(e.target.value)} placeholder="Ex: Conta de Luz" />
+                      <Label htmlFor="billName">{t('bills.billName')}</Label>
+                      <Input id="billName" value={newBillName} onChange={e => setNewBillName(e.target.value)} placeholder={t('bills.billNamePlaceholder')} />
                     </div>
                     <div>
-                      <Label htmlFor="billAmount">Valor (R$)</Label>
-                      <Input id="billAmount" type="number" value={newBillAmount} onChange={e => setNewBillAmount(e.target.value)} placeholder="Ex: 150.00" />
+                      <Label htmlFor="billAmount">{t('bills.amount')}</Label>
+                      <Input id="billAmount" type="number" value={newBillAmount} onChange={e => setNewBillAmount(e.target.value)} placeholder={t('bills.amountPlaceholder')} />
                     </div>
                     <div>
-                      <Label htmlFor="billDueDate">Data de Vencimento</Label>
+                      <Label htmlFor="billDueDate">{t('bills.dueDate')}</Label>
                       <DatePicker date={newBillDueDate} setDate={setNewBillDueDate} />
                     </div>
                     <Button type="submit" className="w-full" disabled={addBillMutation.isPending}>
                       {addBillMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4 mr-2" />}
-                      Adicionar Conta
+                      {t('bills.addBillButton')}
                     </Button>
                   </form>
                 </CardContent>
               </Card>
               <Card>
                 <CardHeader>
-                  <CardTitle>Resumo Mensal</CardTitle>
+                  <CardTitle>{t('bills.monthlySummary')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Total Pago:</span>
+                    <span className="text-muted-foreground">{t('bills.totalPaid')}</span>
                     <span className="font-semibold text-lg text-green-600">{formatCurrency(totalPaid)}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Total Pendente:</span>
+                    <span className="text-muted-foreground">{t('bills.totalPending')}</span>
                     <span className="font-semibold text-lg text-red-500">{formatCurrency(totalPending)}</span>
                   </div>
                 </CardContent>
@@ -156,7 +158,7 @@ const BillsPage = () => {
             <div className="lg:col-span-2">
               <Card>
                 <CardHeader>
-                  <CardTitle>Minhas Contas</CardTitle>
+                  <CardTitle>{t('bills.myBills')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {/* Desktop View */}
@@ -164,10 +166,10 @@ const BillsPage = () => {
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead className="w-[50px]">Status</TableHead>
-                          <TableHead>Descrição</TableHead>
-                          <TableHead>Vencimento</TableHead>
-                          <TableHead className="text-right">Valor</TableHead>
+                          <TableHead className="w-[50px]">{t('bills.status')}</TableHead>
+                          <TableHead>{t('bills.description')}</TableHead>
+                          <TableHead>{t('bills.due')}</TableHead>
+                          <TableHead className="text-right">{t('bills.value')}</TableHead>
                           <TableHead className="w-[50px]"></TableHead>
                         </TableRow>
                       </TableHeader>
@@ -195,7 +197,7 @@ const BillsPage = () => {
                         ) : (
                           <TableRow>
                             <TableCell colSpan={5} className="text-center h-24">
-                              Nenhuma conta cadastrada.
+                              {t('bills.noBills')}
                             </TableCell>
                           </TableRow>
                         )}
@@ -216,7 +218,7 @@ const BillsPage = () => {
                                     {bill.name}
                                   </div>
                                   <div className="text-sm text-muted-foreground">
-                                    Vence em: {format(new Date(bill.due_date), 'dd/MM/yyyy')}
+                                    {t('bills.mobileDueDate', { date: format(new Date(bill.due_date), 'dd/MM/yyyy') })}
                                   </div>
                                 </div>
                               </div>
@@ -232,7 +234,7 @@ const BillsPage = () => {
                       })
                     ) : (
                       <div className="text-center py-10 text-muted-foreground">
-                        Nenhuma conta cadastrada.
+                        {t('bills.noBills')}
                       </div>
                     )}
                   </div>
