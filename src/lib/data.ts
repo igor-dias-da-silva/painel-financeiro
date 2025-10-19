@@ -38,6 +38,33 @@ export async function insertAccount(account: AccountInsert): Promise<Account> {
   return data as Account;
 }
 
+export async function updateAccount(id: string, updates: Partial<AccountInsert>): Promise<Account> {
+  const { data, error } = await supabase
+    .from('accounts')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error updating account:', error);
+    throw error;
+  }
+  return data as Account;
+}
+
+export async function deleteAccount(id: string): Promise<void> {
+  const { error } = await supabase
+    .from('accounts')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    console.error('Error deleting account:', error);
+    throw error;
+  }
+}
+
 // --- Funções de Categorias (Categories) ---
 
 export async function getCategories(): Promise<Category[]> {

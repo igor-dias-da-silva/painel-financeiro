@@ -13,6 +13,7 @@ import { AuthGuard } from '@/components/AuthGuard';
 import { showError, showSuccess } from '@/utils/toast';
 import AccountForm from '@/components/AccountForm';
 import { Account, AccountInsert } from '@/data/types';
+import { EditAccountDialog } from '@/components/EditAccountDialog'; // Importando o novo componente
 
 // Definindo o tipo de dados que o AccountForm retorna
 interface AccountFormValues {
@@ -27,6 +28,7 @@ const AccountsPage = () => {
   const queryClient = useQueryClient();
 
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingAccount, setEditingAccount] = useState<Account | null>(null);
 
   // Fetch Accounts
   const { data: accounts = [], isLoading: isLoadingAccounts } = useQuery<Account[]>({
@@ -40,6 +42,7 @@ const AccountsPage = () => {
     mutationFn: (account: AccountInsert) => insertAccount(account),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['accounts', userId] });
+      queryClient.invalidateQueries({ queryKey: ['transactions', userId] }); // Invalida transações para atualizar o dashboard
       showSuccess('Conta adicionada com sucesso!');
       setIsFormOpen(false);
     },
@@ -62,6 +65,10 @@ const AccountsPage = () => {
     };
 
     insertMutation.mutate(payload);
+  };
+
+  const handleEditClick = (account: Account) => {
+    setEditingAccount(account);
   };
 
   const formatCurrency = (value: number) => {
@@ -137,10 +144,10 @@ const AccountsPage = () => {
                             {formatCurrency(account.balance)}
                           </TableCell>
                           <TableCell className="text-center space-x-2">
-                            <Button variant="ghost" size="icon" disabled>
+                            <Button variant="ghost" size="icon" onClick={() => handleEditClick(account)} disabled={isLoading}>
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <Button variant="ghost" size="icon" disabled>
+                            <Button variant="ghost" size="icon" onClick={() => handleEditClick(account)} disabled={isLoading}>
                               <Trash2 className="h-4 w-4 text-red-500" />
                             </Button>
                           </TableCell>
@@ -160,6 +167,17 @@ const AccountsPage = () => {
           </Card>
         )}
       </div>
+      
+      {/* Diálogo de Edição */}
+      {editingAccount && (
+        <EditAccountDialog
+          account={editingAccount}
+          open={!!editingAccount}
+          onOpenChange={(open) => {
+            if (!open) setEditingAccount(null);
+          }}
+        />
+      )}
     </AuthGuard>
   );
 };
