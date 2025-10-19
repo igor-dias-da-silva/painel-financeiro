@@ -106,29 +106,31 @@ const Help = () => {
 
           {/* Abas de Navegação */}
           <div className="mb-8">
-            <div className="flex space-x-1 bg-gray-200 dark:bg-secondary p-1 rounded-lg max-w-md mx-auto">
+            {/* Removido max-w-md para melhor responsividade em telas pequenas */}
+            <div className="flex space-x-1 bg-gray-200 dark:bg-secondary p-1 rounded-lg mx-auto max-w-full sm:max-w-md">
               <Button
                 variant={activeTab === 'faq' ? 'default' : 'ghost'}
                 onClick={() => setActiveTab('faq')}
-                className="flex-1"
+                className="flex-1 text-sm h-10" // Adicionado text-sm e altura fixa para consistência
               >
-                <HelpCircle className="h-4 w-4 mr-2" />
-                Perguntas Frequentes
+                <HelpCircle className="h-4 w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Perguntas Frequentes</span>
+                <span className="sm:hidden">FAQ</span>
               </Button>
               <Button
                 variant={activeTab === 'guide' ? 'default' : 'ghost'}
                 onClick={() => setActiveTab('guide')}
-                className="flex-1"
+                className="flex-1 text-sm h-10"
               >
-                <BookOpen className="h-4 w-4 mr-2" />
+                <BookOpen className="h-4 w-4 mr-1 sm:mr-2" />
                 Guia
               </Button>
               <Button
                 variant={activeTab === 'contact' ? 'default' : 'ghost'}
                 onClick={() => setActiveTab('contact')}
-                className="flex-1"
+                className="flex-1 text-sm h-10"
               >
-                <MessageCircle className="h-4 w-4 mr-2" />
+                <MessageCircle className="h-4 w-4 mr-1 sm:mr-2" />
                 Contato
               </Button>
             </div>
