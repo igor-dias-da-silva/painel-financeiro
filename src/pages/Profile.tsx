@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Loader2, Edit, Calendar, Crown, Zap, Mail } from 'lucide-react';
+import { Loader2, Edit, Calendar, Crown, Zap } from 'lucide-react';
 import { AuthGuard } from '@/components/AuthGuard';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -114,51 +114,49 @@ const Profile = () => {
 
   return (
     <AuthGuard>
-      <div className="min-h-screen bg-gray-50 p-4 dark:bg-background">
+      <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8 dark:bg-background">
         <div className="max-w-6xl mx-auto">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-800 dark:text-foreground mb-2">Meu Perfil</h1>
+            <h1 className="text-3xl font-bold text-gray-800 dark:text-foreground mb-1">Meu Perfil</h1>
             <p className="text-gray-600 dark:text-muted-foreground">Gerencie suas informações e preferências.</p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
             {/* Coluna Esquerda: Resumo do Perfil */}
             <div className="lg:col-span-1">
               <Card className="dark:bg-card dark:border-border">
-                <CardContent className="p-6 text-center">
-                  <Avatar className="h-24 w-24 mx-auto mb-4">
-                    <AvatarFallback className="text-3xl dark:bg-secondary dark:text-secondary-foreground">
-                      {displayName.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
-                    </AvatarFallback>
-                  </Avatar>
-                  <h2 className="text-2xl font-bold dark:text-foreground">{displayName}</h2>
-                  <p className="text-sm text-muted-foreground flex items-center justify-center gap-2">
-                    <Mail className="h-4 w-4" /> {user.email}
-                  </p>
-                  <div className="flex items-center justify-center space-x-2 text-sm text-muted-foreground mt-2">
-                    <Calendar className="h-4 w-4" />
-                    <span>Membro desde {joinDate}</span>
+                <CardContent className="p-6">
+                  <div className="flex flex-col items-center text-center">
+                    <Avatar className="h-24 w-24 mb-4">
+                      <AvatarFallback className="text-3xl dark:bg-secondary dark:text-secondary-foreground">
+                        {displayName.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <h2 className="text-2xl font-bold dark:text-foreground">{displayName}</h2>
+                    <p className="text-sm text-muted-foreground">{user.email}</p>
                   </div>
-                  <div className="my-6 border-t border-border" />
-                  <div className="space-y-4 text-left">
-                    <h3 className="font-semibold text-center dark:text-foreground">Seu Plano Atual</h3>
-                    <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-secondary rounded-lg">
-                      <div className="flex items-center space-x-2">
-                        {getPlanIcon(profile?.subscription_plan)}
-                        <span className="font-medium dark:text-foreground">Plano</span>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-semibold dark:text-foreground">{getPlanName(profile?.subscription_plan)}</div>
-                        <div className={`text-sm ${planStatus.color}`}>{planStatus.text}</div>
-                      </div>
+                  
+                  <div className="my-6 border-t -mx-6 dark:border-border" />
+
+                  <div className="space-y-4 text-sm text-muted-foreground">
+                    <div className="flex items-center">
+                      <Calendar className="h-4 w-4 mr-3 flex-shrink-0" />
+                      <span>Membro desde {joinDate}</span>
                     </div>
-                    <Link to="/pricing" className="w-full">
-                      <Button variant="outline" className="w-full dark:bg-secondary dark:text-secondary-foreground dark:border-border dark:hover:bg-accent">
-                        Mudar de Plano
-                      </Button>
-                    </Link>
+                    <div className="flex items-center">
+                      {getPlanIcon(profile?.subscription_plan)}
+                      <span className="ml-3">Plano {getPlanName(profile?.subscription_plan)}</span>
+                      <span className={`ml-auto font-semibold ${planStatus.color}`}>{planStatus.text}</span>
+                    </div>
                   </div>
                 </CardContent>
+                <CardFooter>
+                  <Link to="/pricing" className="w-full">
+                    <Button variant="outline" className="w-full dark:bg-secondary dark:text-secondary-foreground dark:border-border dark:hover:bg-accent">
+                      Gerenciar Plano
+                    </Button>
+                  </Link>
+                </CardFooter>
               </Card>
             </div>
 
@@ -167,53 +165,61 @@ const Profile = () => {
               <Card className="dark:bg-card dark:border-border">
                 <CardHeader>
                   <CardTitle className="dark:text-foreground">Informações Pessoais</CardTitle>
+                  <CardDescription>Atualize seus dados pessoais e biografia.</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6">
-                  <div>
-                    <Label className="dark:text-foreground">Nome Completo</Label>
-                    <div className="flex items-center justify-between mt-1">
-                      <p className="text-muted-foreground">{displayName}</p>
+                <CardContent>
+                  <ul className="divide-y dark:divide-border">
+                    <li className="py-4 flex items-center justify-between">
+                      <div>
+                        <Label className="font-semibold dark:text-foreground">Nome Completo</Label>
+                        <p className="text-muted-foreground text-sm">{displayName}</p>
+                      </div>
                       <Button variant="ghost" size="sm" onClick={() => setShowEditNameDialog(true)} disabled={updateProfileMutation.isPending}>
                         <Edit className="h-4 w-4 mr-2" /> Editar
                       </Button>
-                    </div>
-                  </div>
-                  <div className="border-t pt-6">
-                    <Label className="dark:text-foreground">Biografia</Label>
-                    <div className="flex items-start justify-between mt-1">
-                      <p className="text-muted-foreground italic max-w-prose">
-                        {bio || 'Nenhuma biografia definida.'}
-                      </p>
-                      <Button variant="ghost" size="sm" onClick={() => setShowEditBioDialog(true)} disabled={updateProfileMutation.isPending}>
+                    </li>
+                    <li className="py-4 flex items-start justify-between">
+                      <div>
+                        <Label className="font-semibold dark:text-foreground">Biografia</Label>
+                        <p className="text-muted-foreground text-sm italic max-w-prose pt-1">
+                          {bio || 'Nenhuma biografia definida.'}
+                        </p>
+                      </div>
+                      <Button variant="ghost" size="sm" onClick={() => setShowEditBioDialog(true)} disabled={updateProfileMutation.isPending} className="flex-shrink-0 ml-4">
                         <Edit className="h-4 w-4 mr-2" /> Editar
                       </Button>
-                    </div>
-                  </div>
+                    </li>
+                  </ul>
                 </CardContent>
               </Card>
 
               <Card className="dark:bg-card dark:border-border">
                 <CardHeader>
-                  <CardTitle className="dark:text-foreground">Segurança e Conta</CardTitle>
+                  <CardTitle className="dark:text-foreground">Segurança</CardTitle>
+                  <CardDescription>Gerencie sua senha e acesso à conta.</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between p-4 border rounded-lg dark:border-border">
+                <CardContent>
+                  <ul className="divide-y dark:divide-border">
+                    <li className="py-4 flex items-center justify-between">
+                      <div>
+                        <Label className="font-semibold dark:text-foreground">Senha</Label>
+                        <p className="text-muted-foreground text-sm">************</p>
+                      </div>
+                      <Button variant="outline" onClick={() => setShowChangePasswordDialog(true)} className="dark:bg-secondary dark:text-secondary-foreground dark:border-border dark:hover:bg-accent">
+                        Alterar Senha
+                      </Button>
+                    </li>
+                  </ul>
+                </CardContent>
+                <CardFooter className="bg-red-50 dark:bg-destructive/10 p-4 border-t dark:border-destructive/20 rounded-b-lg">
+                  <div className="flex items-center justify-between w-full">
                     <div>
-                      <h4 className="font-medium dark:text-foreground">Alterar Senha</h4>
-                      <p className="text-sm text-muted-foreground">Recomendamos atualizar sua senha periodicamente.</p>
-                    </div>
-                    <Button variant="outline" onClick={() => setShowChangePasswordDialog(true)} className="dark:bg-secondary dark:text-secondary-foreground dark:border-border dark:hover:bg-accent">
-                      Alterar
-                    </Button>
-                  </div>
-                  <div className="flex items-center justify-between p-4 border border-destructive/50 bg-destructive/10 rounded-lg dark:bg-destructive/20 dark:border-destructive/30">
-                    <div>
-                      <h4 className="font-medium text-destructive dark:text-red-400">Sair da Conta</h4>
-                      <p className="text-sm text-destructive/80 dark:text-red-400/80">Desconectar sua conta deste dispositivo.</p>
+                      <h4 className="font-semibold text-destructive dark:text-red-400">Sair da Conta</h4>
+                      <p className="text-sm text-destructive/90 dark:text-red-400/90">Desconectar sua conta deste dispositivo.</p>
                     </div>
                     <Button variant="destructive" onClick={handleLogout}>Sair</Button>
                   </div>
-                </CardContent>
+                </CardFooter>
               </Card>
             </div>
           </div>
