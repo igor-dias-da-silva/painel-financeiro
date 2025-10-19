@@ -48,7 +48,7 @@ const Dashboard = () => {
     return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   };
 
-  if (isLoading || billsLoading || shoppingLoading) {
+  if (authLoading || billsLoading || shoppingLoading) {
     return (
       <div className="flex justify-center items-center h-64">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
