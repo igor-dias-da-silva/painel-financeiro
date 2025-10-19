@@ -15,7 +15,8 @@ export const getOrCreateBudget = async (userId: string, month: number, year: num
     .eq('year', year)
     .single();
 
-  if (error && error.code !== 'PGRST116') { // PGRST116 means no rows found
+  // PGRST116 means no rows found (404 Not Found). This is expected if the budget doesn't exist yet.
+  if (error && error.code !== 'PGRST116') { 
     throw error;
   }
 
@@ -27,7 +28,10 @@ export const getOrCreateBudget = async (userId: string, month: number, year: num
       .select()
       .single();
     
-    if (insertError) throw insertError;
+    if (insertError) {
+      console.error("Error inserting new budget:", insertError);
+      throw insertError;
+    }
     budget = newBudget;
   }
 
