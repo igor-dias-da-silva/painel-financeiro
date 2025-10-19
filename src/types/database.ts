@@ -32,6 +32,7 @@ export interface Database {
           transaction_date: string;
           type: 'expense' | 'income';
           created_at: string;
+          account_id: string | null; // Adicionado account_id
         };
         Insert: {
           user_id: string;
@@ -40,6 +41,7 @@ export interface Database {
           description?: string | null;
           transaction_date: string;
           type: 'expense' | 'income';
+          account_id?: string | null; // Adicionado account_id
         };
         Update: {
           category_id?: string | null;
@@ -47,16 +49,17 @@ export interface Database {
           description?: string | null;
           transaction_date?: string;
           type?: 'expense' | 'income';
+          account_id?: string | null; // Adicionado account_id
         };
       };
-      monthly_budgets: { // Renomeado de shopping_budgets
+      monthly_budgets: {
         Row: {
           id: string;
           user_id: string;
           amount: number;
           month: number;
           year: number;
-          category_limits: Record<string, number>; // Novo campo
+          category_limits: Record<string, number>;
           created_at: string;
           updated_at: string;
         };
@@ -73,7 +76,48 @@ export interface Database {
           updated_at?: string;
         };
       };
-      // shopping_items still references monthly_budgets via budget_id
-    }
-  }
+      shopping_items: { // Adicionado para corrigir o erro 2
+        Row: {
+          id: string;
+          budget_id: string;
+          name: string;
+          price: number;
+          purchased: boolean;
+          created_at: string;
+        };
+        Insert: {
+          budget_id: string;
+          name: string;
+          price: number;
+          purchased?: boolean;
+        };
+        Update: {
+          name?: string;
+          price?: number;
+          purchased?: boolean;
+        };
+      };
+      accounts: { // Adicionado para corrigir o erro 1
+        Row: {
+          id: string;
+          user_id: string;
+          name: string;
+          balance: number;
+          type: 'checking' | 'savings' | 'cash';
+          created_at: string;
+        };
+        Insert: {
+          user_id: string;
+          name: string;
+          balance?: number;
+          type: 'checking' | 'savings' | 'cash';
+        };
+        Update: {
+          name?: string;
+          balance?: number;
+          type?: 'checking' | 'savings' | 'cash';
+        };
+      };
+    };
+  };
 }
