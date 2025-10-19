@@ -25,7 +25,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Transaction, Category, Account } from '@/data/types';
 import { useToast } from '@/components/ui/use-toast';
-import { Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react'; // Importação de Loader2
 
 const transactionSchema = z.object({
   description: z.string().min(1, 'A descrição é obrigatória.'),
