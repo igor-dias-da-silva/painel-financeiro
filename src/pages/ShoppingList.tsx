@@ -15,11 +15,15 @@ import { getOrCreateBudget, getShoppingItems, addShoppingItem, updateShoppingIte
 import { showError, showSuccess } from '@/utils/toast';
 import { format } from 'date-fns';
 import { exportToPdf } from '@/utils/export';
+import { useProfile } from '@/hooks/useProfile';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Link } from 'react-router-dom';
 
 const SHOPPING_LIST_ID = 'shopping-list-export-content';
 
 const ShoppingListPage = () => {
   const { user, isLoading: authLoading } = useAuth();
+  const { profile, isLoading: profileLoading } = useProfile();
   const queryClient = useQueryClient();
 
   const [newItemName, setNewItemName] = useState('');
@@ -109,7 +113,33 @@ const ShoppingListPage = () => {
     return { totalPlanned, totalPurchased };
   }, [items]);
 
-  const isLoading = authLoading || budgetLoading || itemsLoading;
+  const isLoading = authLoading || budgetLoading || itemsLoading || profileLoading;
+  const canExport = profile?.subscription_plan === 'premium' || profile?.role === 'admin';
+
+  const ExportButton = () => (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div className="inline-block">
+            <Button onClick={handleExport} disabled={isLoading || isExporting || (items?.length === 0) || !canExport}>
+              {isExporting ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                <FileText className="h-4 w-4 mr-2" />
+              )}
+              Exportar PDF
+            </Button>
+          </div>
+        </TooltipTrigger>
+        {!canExport && (
+          <TooltipContent>
+            <p>A exportação de dados é um recurso Premium.</p>
+            <Link to="/pricing" className="text-primary underline">Faça upgrade.</Link>
+          </TooltipContent>
+        )}
+      </Tooltip>
+    </TooltipProvider>
+  );
 
   return (
     <AuthGuard>
@@ -119,14 +149,7 @@ const ShoppingListPage = () => {
             <ShoppingCart className="h-8 w-8 mr-3 text-primary" />
             <h1 className="text-3xl font-bold">Lista de Compras Mensal</h1>
           </div>
-          <Button onClick={handleExport} disabled={isLoading || isExporting || (items?.length === 0)}>
-            {isExporting ? (
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            ) : (
-              <FileText className="h-4 w-4 mr-2" />
-            )}
-            Exportar PDF
-          </Button>
+          <ExportButton />
         </div>
 
         {isLoading ? (

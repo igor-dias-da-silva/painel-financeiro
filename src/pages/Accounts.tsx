@@ -68,8 +68,8 @@ const AccountsPage = () => {
     }
 
     // Lógica de Limitação de Contas
-    if (profile?.subscription_plan === 'free' && accounts.length >= 1) {
-      showError('Seu plano gratuito permite apenas 1 conta. Faça upgrade para Premium para adicionar mais.');
+    if (profile?.subscription_plan === 'free' && accounts.length >= 3) {
+      showError('Seu plano gratuito permite até 3 contas. Faça upgrade para Premium para adicionar mais.');
       setIsFormOpen(false);
       return;
     }
@@ -101,7 +101,7 @@ const AccountsPage = () => {
   };
 
   const isLoading = isLoadingAccounts || isLoadingProfile || insertMutation.isPending;
-  const isAddAccountDisabled = profile?.subscription_plan === 'free' && accounts.length >= 1;
+  const isAddAccountDisabled = profile?.subscription_plan === 'free' && accounts.length >= 3;
 
   const AddAccountButton = () => (
     <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
@@ -119,7 +119,7 @@ const AccountsPage = () => {
           </TooltipTrigger>
           {isAddAccountDisabled && (
             <TooltipContent>
-              <p>Seu plano gratuito permite apenas 1 conta.</p>
+              <p>Seu plano gratuito permite até 3 contas.</p>
               <Link to="/pricing" className="text-primary underline">Faça upgrade para Premium.</Link>
             </TooltipContent>
           )}

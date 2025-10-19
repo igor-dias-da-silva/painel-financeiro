@@ -15,6 +15,7 @@ import { useFinancialSummary } from '@/hooks/useFinancialSummary'; // Importando
 import { showError, showSuccess } from '@/utils/toast';
 import { AuthGuard } from '@/components/AuthGuard';
 import { format } from 'date-fns';
+import { PremiumFeatureGuard } from '@/components/PremiumFeatureGuard';
 
 const BudgetPage = () => {
   const { user, isLoading: authLoading } = useAuth();
@@ -105,92 +106,94 @@ const BudgetPage = () => {
 
   return (
     <AuthGuard>
-      <div className="container mx-auto p-4 md:p-6">
-        <div className="flex items-center mb-6">
-          <TrendingUp className="h-8 w-8 mr-3 text-primary" />
-          <h1 className="text-3xl font-bold">Orçamento Mensal</h1>
-        </div>
-        <p className="text-muted-foreground mb-6">
-          Defina limites de gastos para cada categoria neste mês ({format(currentDate, 'MMMM/yyyy')}).
-        </p>
+      <PremiumFeatureGuard>
+        <div className="container mx-auto p-4 md:p-6">
+          <div className="flex items-center mb-6">
+            <TrendingUp className="h-8 w-8 mr-3 text-primary" />
+            <h1 className="text-3xl font-bold">Orçamento Mensal</h1>
+          </div>
+          <p className="text-muted-foreground mb-6">
+            Defina limites de gastos para cada categoria neste mês ({format(currentDate, 'MMMM/yyyy')}).
+          </p>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Coluna de Configuração de Limites */}
-          <Card className="lg:col-span-1">
-            <CardHeader>
-              <CardTitle>Definir Limites</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {expenseCategories.length === 0 ? (
-                <p className="text-muted-foreground">Crie categorias de despesa na página de Transações para começar a orçar.</p>
-              ) : (
-                <div className="space-y-4">
-                  {expenseCategories.map(category => (
-                    <div key={category.id} className="space-y-1">
-                      <Label htmlFor={`limit-${category.id}`}>{category.name}</Label>
-                      <Input
-                        id={`limit-${category.id}`}
-                        type="number"
-                        step="0.01"
-                        placeholder="0.00"
-                        value={localLimits[category.id] || ''}
-                        onChange={(e) => handleLimitChange(category.id, e.target.value)}
-                        disabled={updateLimitsMutation.isPending}
-                      />
-                    </div>
-                  ))}
-                  <Button onClick={handleSaveLimits} className="w-full" disabled={updateLimitsMutation.isPending}>
-                    {updateLimitsMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
-                    Salvar Limites
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Coluna de Visualização de Progresso */}
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle>Progresso do Orçamento</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {expenseCategories.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">Nenhum limite definido.</p>
-              ) : (
-                expenseCategories.map(category => {
-                  const limit = localLimits[category.id] || 0;
-                  const spent = spendingByCategory[category.id] || 0;
-                  const percentage = limit > 0 ? Math.min(100, (spent / limit) * 100) : (spent > 0 ? 100 : 0);
-                  
-                  let progressColor = 'bg-primary';
-                  if (percentage >= 100) {
-                    progressColor = 'bg-red-500';
-                  } else if (percentage >= 75) {
-                    progressColor = 'bg-yellow-500';
-                  }
-
-                  return (
-                    <div key={category.id} className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium">{category.name}</span>
-                        <span className="text-sm text-muted-foreground">{percentage.toFixed(0)}%</span>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Coluna de Configuração de Limites */}
+            <Card className="lg:col-span-1">
+              <CardHeader>
+                <CardTitle>Definir Limites</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {expenseCategories.length === 0 ? (
+                  <p className="text-muted-foreground">Crie categorias de despesa na página de Transações para começar a orçar.</p>
+                ) : (
+                  <div className="space-y-4">
+                    {expenseCategories.map(category => (
+                      <div key={category.id} className="space-y-1">
+                        <Label htmlFor={`limit-${category.id}`}>{category.name}</Label>
+                        <Input
+                          id={`limit-${category.id}`}
+                          type="number"
+                          step="0.01"
+                          placeholder="0.00"
+                          value={localLimits[category.id] || ''}
+                          onChange={(e) => handleLimitChange(category.id, e.target.value)}
+                          disabled={updateLimitsMutation.isPending}
+                        />
                       </div>
-                      <Progress value={percentage} className={`h-3 ${progressColor}`} />
-                      <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>Gasto: <span className="font-semibold text-foreground">{formatCurrency(spent)}</span></span>
-                        <span>Limite: <span className="font-semibold text-foreground">{formatCurrency(limit)}</span></span>
+                    ))}
+                    <Button onClick={handleSaveLimits} className="w-full" disabled={updateLimitsMutation.isPending}>
+                      {updateLimitsMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
+                      Salvar Limites
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Coluna de Visualização de Progresso */}
+            <Card className="lg:col-span-2">
+              <CardHeader>
+                <CardTitle>Progresso do Orçamento</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {expenseCategories.length === 0 ? (
+                  <p className="text-center text-muted-foreground py-8">Nenhum limite definido.</p>
+                ) : (
+                  expenseCategories.map(category => {
+                    const limit = localLimits[category.id] || 0;
+                    const spent = spendingByCategory[category.id] || 0;
+                    const percentage = limit > 0 ? Math.min(100, (spent / limit) * 100) : (spent > 0 ? 100 : 0);
+                    
+                    let progressColor = 'bg-primary';
+                    if (percentage >= 100) {
+                      progressColor = 'bg-red-500';
+                    } else if (percentage >= 75) {
+                      progressColor = 'bg-yellow-500';
+                    }
+
+                    return (
+                      <div key={category.id} className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="font-medium">{category.name}</span>
+                          <span className="text-sm text-muted-foreground">{percentage.toFixed(0)}%</span>
+                        </div>
+                        <Progress value={percentage} className={`h-3 ${progressColor}`} />
+                        <div className="flex justify-between text-xs text-muted-foreground">
+                          <span>Gasto: <span className="font-semibold text-foreground">{formatCurrency(spent)}</span></span>
+                          <span>Limite: <span className="font-semibold text-foreground">{formatCurrency(limit)}</span></span>
+                        </div>
+                        {percentage >= 100 && (
+                          <p className="text-xs text-red-500 font-medium">Limite excedido!</p>
+                        )}
                       </div>
-                      {percentage >= 100 && (
-                        <p className="text-xs text-red-500 font-medium">Limite excedido!</p>
-                      )}
-                    </div>
-                  );
-                })
-              )}
-            </CardContent>
-          </Card>
+                    );
+                  })
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </div>
-      </div>
+      </PremiumFeatureGuard>
     </AuthGuard>
   );
 };
