@@ -17,6 +17,7 @@ import {
   Receipt,
   Crown,
   Shield,
+  DollarSign, // Novo ícone para Transações
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -25,8 +26,9 @@ import { useProfile } from '@/hooks/useProfile';
 
 const navItems = [
   { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
-  { name: 'Lista de Compras', icon: ShoppingCart, path: '/shopping-list' },
+  { name: 'Transações', icon: DollarSign, path: '/transactions' }, // Novo Item
   { name: 'Contas a Pagar', icon: Receipt, path: '/bills' },
+  { name: 'Lista de Compras', icon: ShoppingCart, path: '/shopping-list' },
   { name: 'Planos', icon: Crown, path: '/pricing' },
   { name: 'Configurações', icon: Settings, path: '/settings' },
   { name: 'Perfil', icon: User, path: '/profile' },
