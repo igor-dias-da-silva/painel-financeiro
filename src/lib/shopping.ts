@@ -15,13 +15,15 @@ export const getOrCreateBudget = async (userId: string, month: number, year: num
     .eq('year', year)
     .single();
 
-  // PGRST116 means no rows found (404 Not Found). This is expected if the budget doesn't exist yet.
-  if (error && error.code !== 'PGRST116') { 
+  // Trata erros de "não encontrado". O PostgREST pode retornar 404 (PGRST116) ou, em alguns casos, 406.
+  const isNotFoundError = error && (error.code === 'PGRST116' || error.status === 406);
+
+  if (error && !isNotFoundError) { 
     throw error;
   }
 
-  // If no budget is found, create one
-  if (!budget) {
+  // If no budget is found (data is null or error is a not found error), create one
+  if (!budget || isNotFoundError) {
     const { data: newBudget, error: insertError } = await supabase
       .from('monthly_budgets') // Renomeado
       .insert({ user_id: userId, month, year, amount: 0 })
