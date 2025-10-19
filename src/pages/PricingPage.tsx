@@ -175,13 +175,10 @@ const PricingPage = () => {
       icon: Crown,
       features: [
         'Tudo do plano gratuito',
-        'Listas de compras ilimitadas',
-        'Exportação para PDF e Excel',
-        'Integração com calendário',
+        'Exportação para PDF',
+        'Orçamento por categoria',
         'Análises financeiras avançadas',
         'Suporte prioritário',
-        'Personalização avançada',
-        'Backup automático de dados'
       ],
       limitations: [],
       featured: true,
