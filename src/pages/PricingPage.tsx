@@ -152,15 +152,14 @@ const PricingPage = () => {
       icon: Zap,
       features: [
         'Controle de contas a pagar',
-        'Lista de compras básica',
-        'Dashboard financeiro',
-        'Até 5 contas ativas',
-        'Suporte por email'
+        'Lista de compras',
+        'Dashboard e Transações',
+        'Até 3 contas ativas',
       ],
       limitations: [
-        'Recursos limitados',
-        'Sem exportação avançada',
-        'Sem integrações'
+        'Sem Orçamento por Categoria',
+        'Sem Exportação de Dados',
+        'Suporte apenas por email'
       ],
       featured: false,
       cta: 'Plano Gratuito',
@@ -175,8 +174,9 @@ const PricingPage = () => {
       icon: Crown,
       features: [
         'Tudo do plano gratuito',
-        'Exportação para PDF',
-        'Orçamento por categoria',
+        'Contas ativas ilimitadas',
+        'Orçamento por Categoria',
+        'Exportação de Dados (PDF)',
         'Análises financeiras avançadas',
         'Suporte prioritário',
       ],
