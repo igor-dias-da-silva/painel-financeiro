@@ -49,7 +49,31 @@ export interface Database {
           type?: 'expense' | 'income';
         };
       };
-      // boards, columns, and cards tables removed
+      monthly_budgets: { // Renomeado de shopping_budgets
+        Row: {
+          id: string;
+          user_id: string;
+          amount: number;
+          month: number;
+          year: number;
+          category_limits: Record<string, number>; // Novo campo
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          user_id: string;
+          amount?: number;
+          month: number;
+          year: number;
+          category_limits?: Record<string, number>;
+        };
+        Update: {
+          amount?: number;
+          category_limits?: Record<string, number>;
+          updated_at?: string;
+        };
+      };
+      // shopping_items still references monthly_budgets via budget_id
     }
   }
 }

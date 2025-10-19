@@ -1,30 +1,14 @@
 import { supabase } from '@/integrations/supabase/client';
+import { Database } from '@/types/database';
 
-export interface ShoppingBudget {
-  id: string;
-  user_id: string;
-  amount: number;
-  month: number;
-  year: number;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface ShoppingItem {
-  id: string;
-  user_id: string;
-  budget_id: string;
-  name: string;
-  price: number;
-  purchased: boolean;
-  created_at: string;
-}
+export type ShoppingBudget = Database['public']['Tables']['monthly_budgets']['Row'];
+export type ShoppingItem = Database['public']['Tables']['shopping_items']['Row'];
 
 // Get or create a budget for the current month
 export const getOrCreateBudget = async (userId: string, month: number, year: number): Promise<ShoppingBudget> => {
   // First, try to get the budget
   let { data: budget, error } = await supabase
-    .from('shopping_budgets')
+    .from('monthly_budgets') // Renomeado
     .select('*')
     .eq('user_id', userId)
     .eq('month', month)
@@ -38,7 +22,7 @@ export const getOrCreateBudget = async (userId: string, month: number, year: num
   // If no budget is found, create one
   if (!budget) {
     const { data: newBudget, error: insertError } = await supabase
-      .from('shopping_budgets')
+      .from('monthly_budgets') // Renomeado
       .insert({ user_id: userId, month, year, amount: 0 })
       .select()
       .single();
@@ -47,20 +31,20 @@ export const getOrCreateBudget = async (userId: string, month: number, year: num
     budget = newBudget;
   }
 
-  return budget;
+  return budget as ShoppingBudget;
 };
 
-// Update budget amount
+// Update budget amount (now general monthly budget amount)
 export const updateBudgetAmount = async (budgetId: string, amount: number): Promise<ShoppingBudget> => {
   const { data, error } = await supabase
-    .from('shopping_budgets')
+    .from('monthly_budgets') // Renomeado
     .update({ amount, updated_at: new Date().toISOString() })
     .eq('id', budgetId)
     .select()
     .single();
 
   if (error) throw error;
-  return data;
+  return data as ShoppingBudget;
 };
 
 // Get shopping items for a budget
@@ -84,7 +68,7 @@ export const addShoppingItem = async (item: Omit<ShoppingItem, 'id' | 'created_a
     .single();
 
   if (error) throw error;
-  return data;
+  return data as ShoppingItem;
 };
 
 // Update a shopping item
@@ -97,7 +81,7 @@ export const updateShoppingItem = async (itemId: string, updates: Partial<Shoppi
     .single();
 
   if (error) throw error;
-  return data;
+  return data as ShoppingItem;
 };
 
 // Delete a shopping item

@@ -7,14 +7,13 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { X, Plus, Receipt, Loader2, ShoppingCart } from 'lucide-react';
+import { X, Plus, Receipt, Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getBills, addBill, updateBill, deleteBill, Bill } from '@/lib/bills';
-import { getOrCreateBudget, getShoppingItems } from '@/lib/shopping';
 import { showError, showSuccess } from '@/utils/toast';
 import { DatePicker } from '@/components/ui/date-picker';
-import { format, endOfMonth } from 'date-fns';
+import { format } from 'date-fns';
 import { AuthGuard } from '@/components/AuthGuard';
 
 const BillsPage = () => {
@@ -25,10 +24,6 @@ const BillsPage = () => {
   const [newBillAmount, setNewBillAmount] = useState('');
   const [newBillDueDate, setNewBillDueDate] = useState<Date | undefined>(new Date());
 
-  const currentDate = new Date();
-  const currentMonth = currentDate.getMonth() + 1;
-  const currentYear = currentDate.getFullYear();
-
   // Fetch regular bills
   const { data: bills, isLoading: billsLoading, error: billsError } = useQuery({
     queryKey: ['bills', user?.id],
@@ -36,23 +31,8 @@ const BillsPage = () => {
     enabled: !!user,
   });
 
-  // Fetch shopping list data for the current month
-  const { data: shoppingData, isLoading: shoppingLoading, error: shoppingError } = useQuery({
-    queryKey: ['monthlyShoppingSummary', user?.id, currentMonth, currentYear],
-    queryFn: async () => {
-      if (!user?.id) return null;
-      const budget = await getOrCreateBudget(user.id, currentMonth, currentYear);
-      const items = await getShoppingItems(budget.id);
-      const totalExpenses = items.reduce((sum, item) => sum + Number(item.price), 0);
-      const purchasedExpenses = items.filter(i => i.purchased).reduce((sum, item) => sum + Number(item.price), 0);
-      return { totalExpenses, purchasedExpenses, budget };
-    },
-    enabled: !!user,
-  });
-
   // Log errors for debugging
   if (billsError) console.error('Bills Error:', billsError);
-  if (shoppingError) console.error('Shopping Error:', shoppingError);
 
   const addBillMutation = useMutation({
     mutationFn: (newBill: Omit<Bill, 'id' | 'created_at'>) => addBill(newBill),
@@ -79,36 +59,16 @@ const BillsPage = () => {
   });
 
   const displayBills = useMemo(() => {
-    const allBills: (Bill & { isVirtual?: boolean })[] = bills ? [...bills] : [];
-
-    if (shoppingData && shoppingData.totalExpenses > 0 && shoppingData.budget) {
-      const shoppingBill: Bill & { isVirtual?: boolean } = {
-        id: 'shopping-list-bill',
-        user_id: user!.id,
-        name: 'Compras do Mês',
-        amount: shoppingData.totalExpenses,
-        due_date: format(endOfMonth(currentDate), 'yyyy-MM-dd'),
-        is_paid: shoppingData.purchasedExpenses === shoppingData.totalExpenses,
-        created_at: currentDate.toISOString(),
-        isVirtual: true,
-      };
-      allBills.push(shoppingBill);
-    }
-    return allBills.sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime());
-  }, [bills, shoppingData, user, currentDate]);
+    // Apenas contas regulares, sem a conta virtual da lista de compras
+    return bills ? [...bills].sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime()) : [];
+  }, [bills]);
 
   const { totalPaid, totalPending } = useMemo(() => {
-    const regularPaid = bills?.filter(b => b.is_paid).reduce((sum, b) => sum + Number(b.amount), 0) || 0;
-    const regularPending = bills?.filter(b => !b.is_paid).reduce((sum, b) => sum + Number(b.amount), 0) || 0;
+    const totalPaid = bills?.filter(b => b.is_paid).reduce((sum, b) => sum + Number(b.amount), 0) || 0;
+    const totalPending = bills?.filter(b => !b.is_paid).reduce((sum, b) => sum + Number(b.amount), 0) || 0;
     
-    const shoppingPaid = shoppingData?.purchasedExpenses || 0;
-    const shoppingPending = (shoppingData?.totalExpenses || 0) - shoppingPaid;
-
-    return { 
-      totalPaid: regularPaid + shoppingPaid, 
-      totalPending: regularPending + shoppingPending 
-    };
-  }, [bills, shoppingData]);
+    return { totalPaid, totalPending };
+  }, [bills]);
 
   const handleAddBill = (e: React.FormEvent) => {
     e.preventDefault();
@@ -134,7 +94,7 @@ const BillsPage = () => {
     return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   };
 
-  const isLoading = authLoading || billsLoading || shoppingLoading;
+  const isLoading = authLoading || billsLoading;
 
   return (
     <AuthGuard>
@@ -214,27 +174,20 @@ const BillsPage = () => {
                       <TableBody>
                         {displayBills.length > 0 ? (
                           displayBills.map(bill => {
-                            const isVirtual = 'isVirtual' in bill && bill.isVirtual;
                             return (
                               <TableRow key={bill.id} className={bill.is_paid ? 'bg-green-50 dark:bg-green-900/20' : ''}>
                                 <TableCell>
-                                  <Checkbox checked={bill.is_paid} onCheckedChange={() => handleTogglePaid(bill)} disabled={isVirtual} />
+                                  <Checkbox checked={bill.is_paid} onCheckedChange={() => handleTogglePaid(bill)} />
                                 </TableCell>
                                 <TableCell className={`font-medium ${bill.is_paid ? 'line-through text-muted-foreground' : ''}`}>
-                                  <div className="flex items-center">
-                                    {isVirtual && <ShoppingCart className="h-4 w-4 mr-2 text-primary" />}
-                                    {bill.name}
-                                  </div>
-                                  {isVirtual && <div className="text-xs text-muted-foreground">Total de {shoppingData?.purchasedExpenses === shoppingData?.totalExpenses ? 'comprados' : 'previstos'}</div>}
+                                  {bill.name}
                                 </TableCell>
                                 <TableCell className={bill.is_paid ? 'line-through text-muted-foreground' : ''}>{format(new Date(bill.due_date), 'dd/MM/yyyy')}</TableCell>
                                 <TableCell className={`text-right font-semibold ${bill.is_paid ? 'line-through text-muted-foreground' : ''}`}>{formatCurrency(bill.amount)}</TableCell>
                                 <TableCell>
-                                  {!isVirtual && (
-                                    <Button variant="ghost" size="icon" onClick={() => deleteBillMutation.mutate(bill.id)}>
-                                      <X className="h-4 w-4 text-red-500" />
-                                    </Button>
-                                  )}
+                                  <Button variant="ghost" size="icon" onClick={() => deleteBillMutation.mutate(bill.id)}>
+                                    <X className="h-4 w-4 text-red-500" />
+                                  </Button>
                                 </TableCell>
                               </TableRow>
                             );
@@ -253,32 +206,25 @@ const BillsPage = () => {
                   <div className="md:hidden space-y-4">
                     {displayBills.length > 0 ? (
                       displayBills.map(bill => {
-                        const isVirtual = 'isVirtual' in bill && bill.isVirtual;
                         return (
                           <div key={bill.id} className={`p-4 rounded-lg border ${bill.is_paid ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' : 'bg-card'}`}>
                             <div className="flex items-start justify-between">
                               <div className="flex items-start gap-4">
-                                <Checkbox checked={bill.is_paid} onCheckedChange={() => handleTogglePaid(bill)} disabled={isVirtual} className="mt-1" />
+                                <Checkbox checked={bill.is_paid} onCheckedChange={() => handleTogglePaid(bill)} className="mt-1" />
                                 <div>
                                   <div className={`font-medium ${bill.is_paid ? 'line-through text-muted-foreground' : ''}`}>
-                                    <div className="flex items-center">
-                                      {isVirtual && <ShoppingCart className="h-4 w-4 mr-2 text-primary" />}
-                                      {bill.name}
-                                    </div>
+                                    {bill.name}
                                   </div>
                                   <div className="text-sm text-muted-foreground">
                                     Vence em: {format(new Date(bill.due_date), 'dd/MM/yyyy')}
                                   </div>
-                                  {isVirtual && <div className="text-xs text-muted-foreground">Total de {shoppingData?.purchasedExpenses === shoppingData?.totalExpenses ? 'comprados' : 'previstos'}</div>}
                                 </div>
                               </div>
                               <div className="text-right">
                                 <div className={`font-semibold text-lg ${bill.is_paid ? 'line-through text-muted-foreground' : ''}`}>{formatCurrency(bill.amount)}</div>
-                                {!isVirtual && (
-                                  <Button variant="ghost" size="icon" onClick={() => deleteBillMutation.mutate(bill.id)} className="h-8 w-8 mt-1">
-                                    <X className="h-4 w-4 text-red-500" />
-                                  </Button>
-                                )}
+                                <Button variant="ghost" size="icon" onClick={() => deleteBillMutation.mutate(bill.id)} className="h-8 w-8 mt-1">
+                                  <X className="h-4 w-4 text-red-500" />
+                                </Button>
                               </div>
                             </div>
                           </div>

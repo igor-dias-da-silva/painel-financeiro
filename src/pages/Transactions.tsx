@@ -12,6 +12,7 @@ import { Edit, Trash2, PlusCircle } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { mockCategories, mockAccounts, mockTransactions } from '@/data/mockData';
 import { Transaction, Category, Account } from '@/data/types'; // Importando tipos corretos
+import { getTransactions } from '@/lib/transactions'; // Importando getTransactions para resolver dependência
 
 // Definindo o tipo de dados que o TransactionForm retorna
 interface TransactionFormValues {

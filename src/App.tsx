@@ -21,6 +21,7 @@ import PricingPage from './pages/PricingPage';
 import UpdatePassword from './pages/UpdatePassword';
 import AdminPage from './pages/AdminPage';
 import Transactions from './pages/Transactions';
+import BudgetPage from './pages/Budget'; // Importando a nova página
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,7 @@ const App = () => {
                 <Route path="/help" element={<Help />} />
                 <Route path="/pricing" element={<PricingPage />} />
                 <Route path="/admin" element={<AdminPage />} />
+                <Route path="/budget" element={<BudgetPage />} /> {/* Nova Rota */}
               </Route>
             </Routes>
           </AuthProvider>
