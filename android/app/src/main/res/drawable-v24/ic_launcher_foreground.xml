@@ -9,31 +9,33 @@
         android:translateX="18"
         android:translateY="18">
         
-        <!-- Fundo do ícone (quadrado arredondado) - Opcional, mas o logo tem um contorno -->
-        <!-- Vamos focar apenas no gráfico de barras e seta, deixando o fundo para o background.xml -->
+        <!-- Gráfico de Barras e Seta (Roxo #8A2BE2) -->
         
-        <!-- Gráfico de Barras e Seta (Roxo) -->
+        <!-- Barra 1 -->
         <path
             android:fillColor="#8A2BE2"
-            android:pathData="M 20 70 L 20 40 L 30 40 L 30 70 Z" />
+            android:pathData="M 15 70 L 15 50 L 25 50 L 25 70 Z" />
+        <!-- Barra 2 -->
         <path
             android:fillColor="#8A2BE2"
-            android:pathData="M 40 70 L 40 30 L 50 30 L 50 70 Z" />
+            android:pathData="M 35 70 L 35 40 L 45 40 L 45 70 Z" />
+        <!-- Barra 3 -->
         <path
             android:fillColor="#8A2BE2"
-            android:pathData="M 60 70 L 60 20 L 70 20 L 70 70 Z" />
+            android:pathData="M 55 70 L 55 30 L 65 30 L 65 70 Z" />
         
-        <!-- Linha de tendência e seta (simplificada) -->
+        <!-- Linha de tendência (simplificada) -->
         <path
             android:strokeColor="#8A2BE2"
             android:strokeWidth="4"
             android:strokeLineCap="round"
-            android:pathData="M 15 65 C 35 45, 55 25, 75 15" />
-        
-        <!-- Seta (triângulo) -->
+            android:strokeLineJoin="round"
+            android:pathData="M 15 50 L 35 40 L 55 30" />
+            
+        <!-- Seta no topo da última barra -->
         <path
             android:fillColor="#8A2BE2"
-            android:pathData="M 75 15 L 70 20 L 75 25 Z" />
+            android:pathData="M 65 30 L 70 25 L 75 30 L 65 30 Z" />
             
     </group>
 </vector>
