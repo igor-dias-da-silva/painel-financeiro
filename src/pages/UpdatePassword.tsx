@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Eye, EyeOff, Lock, DollarSign } from 'lucide-react';
+import { Eye, EyeOff, Lock, DollarSign, Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { showError, showSuccess } from '@/utils/toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -20,12 +20,21 @@ const UpdatePassword = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSessionReady, setIsSessionReady] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   const { updateUserPassword } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'PASSWORD_RECOVERY') {
+      console.log('Evento de autenticação:', event);
+      if (event === 'PASSWORD_RECOVERY' || event === 'INITIAL_SESSION') {
+        setIsSessionReady(true);
+      }
+    });
+
+    // Verifica se já temos uma sessão de recuperação de senha
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
         setIsSessionReady(true);
       }
     });
@@ -46,20 +55,23 @@ const UpdatePassword = () => {
       return;
     }
 
-    setIsLoading(true);
+    setIsUpdating(true);
     try {
       const success = await updateUserPassword(password);
       if (success) {
         showSuccess('Senha atualizada com sucesso! Você já pode fazer login.');
-        await supabase.auth.signOut();
-        navigate('/login');
+        // Espera um pouco antes de redirecionar para o login
+        setTimeout(() => {
+          navigate('/login');
+        }, 2000);
       } else {
         setError('Não foi possível atualizar a senha. O link pode ter expirado.');
       }
     } catch (err) {
-      setError('Ocorreu um erro inesperado.');
+      console.error('Erro ao atualizar senha:', err);
+      setError('Ocorreu um erro inesperado ao atualizar a senha.');
     } finally {
-      setIsLoading(false);
+      setIsUpdating(false);
     }
   };
 
@@ -129,13 +141,23 @@ const UpdatePassword = () => {
                 </Alert>
               )}
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? 'Salvando...' : 'Salvar Nova Senha'}
+              <Button type="submit" className="w-full" disabled={isUpdating}>
+                {isUpdating ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Atualizando...
+                  </>
+                ) : (
+                  'Salvar Nova Senha'
+                )}
               </Button>
             </form>
           ) : (
-            <div className="text-center text-muted-foreground">
-              Aguardando autorização... Por favor, verifique se você acessou esta página através do link enviado para o seu e-mail.
+            <div className="text-center">
+              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
+              <p className="text-muted-foreground">
+                Aguardando autorização... Por favor, verifique se você acessou esta página através do link enviado para o seu e-mail.
+              </p>
             </div>
           )}
         </CardContent>

@@ -29,12 +29,19 @@ export const ForgotPasswordDialog: React.FC<ForgotPasswordDialogProps> = ({
     setIsLoading(true);
 
     try {
-      const redirectUrl = `${window.location.origin}/update-password`;
+      // Constrói a URL de redirecionamento dinamicamente
+      const baseUrl = window.location.origin;
+      const redirectUrl = `${baseUrl}/update-password`;
+      
+      console.log('Enviando e-mail de redefinição para:', email);
+      console.log('URL de redirecionamento:', redirectUrl);
+      
       const { error: supabaseError } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: redirectUrl,
       });
 
       if (supabaseError) {
+        console.error('Erro do Supabase:', supabaseError);
         throw supabaseError;
       }
 
@@ -43,7 +50,11 @@ export const ForgotPasswordDialog: React.FC<ForgotPasswordDialogProps> = ({
       setEmail('');
     } catch (err: any) {
       console.error('Erro ao redefinir senha:', err);
-      showError('Não foi possível enviar o e-mail de redefinição. Tente novamente.');
+      if (err.message?.includes('already in use')) {
+        showError('Este e-mail já está em uso. Por favor, faça login.');
+      } else {
+        showError('Não foi possível enviar o e-mail de redefinição. Tente novamente.');
+      }
     } finally {
       setIsLoading(false);
     }
