@@ -133,7 +133,7 @@ const ShoppingListPage = () => {
               )}
               {t('shoppingList.export')}
             </Button>
-          </div>
+          </DialogTrigger> {/* Corrigido: TooltipTrigger deve envolver o Button */}
         </TooltipTrigger>
         {!canExport && (
           <TooltipContent>
