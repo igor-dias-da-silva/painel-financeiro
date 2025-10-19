@@ -75,6 +75,7 @@ const AccountsPage = () => {
     }
 
     const payload: AccountInsert = {
+      user_id: userId,
       name: data.name,
       balance: data.balance,
       type: data.type,

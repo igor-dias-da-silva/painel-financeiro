@@ -101,9 +101,10 @@ export interface Database {
           updated_at?: string;
         };
       };
-      shopping_items: { // Adicionado para corrigir o erro 2
+      shopping_items: {
         Row: {
           id: string;
+          user_id: string;
           budget_id: string;
           name: string;
           price: number;
@@ -111,6 +112,7 @@ export interface Database {
           created_at: string;
         };
         Insert: {
+          user_id: string;
           budget_id: string;
           name: string;
           price: number;
