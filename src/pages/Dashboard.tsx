@@ -8,7 +8,8 @@ import { Transaction, Category } from '@/data/types';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { getTransactions, getCategories } from '@/lib/data';
 import { useToast } from '@/components/ui/use-toast';
-import { Button } from '@/components/ui/button'; // <-- Importação adicionada
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom'; // Importando Link
 
 // Cores para o gráfico de rosca
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
@@ -185,7 +186,7 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
-          {/* Card de Metas/Orçamento (Placeholder) */}
+          {/* Card de Metas/Orçamento */}
           <Card>
             <CardHeader>
               <CardTitle>Metas e Orçamento</CardTitle>
@@ -195,7 +196,9 @@ const Dashboard = () => {
               <p className="text-muted-foreground">
                 Acompanhe seu progresso em relação aos seus orçamentos mensais.
               </p>
-              <Button className="w-full">Ver Orçamento Completo</Button>
+              <Link to="/budget">
+                <Button className="w-full">Ver Orçamento Completo</Button>
+              </Link>
             </CardContent>
           </Card>
         </div>
