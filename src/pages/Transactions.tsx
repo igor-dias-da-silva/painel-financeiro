@@ -6,7 +6,7 @@ import CategoryManager from '@/components/CategoryManager';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Edit, Trash2, PlusCircle, Loader2 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { Transaction, Category, Account, TransactionInsert } from '@/data/types';
@@ -156,6 +156,9 @@ const Transactions = () => {
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
               <DialogTitle>{editingTransaction ? 'Editar Transação' : 'Nova Transação'}</DialogTitle>
+              <DialogDescription>
+                Registre uma nova receita ou despesa para manter suas finanças atualizadas.
+              </DialogDescription>
             </DialogHeader>
             <TransactionForm
               initialData={editingTransaction}
