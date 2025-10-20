@@ -4,58 +4,54 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Paleta Clara: Foco em um azul/ciano elegante e vibrante */
+    --background: 0 0% 99%; /* Branco suave */
+    --foreground: 222.2 47.4% 11.2%; /* Quase preto */
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 222.2 47.4% 11.2%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 222.2 47.4% 11.2%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 210 80% 45%; /* Azul vibrante e moderno */
+    --primary-foreground: 0 0% 98%;
 
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
 
-    --muted: 210 40% 90%; /* Ajustado para melhor contraste */
+    --muted: 210 40% 90%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 210 40% 90%; /* Ajustado para melhor contraste */
+    --accent: 210 40% 90%;
     --accent-foreground: 222.2 47.4% 11.2%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 85%; /* Ajustado para melhor contraste */
-    --input: 214.3 31.8% 85%; /* Ajustado para melhor contraste */
-    --ring: 222.2 84% 4.9%;
+    --border: 214.3 31.8% 85%;
+    --input: 214.3 31.8% 85%;
+    --ring: 210 80% 45%; /* Usando a cor primária para o ring */
 
     --radius: 0.5rem;
 
+    /* Sidebar colors (Light) */
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
+    --sidebar-primary: 210 80% 45%; /* Azul vibrante */
     --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 210 40% 90%; /* Ajustado para um tom mais escuro no modo claro */
-
+    --sidebar-accent: 210 40% 90%;
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 210 80% 45%;
   }
 
   .dark {
+    /* Paleta Escura: Mantendo o roxo vibrante */
     --background: 240 10% 3.9%; /* Quase preto */
     --foreground: 0 0% 98%;
 
-    --card: 240 4% 10%; /* Cinza bem escuro para os cards */
+    --card: 240 4% 10%;
     --card-foreground: 0 0% 98%;
 
     --popover: 240 10% 3.9%;
@@ -80,7 +76,7 @@
     --input: 240 4% 15%;
     --ring: 262 82% 60%; /* Roxo para o anel de foco */
 
-    /* Sidebar colors to match */
+    /* Sidebar colors (Dark) */
     --sidebar-background: 240 10% 3.9%;
     --sidebar-foreground: 0 0% 98%;
     --sidebar-primary: 262 82% 60%;
