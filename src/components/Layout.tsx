@@ -93,7 +93,7 @@ export const Layout: React.FC = () => {
       </nav>
       <div className="p-4 border-t border-sidebar-border relative">
         <div
-          className="flex items-center space-x-2 cursor-pointer"
+          className="flex items-center space-x-3 cursor-pointer" // Alterado de space-x-2 para space-x-3
           onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
         >
           <Avatar className="h-10 w-10">
@@ -156,7 +156,7 @@ export const Layout: React.FC = () => {
           </nav>
           <div className="p-4 border-t relative border-sidebar-border">
             <div
-              className={`flex items-center space-x-2 cursor-pointer ${isSidebarOpen ? 'justify-start' : 'justify-center'}`}
+              className={`flex items-center space-x-3 cursor-pointer ${isSidebarOpen ? 'justify-start' : 'justify-center'}`} // Alterado de space-x-2 para space-x-3
               onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
             >
               <Avatar className="h-10 w-10">
