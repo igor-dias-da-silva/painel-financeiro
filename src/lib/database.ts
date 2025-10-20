@@ -23,8 +23,8 @@ export const getProfile = async (userId: string): Promise<Profile | null> => {
     .eq('id', userId)
     .single();
 
-  // PGRST116 (404) ou 406 (Not Acceptable) são tratados como "não encontrado"
-  const isNotFoundError = error && (error.code === 'PGRST116' || error.status === 406);
+  // PGRST116 (404) é tratado como "não encontrado"
+  const isNotFoundError = error && error.code === 'PGRST116';
 
   if (error && !isNotFoundError) { 
     console.error("Erro ao buscar perfil:", error);

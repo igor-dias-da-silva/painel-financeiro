@@ -15,8 +15,8 @@ export const getOrCreateBudget = async (userId: string, month: number, year: num
     .eq('year', year)
     .single();
 
-  // PostgREST retorna PGRST116 (404) ou 406 (Not Acceptable) quando .single() não encontra nada.
-  const isNotFoundError = error && (error.code === 'PGRST116' || error.status === 406);
+  // PostgREST retorna PGRST116 (404) quando .single() não encontra nada.
+  const isNotFoundError = error && error.code === 'PGRST116';
 
   if (error && !isNotFoundError) { 
     console.error(`Error fetching budget for ${month}/${year}:`, error);

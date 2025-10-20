@@ -38,19 +38,19 @@ const Transactions = () => {
   // 1. Fetch Data
   const { data: transactions = [], isLoading: isLoadingTransactions } = useQuery<Transaction[]>({
     queryKey: ['transactions', userId],
-    queryFn: () => getTransactions(),
+    queryFn: getTransactions,
     enabled: !!userId,
   });
 
   const { data: categories = [], isLoading: isLoadingCategories } = useQuery<Category[]>({
     queryKey: ['categories', userId],
-    queryFn: () => getCategories(),
+    queryFn: getCategories,
     enabled: !!userId,
   });
 
   const { data: accounts = [], isLoading: isLoadingAccounts } = useQuery<Account[]>({
     queryKey: ['accounts', userId],
-    queryFn: () => getAccounts(),
+    queryFn: getAccounts,
     enabled: !!userId,
   });
 
@@ -190,32 +190,37 @@ const Transactions = () => {
                 </TableHeader>
                 <TableBody>
                   {transactions.length > 0 ? (
-                    transactions.map((transaction) => (
-                      <TableRow key={transaction.id} className={transaction.type === 'income' ? 'bg-green-50/50 dark:bg-green-900/10' : 'bg-red-50/50 dark:bg-red-900/10'}>
-                        <TableCell>{transaction.transaction_date}</TableCell>
-                        <TableCell className="font-medium">{transaction.description}</TableCell>
-                        <TableCell>
-                          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                            transaction.type === 'income' ? 'bg-green-200 text-green-800 dark:bg-green-800 dark:text-green-200' : 'bg-red-200 text-red-800 dark:bg-red-800 dark:text-red-200'
-                          }`}>
-                            {transaction.type === 'income' ? 'Receita' : 'Despesa'}
-                          </span>
-                        </TableCell>
-                        <TableCell>{categoriesMap[transaction.category_id]?.name || 'N/A'}</TableCell>
-                        <TableCell>{accountsMap[transaction.account_id]?.name || 'N/A'}</TableCell>
-                        <TableCell className={`text-right font-semibold ${transaction.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                          {transaction.type === 'expense' ? '-' : ''}R$ {transaction.amount.toFixed(2)}
-                        </TableCell>
-                        <TableCell className="text-center space-x-2">
-                          <Button variant="ghost" size="icon" onClick={() => handleEdit(transaction)} disabled={isLoading}>
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon" onClick={() => handleDelete(transaction.id)} disabled={isLoading}>
-                            <Trash2 className="h-4 w-4 text-red-500" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))
+                    transactions.map((transaction) => {
+                      const categoryId = transaction.category_id || '';
+                      const accountId = transaction.account_id || '';
+                      
+                      return (
+                        <TableRow key={transaction.id} className={transaction.type === 'income' ? 'bg-green-50/50 dark:bg-green-900/10' : 'bg-red-50/50 dark:bg-red-900/10'}>
+                          <TableCell>{transaction.transaction_date}</TableCell>
+                          <TableCell className="font-medium">{transaction.description}</TableCell>
+                          <TableCell>
+                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                              transaction.type === 'income' ? 'bg-green-200 text-green-800 dark:bg-green-800 dark:text-green-200' : 'bg-red-200 text-red-800 dark:bg-red-800 dark:text-red-200'
+                            }`}>
+                              {transaction.type === 'income' ? 'Receita' : 'Despesa'}
+                            </span>
+                          </TableCell>
+                          <TableCell>{categoriesMap[categoryId]?.name || 'N/A'}</TableCell>
+                          <TableCell>{accountsMap[accountId]?.name || 'N/A'}</TableCell>
+                          <TableCell className={`text-right font-semibold ${transaction.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                            {transaction.type === 'expense' ? '-' : ''}R$ {transaction.amount.toFixed(2)}
+                          </TableCell>
+                          <TableCell className="text-center space-x-2">
+                            <Button variant="ghost" size="icon" onClick={() => handleEdit(transaction)} disabled={isLoading}>
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon" onClick={() => handleDelete(transaction.id)} disabled={isLoading}>
+                              <Trash2 className="h-4 w-4 text-red-500" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
                   ) : (
                     <TableRow>
                       <TableCell colSpan={7} className="text-center h-24 text-muted-foreground">
