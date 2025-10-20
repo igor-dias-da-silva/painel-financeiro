@@ -25,32 +25,29 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      try {
-        const { data: { user }, error } = await supabase.auth.getUser();
-        
-        if (error) {
-          if (error instanceof AuthApiError && (error.status === 401 || error.status === 403)) {
-            console.warn('Session expired, signing out.');
-            await supabase.auth.signOut();
-            setUser(null);
-          } else {
-            console.error('Error checking auth:', error);
-          }
-        } else if (user) {
-          const userData: User = {
-            id: user.id,
-            name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuário',
-            email: user.email!,
-            createdAt: user.created_at,
-          };
-          setUser(userData);
-        }
-      } catch (error) {
-        console.error('Error in auth check:', error);
+      // Tenta obter a sessão. Se não houver sessão, o erro é esperado e tratado.
+      const { data: { session }, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        console.error('Error fetching session:', error);
         setUser(null);
-      } finally {
         setIsLoading(false);
+        return;
       }
+
+      if (session?.user) {
+        const user = session.user;
+        const userData: User = {
+          id: user.id,
+          name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuário',
+          email: user.email!,
+          createdAt: user.created_at,
+        };
+        setUser(userData);
+      } else {
+        setUser(null);
+      }
+      setIsLoading(false);
     };
 
     checkAuth();
@@ -68,10 +65,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       } else if (event === 'SIGNED_OUT') {
         setUser(null);
       }
+      // Garante que isLoading seja false após o primeiro evento de mudança de estado
+      if (isLoading) {
+        setIsLoading(false);
+      }
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, []); // Dependência vazia para rodar apenas na montagem
 
   const login = async (email: string, password: string): Promise<void> => {
     const { data, error } = await supabase.auth.signInWithPassword({
