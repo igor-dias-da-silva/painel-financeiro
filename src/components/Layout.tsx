@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom'; // Adicionando Outlet
+import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import {
-  LayoutDashboard, // Mantendo LayoutDashboard para o painel
+  LayoutDashboard,
   Settings,
   User,
   HelpCircle,
@@ -25,6 +25,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ThemeToggle } from './ThemeToggle';
 import { useProfile } from '@/hooks/useProfile';
+import { cn } from '@/lib/utils'; // Importando cn para classes condicionais
 
 // Removendo a prop 'children' da assinatura do componente
 export const Layout: React.FC = () => {
@@ -44,7 +45,6 @@ export const Layout: React.FC = () => {
     { name: 'Orçamento', icon: TrendingUp, path: '/budget' },
     { name: 'Planos', icon: Crown, path: '/pricing' },
     { name: 'Configurações', icon: Settings, path: '/settings' },
-    // Perfil e Ajuda removidos da lista principal, acessíveis via menu de perfil/rodapé
   ];
 
   const handleLogout = async () => {
@@ -55,24 +55,41 @@ export const Layout: React.FC = () => {
   const adminNavItem = { name: 'Admin', icon: Shield, path: '/admin' };
   const fullNavItems = isAdmin ? [...navItems, adminNavItem] : navItems;
 
+  const renderNavItem = (item: typeof navItems[0]) => {
+    const isActive = location.pathname === item.path;
+    const Icon = item.icon;
+
+    // Estilo para o modo minimizado (apenas ícone)
+    const iconOnlyClasses = "h-10 w-10 p-0";
+    // Estilo para o modo expandido (ícone + texto)
+    const expandedClasses = "w-full justify-start h-10 px-3";
+
+    return (
+      <Link
+        key={item.name}
+        to={item.path}
+        title={item.name}
+        className={cn(
+          "flex items-center rounded-md transition-colors duration-200",
+          isSidebarOpen ? expandedClasses : iconOnlyClasses,
+          isActive
+            ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+            : 'text-sidebar-foreground hover:bg-sidebar-accent'
+        )}
+      >
+        <Icon className={cn("h-5 w-5 flex-shrink-0", isSidebarOpen ? 'mr-3' : '')} />
+        {isSidebarOpen && <span className="truncate">{item.name}</span>}
+      </Link>
+    );
+  };
+
   const SidebarContent = () => (
     <div className="flex flex-col h-full bg-sidebar-background text-sidebar-foreground border-r border-sidebar-border">
       <div className="p-4 border-b border-sidebar-border">
         <h1 className="text-xl font-bold">FinanBoard</h1>
       </div>
       <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-        {fullNavItems.map((item) => (
-          <Link
-            key={item.name}
-            to={item.path}
-            className={`flex items-center p-2 rounded-md hover:bg-sidebar-accent ${
-              location.pathname === item.path ? 'bg-sidebar-primary text-sidebar-primary-foreground' : ''
-            }`}
-          >
-            <item.icon className="h-5 w-5 mr-3 flex-shrink-0" />
-            <span className="truncate">{item.name}</span>
-          </Link>
-        ))}
+        {fullNavItems.map(renderNavItem)}
       </nav>
       <div className="p-4 border-t border-sidebar-border relative">
         <div
@@ -123,31 +140,19 @@ export const Layout: React.FC = () => {
     <div className="flex h-screen bg-gray-100 dark:bg-background">
       {/* Sidebar Desktop */}
       <aside
-        className={`hidden md:flex flex-col transition-all duration-300 w-64 ${
-          isSidebarOpen ? 'w-64' : 'w-16'
+        className={`hidden md:flex flex-col transition-all duration-300 ${
+          isSidebarOpen ? 'w-64' : 'w-20' // Aumentei a largura minimizada para 20 (80px) para melhor visualização do ícone
         }`}
       >
         <div className="flex flex-col h-full bg-sidebar-background text-sidebar-foreground border-r border-sidebar-border">
-          <div className="p-4 border-b flex items-center justify-between">
+          <div className={cn("p-4 border-b flex items-center", isSidebarOpen ? 'justify-between' : 'justify-center')}>
             <h1 className={`text-xl font-bold ${isSidebarOpen ? '' : 'hidden'}`}>FinanBoard</h1>
             <Button variant="ghost" size="icon" onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="text-sidebar-foreground hover:bg-sidebar-accent">
               <Menu className="h-6 w-6" />
             </Button>
           </div>
           <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-            {fullNavItems.map((item) => (
-              <Link
-                key={item.name}
-                to={item.path}
-                className={`flex items-center p-2 rounded-md hover:bg-sidebar-accent ${
-                  location.pathname === item.path ? 'bg-sidebar-primary text-sidebar-primary-foreground' : ''
-                } ${isSidebarOpen ? 'justify-start' : 'justify-center'}`}
-                title={item.name}
-              >
-                <item.icon className="h-5 w-5" />
-                {isSidebarOpen && <span className="ml-3 truncate">{item.name}</span>}
-              </Link>
-            ))}
+            {fullNavItems.map(renderNavItem)}
           </nav>
           <div className="p-4 border-t relative border-sidebar-border">
             <div
