@@ -5,6 +5,7 @@ export interface Profile {
   first_name: string | null;
   last_name: string | null;
   bio?: string | null;
+  phone_number?: string | null; // Novo campo
   default_priority?: 'low' | 'medium' | 'high' | 'urgent';
   priority_colors?: Record<string, string> | null;
   subscription_plan?: 'free' | 'premium';

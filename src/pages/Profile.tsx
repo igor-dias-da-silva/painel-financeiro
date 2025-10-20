@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Loader2, Edit, Calendar, Crown, Zap } from 'lucide-react';
+import { Loader2, Edit, Calendar, Crown, Zap, Phone } from 'lucide-react';
 import { AuthGuard } from '@/components/AuthGuard';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -14,6 +14,7 @@ import { showError, showSuccess } from '@/utils/toast';
 import { ChangePasswordDialog } from '@/components/ChangePasswordDialog';
 import { EditBioDialog } from '@/components/EditBioDialog';
 import { EditNameDialog } from '@/components/EditNameDialog';
+import { EditContactDialog } from '@/components/EditContactDialog'; // Importando novo diálogo
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 
@@ -31,9 +32,12 @@ const Profile = () => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [bio, setBio] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState<string | null>(null); // Novo estado
+  
   const [showChangePasswordDialog, setShowChangePasswordDialog] = useState(false);
   const [showEditBioDialog, setShowEditBioDialog] = useState(false);
   const [showEditNameDialog, setShowEditNameDialog] = useState(false);
+  const [showEditContactDialog, setShowEditContactDialog] = useState(false); // Novo estado de diálogo
 
   // Sincroniza o estado local com os dados do perfil sempre que o perfil mudar
   useEffect(() => {
@@ -41,12 +45,14 @@ const Profile = () => {
       setFirstName(profile.first_name || '');
       setLastName(profile.last_name || '');
       setBio(profile.bio || '');
+      setPhoneNumber(profile.phone_number || null); // Sincroniza o número de telefone
     } else if (user) {
       // Fallback para o nome do usuário se o perfil não existir (embora o trigger deva criar um)
       const fullName = user.name.split(' ');
       setFirstName(fullName[0] || '');
       setLastName(fullName.slice(1).join(' ') || '');
       setBio('');
+      setPhoneNumber(null);
     }
   }, [profile, user]);
 
@@ -84,6 +90,15 @@ const Profile = () => {
     
     updateProfileMutation.mutate({ bio: newBio });
     setShowEditBioDialog(false);
+  };
+  
+  const handleSaveContact = (newPhoneNumber: string) => {
+    if (!userId) return;
+    // Atualiza o estado local imediatamente para feedback visual
+    setPhoneNumber(newPhoneNumber);
+    
+    updateProfileMutation.mutate({ phone_number: newPhoneNumber });
+    setShowEditContactDialog(false);
   };
 
   const handleLogout = async () => {
@@ -200,6 +215,18 @@ const Profile = () => {
                         <Edit className="h-4 w-4 mr-2" /> Editar
                       </Button>
                     </li>
+                    {/* Novo campo de Contato */}
+                    <li className="py-4 flex items-center justify-between">
+                      <div>
+                        <Label className="font-semibold dark:text-foreground">Número de Contato</Label>
+                        <p className="text-muted-foreground text-sm">
+                          {phoneNumber || 'Não definido'}
+                        </p>
+                      </div>
+                      <Button variant="ghost" size="sm" onClick={() => setShowEditContactDialog(true)} disabled={isLoading}>
+                        <Edit className="h-4 w-4 mr-2" /> Editar
+                      </Button>
+                    </li>
                   </ul>
                 </CardContent>
               </Card>
@@ -248,6 +275,13 @@ const Profile = () => {
       <ChangePasswordDialog open={showChangePasswordDialog} onOpenChange={setShowChangePasswordDialog} />
       <EditBioDialog open={showEditBioDialog} onOpenChange={setShowEditBioDialog} currentBio={bio} onSave={handleSaveBio} isLoading={updateProfileMutation.isPending} />
       <EditNameDialog open={showEditNameDialog} onOpenChange={setShowEditNameDialog} currentFirstName={firstName} currentLastName={lastName} onSave={handleSaveName} isLoading={updateProfileMutation.isPending} />
+      <EditContactDialog 
+        open={showEditContactDialog} 
+        onOpenChange={setShowEditContactDialog} 
+        currentPhoneNumber={phoneNumber} 
+        onSave={handleSaveContact} 
+        isLoading={updateProfileMutation.isPending} 
+      />
     </AuthGuard>
   );
 };
