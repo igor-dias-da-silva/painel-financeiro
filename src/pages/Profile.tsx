@@ -35,12 +35,14 @@ const Profile = () => {
   const [showEditBioDialog, setShowEditBioDialog] = useState(false);
   const [showEditNameDialog, setShowEditNameDialog] = useState(false);
 
+  // Sincroniza o estado local com os dados do perfil sempre que o perfil mudar
   useEffect(() => {
     if (profile) {
       setFirstName(profile.first_name || '');
       setLastName(profile.last_name || '');
       setBio(profile.bio || '');
     } else if (user) {
+      // Fallback para o nome do usuário se o perfil não existir (embora o trigger deva criar um)
       const fullName = user.name.split(' ');
       setFirstName(fullName[0] || '');
       setLastName(fullName.slice(1).join(' ') || '');
@@ -50,8 +52,13 @@ const Profile = () => {
 
   const updateProfileMutation = useMutation({
     mutationFn: (updates: Partial<Omit<SupabaseProfile, 'id' | 'updated_at'>>) => updateProfile(userId!, updates),
-    onSuccess: () => {
+    onSuccess: (updatedProfile) => {
+      // Atualiza o cache localmente para refletir a mudança imediatamente
+      queryClient.setQueryData(['profile', userId], updatedProfile);
+      
+      // Invalida para garantir que outros componentes que usam useProfile vejam a mudança
       queryClient.invalidateQueries({ queryKey: ['profile', userId] });
+      
       showSuccess('Perfil atualizado com sucesso!');
     },
     onError: (error) => {
@@ -62,15 +69,19 @@ const Profile = () => {
 
   const handleSaveName = (newFirstName: string, newLastName: string) => {
     if (!userId) return;
+    // Atualiza o estado local imediatamente para feedback visual
     setFirstName(newFirstName);
     setLastName(newLastName);
+    
     updateProfileMutation.mutate({ first_name: newFirstName, last_name: newLastName });
     setShowEditNameDialog(false);
   };
 
   const handleSaveBio = (newBio: string) => {
     if (!userId) return;
+    // Atualiza o estado local imediatamente para feedback visual
     setBio(newBio);
+    
     updateProfileMutation.mutate({ bio: newBio });
     setShowEditBioDialog(false);
   };
@@ -79,7 +90,7 @@ const Profile = () => {
     await logout();
   };
 
-  const isLoading = authLoading || profileLoading;
+  const isLoading = authLoading || profileLoading || updateProfileMutation.isPending;
 
   if (isLoading) {
     return (
@@ -174,7 +185,7 @@ const Profile = () => {
                         <Label className="font-semibold dark:text-foreground">Nome Completo</Label>
                         <p className="text-muted-foreground text-sm">{displayName}</p>
                       </div>
-                      <Button variant="ghost" size="sm" onClick={() => setShowEditNameDialog(true)} disabled={updateProfileMutation.isPending}>
+                      <Button variant="ghost" size="sm" onClick={() => setShowEditNameDialog(true)} disabled={isLoading}>
                         <Edit className="h-4 w-4 mr-2" /> Editar
                       </Button>
                     </li>
@@ -185,7 +196,7 @@ const Profile = () => {
                           {bio || 'Nenhuma biografia definida.'}
                         </p>
                       </div>
-                      <Button variant="ghost" size="sm" onClick={() => setShowEditBioDialog(true)} disabled={updateProfileMutation.isPending} className="flex-shrink-0 ml-4">
+                      <Button variant="ghost" size="sm" onClick={() => setShowEditBioDialog(true)} disabled={isLoading} className="flex-shrink-0 ml-4">
                         <Edit className="h-4 w-4 mr-2" /> Editar
                       </Button>
                     </li>
