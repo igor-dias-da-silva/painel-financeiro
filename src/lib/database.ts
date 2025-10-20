@@ -22,7 +22,10 @@ export const getProfile = async (userId: string): Promise<Profile | null> => {
     .eq('id', userId)
     .single();
 
-  if (error && error.code !== 'PGRST116') { // PGRST116 significa que nenhuma linha foi encontrada
+  // PGRST116 (404) ou 406 (Not Acceptable) são tratados como "não encontrado"
+  const isNotFoundError = error && (error.code === 'PGRST116' || error.status === 406);
+
+  if (error && !isNotFoundError) { 
     console.error("Erro ao buscar perfil:", error);
     throw error;
   }
