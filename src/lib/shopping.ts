@@ -7,25 +7,26 @@ export type ShoppingItem = Database['public']['Tables']['shopping_items']['Row']
 // Get or create a budget for the current month
 export const getOrCreateBudget = async (userId: string, month: number, year: number): Promise<ShoppingBudget> => {
   // First, try to get the budget
-  let { data: budget, error } = await supabase
-    .from('monthly_budgets') // Renomeado
+  const { data: budget, error } = await supabase
+    .from('monthly_budgets')
     .select('*')
     .eq('user_id', userId)
     .eq('month', month)
     .eq('year', year)
     .single();
 
-  // Trata erros de "não encontrado". O PostgREST pode retornar 404 (PGRST116) ou, em alguns casos, 406.
+  // PostgREST retorna PGRST116 (404) ou 406 (Not Acceptable) quando .single() não encontra nada.
   const isNotFoundError = error && (error.code === 'PGRST116' || error.status === 406);
 
   if (error && !isNotFoundError) { 
+    console.error(`Error fetching budget for ${month}/${year}:`, error);
     throw error;
   }
 
-  // If no budget is found (data is null or error is a not found error), create one
+  // If no budget is found, create one
   if (!budget || isNotFoundError) {
     const { data: newBudget, error: insertError } = await supabase
-      .from('monthly_budgets') // Renomeado
+      .from('monthly_budgets')
       .insert({ user_id: userId, month, year, amount: 0 })
       .select()
       .single();
@@ -34,7 +35,7 @@ export const getOrCreateBudget = async (userId: string, month: number, year: num
       console.error("Error inserting new budget:", insertError);
       throw insertError;
     }
-    budget = newBudget;
+    return newBudget as ShoppingBudget;
   }
 
   return budget as ShoppingBudget;
