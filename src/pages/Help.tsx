@@ -9,19 +9,15 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { 
   HelpCircle, 
-  BookOpen, 
-  Video, 
   MessageCircle, 
   Mail, 
   Search,
-  Plus,
-  CheckCircle,
 } from 'lucide-react';
 import { AuthGuard } from '@/components/AuthGuard';
 
 const Help = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState('faq');
+  const [activeTab, setActiveTab] = useState('faq'); // Padrão para 'faq'
 
   const faqs = [
     {
@@ -61,26 +57,7 @@ const Help = () => {
     faq.answer.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const guides = [
-    {
-      title: 'Primeiros Passos',
-      description: 'Aprenda a configurar seu orçamento e adicionar contas',
-      icon: Plus,
-      duration: '5 min'
-    },
-    {
-      title: 'Gerenciando suas Contas',
-      description: 'Dicas para manter suas contas sempre em dia',
-      icon: CheckCircle,
-      duration: '10 min'
-    },
-    {
-      title: 'Otimizando Compras',
-      description: 'Como usar a lista de compras para economizar',
-      icon: MessageCircle,
-      duration: '15 min'
-    }
-  ];
+  // Removido o array 'guides'
 
   return (
     <AuthGuard>
@@ -106,24 +83,15 @@ const Help = () => {
 
           {/* Abas de Navegação */}
           <div className="mb-8">
-            {/* Removido max-w-md para melhor responsividade em telas pequenas */}
             <div className="flex space-x-1 bg-gray-200 dark:bg-secondary p-1 rounded-lg mx-auto max-w-full sm:max-w-md">
               <Button
                 variant={activeTab === 'faq' ? 'default' : 'ghost'}
                 onClick={() => setActiveTab('faq')}
-                className="flex-1 text-sm h-10" // Adicionado text-sm e altura fixa para consistência
+                className="flex-1 text-sm h-10"
               >
                 <HelpCircle className="h-4 w-4 mr-1 sm:mr-2" />
                 <span className="hidden sm:inline">Perguntas Frequentes</span>
                 <span className="sm:hidden">FAQ</span>
-              </Button>
-              <Button
-                variant={activeTab === 'guide' ? 'default' : 'ghost'}
-                onClick={() => setActiveTab('guide')}
-                className="flex-1 text-sm h-10"
-              >
-                <BookOpen className="h-4 w-4 mr-1 sm:mr-2" />
-                Guia
               </Button>
               <Button
                 variant={activeTab === 'contact' ? 'default' : 'ghost'}
@@ -137,88 +105,6 @@ const Help = () => {
           </div>
 
           {/* Conteúdo das Abas */}
-          {activeTab === 'guide' && (
-            <div className="space-y-6">
-              <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-gray-800 dark:text-foreground mb-4">Guia do Usuário</h2>
-                <p className="text-gray-600 dark:text-muted-foreground max-w-2xl mx-auto">
-                  Aprenda passo a passo como usar todas as funcionalidades do FinanBoard
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {guides.map((guide, index) => {
-                  const Icon = guide.icon;
-                  return (
-                    <Card key={index} className="hover:shadow-md transition-shadow dark:bg-card dark:border-border">
-                      <CardHeader>
-                        <div className="flex items-center space-x-3">
-                          <div className="p-2 bg-blue-100 dark:bg-primary/10 rounded-lg">
-                            <Icon className="h-6 w-6 text-blue-600 dark:text-primary" />
-                          </div>
-                          <div>
-                            <CardTitle className="text-lg dark:text-card-foreground">{guide.title}</CardTitle>
-                            <div className="flex items-center space-x-1 text-sm text-gray-500 dark:text-muted-foreground">
-                              <span>{guide.duration}</span>
-                            </div>
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-gray-600 dark:text-muted-foreground mb-4">{guide.description}</p>
-                        <Button variant="outline" className="w-full dark:bg-secondary dark:text-secondary-foreground dark:border-border dark:hover:bg-accent">
-                          Ler Guia
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
-
-              <Card className="dark:bg-card dark:border-border">
-                <CardHeader>
-                  <CardTitle className="dark:text-card-foreground">Recursos Disponíveis</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-3">
-                      <div className="flex items-center space-x-3">
-                        <Video className="h-5 w-5 text-blue-600 dark:text-primary" />
-                        <div>
-                          <div className="font-medium dark:text-foreground">Vídeo Tutoriais</div>
-                          <div className="text-sm text-gray-600 dark:text-muted-foreground">Assista a vídeos explicativos</div>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <BookOpen className="h-5 w-5 text-green-600 dark:text-green-400" />
-                        <div>
-                          <div className="font-medium dark:text-foreground">Documentação Completa</div>
-                          <div className="text-sm text-gray-600 dark:text-muted-foreground">Acesse a documentação detalhada</div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="space-y-3">
-                      <div className="flex items-center space-x-3">
-                        <MessageCircle className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                        <div>
-                          <div className="font-medium dark:text-foreground">Comunidade</div>
-                          <div className="text-sm text-gray-600 dark:text-muted-foreground">Participe da nossa comunidade</div>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <Mail className="h-5 w-5 text-orange-600 dark:text-orange-400" />
-                        <div>
-                          <div className="font-medium dark:text-foreground">Suporte por Email</div>
-                          <div className="text-sm text-gray-600 dark:text-muted-foreground">Entre em contato com nossa equipe</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-
           {activeTab === 'faq' && (
             <div className="space-y-6">
               <div className="text-center mb-8">
