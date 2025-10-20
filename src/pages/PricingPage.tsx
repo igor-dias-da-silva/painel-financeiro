@@ -110,8 +110,9 @@ const PricingPage = () => {
         const { init_point } = data as { init_point: string };
 
         if (init_point) {
-          // 2. Redirecionar para o Checkout do Mercado Pago
-          window.location.href = init_point;
+          // 2. Redirecionar para o Checkout do Mercado Pago em uma nova aba
+          window.open(init_point, '_blank');
+          showSuccess('Redirecionando para o checkout do Mercado Pago...');
         } else {
           throw new Error('Não foi possível obter o link de pagamento.');
         }
