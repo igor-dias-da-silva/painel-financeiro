@@ -12,12 +12,23 @@ import {
   MessageCircle, 
   Mail, 
   Search,
+  Loader2,
 } from 'lucide-react';
 import { AuthGuard } from '@/components/AuthGuard';
+import { showError, showSuccess } from '@/utils/toast';
 
 const Help = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('faq'); // Padrão para 'faq'
+  
+  // Estado do formulário de contato
+  const [contactForm, setContactForm] = useState({
+    name: '',
+    email: '',
+    subject: '',
+    message: '',
+  });
+  const [isSending, setIsSending] = useState(false);
 
   const faqs = [
     {
@@ -56,6 +67,34 @@ const Help = () => {
     faq.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
     faq.answer.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { id, value } = e.target;
+    setContactForm(prev => ({ ...prev, [id]: value }));
+  };
+
+  const handleSendContact = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!contactForm.name || !contactForm.email || !contactForm.subject || !contactForm.message) {
+      showError('Por favor, preencha todos os campos do formulário.');
+      return;
+    }
+
+    setIsSending(true);
+
+    // Simulação de envio de e-mail
+    setTimeout(() => {
+      setIsSending(false);
+      showSuccess('Mensagem enviada com sucesso! Responderemos em breve.');
+      setContactForm({
+        name: '',
+        email: '',
+        subject: '',
+        message: '',
+      });
+    }, 1500);
+  };
 
   return (
     <AuthGuard>
@@ -158,32 +197,69 @@ const Help = () => {
                     <CardTitle className="dark:text-card-foreground">Envie uma Mensagem</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div>
-                      <Label htmlFor="name" className="dark:text-foreground">Nome</Label>
-                      <Input id="name" placeholder="Seu nome" className="dark:bg-input dark:text-foreground dark:border-border" />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="email" className="dark:text-foreground">Email</Label>
-                      <Input id="email" type="email" placeholder="seu@email.com" className="dark:bg-input dark:text-foreground dark:border-border" />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="subject" className="dark:text-foreground">Assunto</Label>
-                      <Input id="subject" placeholder="Assunto da mensagem" className="dark:bg-input dark:text-foreground dark:border-border" />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="message" className="dark:text-foreground">Mensagem</Label>
-                      <Textarea 
-                        id="message" 
-                        placeholder="Descreva sua dúvida ou sugestão..." 
-                        rows={5}
-                        className="dark:bg-input dark:text-foreground dark:border-border"
-                      />
-                    </div>
-                    
-                    <Button className="w-full">Enviar Mensagem</Button>
+                    <form onSubmit={handleSendContact} className="space-y-4">
+                      <div>
+                        <Label htmlFor="name" className="dark:text-foreground">Nome</Label>
+                        <Input 
+                          id="name" 
+                          placeholder="Seu nome" 
+                          value={contactForm.name}
+                          onChange={handleInputChange}
+                          className="dark:bg-input dark:text-foreground dark:border-border" 
+                          disabled={isSending}
+                          required
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="email" className="dark:text-foreground">Email</Label>
+                        <Input 
+                          id="email" 
+                          type="email" 
+                          placeholder="seu@email.com" 
+                          value={contactForm.email}
+                          onChange={handleInputChange}
+                          className="dark:bg-input dark:text-foreground dark:border-border" 
+                          disabled={isSending}
+                          required
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="subject" className="dark:text-foreground">Assunto</Label>
+                        <Input 
+                          id="subject" 
+                          placeholder="Assunto da mensagem" 
+                          value={contactForm.subject}
+                          onChange={handleInputChange}
+                          className="dark:bg-input dark:text-foreground dark:border-border" 
+                          disabled={isSending}
+                          required
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="message" className="dark:text-foreground">Mensagem</Label>
+                        <Textarea 
+                          id="message" 
+                          placeholder="Descreva sua dúvida ou sugestão..." 
+                          rows={5}
+                          value={contactForm.message}
+                          onChange={handleInputChange}
+                          className="dark:bg-input dark:text-foreground dark:border-border"
+                          disabled={isSending}
+                          required
+                        />
+                      </div>
+                      
+                      <Button type="submit" className="w-full" disabled={isSending}>
+                        {isSending ? (
+                          <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Enviando...</>
+                        ) : (
+                          'Enviar Mensagem'
+                        )}
+                      </Button>
+                    </form>
                   </CardContent>
                 </Card>
 
