@@ -9,15 +9,17 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recha
 import { getTransactions, getCategories } from '@/lib/data';
 import { getBills, Bill } from '@/lib/bills'; // Importando funções de Bills
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'; // Importando useNavigate
 import { useAuth } from '@/hooks/useAuth'; // Importando useAuth para obter o user id
 import { useQuery } from '@tanstack/react-query'; // Importando useQuery
+import { FloatingActionButton } from '@/components/FloatingActionButton'; // Importando FAB
 
 // Cores para o gráfico de rosca
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate(); // Inicializando useNavigate
   const userId = user?.id;
 
   // 1. Fetch Transações
@@ -227,6 +229,9 @@ const Dashboard = () => {
           </Card>
         </div>
       </div>
+      
+      {/* Floating Action Button */}
+      <FloatingActionButton onClick={() => navigate('/transactions')} />
     </AuthGuard>
   );
 };
