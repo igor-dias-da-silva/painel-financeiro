@@ -1,14 +1,24 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
 import { DollarSign, Receipt, ShoppingCart, BarChart2, CheckCircle, ArrowRight } from 'lucide-react';
+import { useTheme } from 'next-themes';
 
 const Home = () => {
+  const { setTheme, theme } = useTheme();
+
+  // Força o tema claro ao carregar a página inicial
+  useEffect(() => {
+    if (theme !== 'light') {
+      setTheme('light');
+    }
+  }, [setTheme, theme]);
+
   const features = [
     {
       icon: <Receipt className="h-8 w-8 text-primary" />,
