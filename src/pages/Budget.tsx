@@ -17,6 +17,7 @@ import { AuthGuard } from '@/components/AuthGuard';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { PremiumFeatureGuard } from '@/components/PremiumFeatureGuard';
+import CategoryManager from '@/components/CategoryManager'; // Importando CategoryManager
 
 const BudgetPage = () => {
   const { user, isLoading: authLoading } = useAuth();
@@ -125,7 +126,7 @@ const BudgetPage = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 {expenseCategories.length === 0 ? (
-                  <p className="text-muted-foreground">Crie categorias de despesa na página de Transações para começar a orçar.</p>
+                  <p className="text-muted-foreground">Crie categorias de despesa na seção abaixo para começar a orçar.</p>
                 ) : (
                   <div className="space-y-4">
                     {expenseCategories.map(category => (
@@ -192,6 +193,11 @@ const BudgetPage = () => {
                 )}
               </CardContent>
             </Card>
+          </div>
+          
+          {/* Gerenciamento de Categorias */}
+          <div className="mt-8">
+            <CategoryManager />
           </div>
         </div>
       </PremiumFeatureGuard>
