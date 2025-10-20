@@ -5,7 +5,7 @@ import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom'; // Ad
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import {
-  LayoutDashboard,
+  LayoutDashboard, // Mantendo LayoutDashboard para o painel
   Settings,
   User,
   HelpCircle,
@@ -19,7 +19,7 @@ import {
   Shield,
   DollarSign,
   TrendingUp,
-  Wallet, // Importando Wallet para o ícone de Contas
+  Wallet,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -38,14 +38,13 @@ export const Layout: React.FC = () => {
   const navItems = [
     { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
     { name: 'Transações', icon: DollarSign, path: '/transactions' },
-    { name: 'Contas', icon: Wallet, path: '/accounts' }, // NOVO ITEM
+    { name: 'Contas', icon: Wallet, path: '/accounts' },
     { name: 'Contas a Pagar', icon: Receipt, path: '/bills' },
     { name: 'Lista de Compras', icon: ShoppingCart, path: '/shopping-list' },
     { name: 'Orçamento', icon: TrendingUp, path: '/budget' },
     { name: 'Planos', icon: Crown, path: '/pricing' },
     { name: 'Configurações', icon: Settings, path: '/settings' },
-    { name: 'Perfil', icon: User, path: '/profile' },
-    { name: 'Ajuda', icon: HelpCircle, path: '/help' },
+    // Perfil e Ajuda removidos da lista principal, acessíveis via menu de perfil/rodapé
   ];
 
   const handleLogout = async () => {
@@ -97,6 +96,13 @@ export const Layout: React.FC = () => {
             >
               Perfil
             </Link>
+            <Link
+              to="/help"
+              className="block px-4 py-2 text-sm hover:bg-sidebar-primary"
+              onClick={() => setIsProfileMenuOpen(false)}
+            >
+              Ajuda
+            </Link>
             <button
               onClick={() => {
                 handleLogout();
@@ -135,7 +141,7 @@ export const Layout: React.FC = () => {
                 to={item.path}
                 className={`flex items-center p-2 rounded-md hover:bg-sidebar-accent ${
                   location.pathname === item.path ? 'bg-sidebar-primary text-sidebar-primary-foreground' : ''
-                }`}
+                } ${isSidebarOpen ? 'justify-start' : 'justify-center'}`}
                 title={item.name}
               >
                 <item.icon className="h-5 w-5" />
@@ -145,18 +151,20 @@ export const Layout: React.FC = () => {
           </nav>
           <div className="p-4 border-t relative border-sidebar-border">
             <div
-              className="flex items-center space-x-2 cursor-pointer"
+              className={`flex items-center space-x-2 cursor-pointer ${isSidebarOpen ? 'justify-start' : 'justify-center'}`}
               onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
             >
               <Avatar className="h-10 w-10">
                 <AvatarFallback>{user?.name?.charAt(0) || 'U'}</AvatarFallback>
               </Avatar>
-              <div className="flex-1 min-w-0">
-                <span className="text-sm font-medium truncate">{user?.name || 'Usuário'}</span>
-              </div>
-              {isProfileMenuOpen ? <ChevronUp className="h-4 w-4 flex-shrink-0" /> : <ChevronDown className="h-4 w-4 flex-shrink-0" />}
+              {isSidebarOpen && (
+                <div className="flex-1 min-w-0">
+                  <span className="text-sm font-medium truncate">{user?.name || 'Usuário'}</span>
+                </div>
+              )}
+              {isSidebarOpen && (isProfileMenuOpen ? <ChevronUp className="h-4 w-4 flex-shrink-0" /> : <ChevronDown className="h-4 w-4 flex-shrink-0" />)}
             </div>
-            {isProfileMenuOpen && (
+            {isProfileMenuOpen && isSidebarOpen && (
               <div className="absolute left-4 right-4 bottom-full mb-2 bg-sidebar-accent rounded-md shadow-lg py-1 z-10">
                 <Link
                   to="/profile"
@@ -164,6 +172,13 @@ export const Layout: React.FC = () => {
                   onClick={() => setIsProfileMenuOpen(false)}
                 >
                   Perfil
+                </Link>
+                <Link
+                  to="/help"
+                  className="block px-4 py-2 text-sm hover:bg-sidebar-primary"
+                  onClick={() => setIsProfileMenuOpen(false)}
+                >
+                  Ajuda
                 </Link>
                 <button
                   onClick={() => {
