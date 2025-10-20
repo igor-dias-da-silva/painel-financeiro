@@ -133,7 +133,7 @@ const Profile = () => {
                       </AvatarFallback>
                     </Avatar>
                     <h2 className="text-2xl font-bold dark:text-foreground">{displayName}</h2>
-                    <p className="text-sm text-muted-foreground">{user.email}</p>
+                    {/* REMOVIDO: <p className="text-sm text-muted-foreground">{user.email}</p> */}
                   </div>
                   
                   <div className="my-6 border-t -mx-6 dark:border-border" />
@@ -200,6 +200,15 @@ const Profile = () => {
                 </CardHeader>
                 <CardContent>
                   <ul className="divide-y dark:divide-border">
+                    <li className="py-4 flex items-center justify-between">
+                      <div>
+                        <Label className="font-semibold dark:text-foreground">Email de Acesso</Label>
+                        <p className="text-muted-foreground text-sm">
+                          {user.email}
+                        </p>
+                      </div>
+                      {/* Não permite edição de email aqui, apenas visualização */}
+                    </li>
                     <li className="py-4 flex items-center justify-between">
                       <div>
                         <Label className="font-semibold dark:text-foreground">Senha</Label>
