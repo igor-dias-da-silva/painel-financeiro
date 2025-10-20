@@ -57,18 +57,17 @@ const Help = () => {
     faq.answer.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Removido o array 'guides'
-
   return (
     <AuthGuard>
       <div className="min-h-screen bg-gray-50 dark:bg-background p-4">
         <div className="max-w-6xl mx-auto">
-          <div className="mb-8">
+          {/* Cabeçalho Centralizado */}
+          <div className="mb-8 text-center">
             <h1 className="text-3xl font-bold text-gray-800 dark:text-foreground mb-2">Central de Ajuda</h1>
             <p className="text-gray-600 dark:text-muted-foreground">Encontre respostas para suas dúvidas e aprenda a usar o FinanBoard</p>
           </div>
 
-          {/* Barra de Pesquisa */}
+          {/* Barra de Pesquisa Centralizada */}
           <div className="mb-8">
             <div className="relative max-w-2xl mx-auto">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -81,9 +80,9 @@ const Help = () => {
             </div>
           </div>
 
-          {/* Abas de Navegação */}
-          <div className="mb-8">
-            <div className="flex space-x-1 bg-gray-200 dark:bg-secondary p-1 rounded-lg mx-auto max-w-full sm:max-w-md">
+          {/* Abas de Navegação Centralizadas */}
+          <div className="mb-8 flex justify-center">
+            <div className="flex space-x-1 bg-gray-200 dark:bg-secondary p-1 rounded-lg w-full sm:w-auto max-w-md">
               <Button
                 variant={activeTab === 'faq' ? 'default' : 'ghost'}
                 onClick={() => setActiveTab('faq')}
@@ -153,7 +152,7 @@ const Help = () => {
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-4xl mx-auto">
                 <Card className="dark:bg-card dark:border-border">
                   <CardHeader>
                     <CardTitle className="dark:text-card-foreground">Envie uma Mensagem</CardTitle>
