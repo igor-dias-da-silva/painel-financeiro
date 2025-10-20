@@ -60,7 +60,7 @@ export const Layout: React.FC = () => {
     const Icon = item.icon;
 
     // Estilo para o modo minimizado (apenas ícone)
-    const iconOnlyClasses = "h-10 w-10 p-0";
+    const iconOnlyClasses = "h-10 w-10 p-0 justify-center"; // Adicionado justify-center
     // Estilo para o modo expandido (ícone + texto)
     const expandedClasses = "w-full justify-start h-10 px-3";
 
