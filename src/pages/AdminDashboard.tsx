@@ -121,7 +121,7 @@ const AdminDashboard = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Nome</TableHead>
+                  <TableHead>Nome</TableHead> {/* Garantindo que o cabeçalho está aqui */}
                   <TableHead>ID do Usuário</TableHead>
                   <TableHead>Plano</TableHead>
                   <TableHead>Função</TableHead>
@@ -129,34 +129,39 @@ const AdminDashboard = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {profiles?.map((profile) => (
-                  <TableRow key={profile.id}>
-                    <TableCell className="font-medium">
-                      {profile.first_name} {profile.last_name}
-                    </TableCell>
-                    <TableCell className="text-xs font-mono text-muted-foreground">{profile.id}</TableCell>
-                    <TableCell>
-                      <Badge variant={profile.subscription_plan === 'premium' ? 'default' : 'outline'}>
-                        {profile.subscription_plan || 'free'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={profile.role === 'admin' ? 'destructive' : 'secondary'}>
-                        {profile.role}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button 
-                        variant={profile.role === 'admin' ? 'outline' : 'default'} 
-                        size="sm"
-                        onClick={() => handleToggleRole(profile)}
-                        disabled={updateRoleMutation.isPending}
-                      >
-                        {profile.role === 'admin' ? 'Rebaixar' : 'Promover a Admin'}
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {profiles?.map((profile) => {
+                  const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
+                  const displayId = profile.id.substring(0, 8) + '...'; // Exibe apenas o início do ID
+                  
+                  return (
+                    <TableRow key={profile.id}>
+                      <TableCell className="font-medium">
+                        {fullName || displayId} {/* Exibe o nome completo ou o ID truncado se o nome estiver vazio */}
+                      </TableCell>
+                      <TableCell className="text-xs font-mono text-muted-foreground">{profile.id}</TableCell>
+                      <TableCell>
+                        <Badge variant={profile.subscription_plan === 'premium' ? 'default' : 'outline'}>
+                          {profile.subscription_plan || 'free'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={profile.role === 'admin' ? 'destructive' : 'secondary'}>
+                          {profile.role}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button 
+                          variant={profile.role === 'admin' ? 'outline' : 'default'} 
+                          size="sm"
+                          onClick={() => handleToggleRole(profile)}
+                          disabled={updateRoleMutation.isPending}
+                        >
+                          {profile.role === 'admin' ? 'Rebaixar' : 'Promover a Admin'}
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </div>
