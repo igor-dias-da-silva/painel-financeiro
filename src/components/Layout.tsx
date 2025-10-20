@@ -32,7 +32,7 @@ export const Layout: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const { user, logout } = useAuth();
-  const { isAdmin } = useProfile();
+  const { profile, isAdmin } = useProfile(); // Usando useProfile
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -54,6 +54,13 @@ export const Layout: React.FC = () => {
 
   const adminNavItem = { name: 'Admin', icon: Shield, path: '/admin' };
   const fullNavItems = isAdmin ? [...navItems, adminNavItem] : navItems;
+
+  // Determina o nome a ser exibido e as iniciais
+  const profileFirstName = profile?.first_name || user?.name?.split(' ')[0] || 'Usuário';
+  const profileLastName = profile?.last_name || user?.name?.split(' ').slice(1).join(' ') || '';
+  const displayName = `${profileFirstName} ${profileLastName}`.trim() || 'Usuário';
+  const initials = displayName.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
+
 
   const renderNavItem = (item: typeof navItems[0]) => {
     const isActive = location.pathname === item.path;
@@ -97,10 +104,10 @@ export const Layout: React.FC = () => {
           onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
         >
           <Avatar className="h-10 w-10">
-            <AvatarFallback>{user?.name?.charAt(0) || 'U'}</AvatarFallback>
+            <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <span className="text-sm font-medium truncate">{user?.name || 'Usuário'}</span>
+            <span className="text-sm font-medium truncate">{displayName}</span>
           </div>
           {isProfileMenuOpen ? <ChevronUp className="h-4 w-4 flex-shrink-0" /> : <ChevronDown className="h-4 w-4 flex-shrink-0" />}
         </div>
@@ -160,11 +167,11 @@ export const Layout: React.FC = () => {
               onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
             >
               <Avatar className="h-10 w-10">
-                <AvatarFallback>{user?.name?.charAt(0) || 'U'}</AvatarFallback>
+                <AvatarFallback>{initials}</AvatarFallback>
               </Avatar>
               {isSidebarOpen && (
                 <div className="flex-1 min-w-0">
-                  <span className="text-sm font-medium truncate">{user?.name || 'Usuário'}</span>
+                  <span className="text-sm font-medium truncate">{displayName}</span>
                 </div>
               )}
               {isSidebarOpen && (isProfileMenuOpen ? <ChevronUp className="h-4 w-4 flex-shrink-0" /> : <ChevronDown className="h-4 w-4 flex-shrink-0" />)}
